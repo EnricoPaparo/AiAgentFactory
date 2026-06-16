@@ -62,6 +62,7 @@ Queste regole devono rimanere valide anche se cambiano runtime, modelli AI, stru
 |---|---|
 | Agenti permanenti | Ruoli stabili della factory. Definiscono e governano il processo principale. |
 | Factory Intake | Agente permanente che riceve una richiesta grezza, crea il Project Workspace iniziale e prepara il primo Agent Package per Requirement Analyst. |
+| Factory Host | Agente permanente conversazionale che coordina fasi, Agent Package, handoff e Human Gate nella stessa sessione runtime. |
 | Subagenti temporanei | Agenti creati per uno specifico progetto o task. Possono essere archiviati o distrutti a fine lavoro. |
 | Archetype | Scheletro riutilizzabile e approvato per generare subagenti temporanei di un tipo ricorrente. Definisce ruolo, responsabilità, input, output, limiti e formato dei deliverable. Non contiene conoscenza tecnica specifica e non limita la creazione di agenti ad hoc. |
 | Capability | Conoscenza tecnica operativa riutilizzabile: best practice, checklist, failure mode, rischi, criteri di revisione e lezioni apprese. Non è un tutorial. |
@@ -79,6 +80,7 @@ Queste regole devono rimanere valide anche se cambiano runtime, modelli AI, stru
 
 ```text
 User Request
+→ Factory Host
 → Factory Intake
 → Project Bootstrap
 → Requirement Analyst
@@ -105,6 +107,7 @@ Questo flusso separa analisi, progettazione, generazione degli agenti, esecuzion
 | Agente | Input principale | Output principale | Responsabilità | Limite |
 |---|---|---|---|---|
 | Factory Intake | Richiesta utente grezza | Project Workspace iniziale, bootstrap blueprint, Requirement Analyst Agent Package | Preserva la richiesta, crea il workspace e prepara il primo run della factory. | Non produce requisiti, architettura, execution plan o deliverable. |
+| Factory Host | Richiesta utente o Project Workspace | Stato conversazionale, avanzamento fasi, richieste Human Gate, handoff | Coordina gli agenti e mantiene il processo nella stessa conversazione runtime. | Non sostituisce agenti specialistici e non decide Human Gate. |
 | Requirement Analyst | Richiesta utente | Requirements Blueprint | Chiarisce obiettivi, requisiti, vincoli, ambiguità, assunzioni e criteri di accettazione. | Non sceglie stack, architettura o agenti. |
 | Architect | Requirements Blueprint | Solution Blueprint | Propone architettura, stack, componenti, integrazioni, rischi tecnici e trade-off. | Non crea il team operativo e non implementa codice. |
 | Pipeline Designer | Requirements Blueprint, Solution Blueprint | Execution Blueprint | Progetta task force, workflow, handoff, review gate, responsabilità e criteri di completamento. | Non esegue direttamente il progetto e non aggiorna la knowledge base. |
@@ -274,6 +277,7 @@ AgentFactory/
 ├── AgentFactory.md
 ├── agents/
 │   ├── factory-intake/
+│   ├── factory-host/
 │   ├── requirement-analyst/
 │   │   ├── requirement-analyst.md
 │   │   └── requirement-analyst-skills.md
@@ -306,6 +310,7 @@ AgentFactory/
 ├── runtime-adapters/
 │   ├── claude-code.md
 │   ├── codex.md
+│   ├── codex-conversation.md
 │   ├── codex-project-bootstrap.md
 │   ├── opencode.md
 │   ├── openai-agents-sdk.md
@@ -344,6 +349,7 @@ AgentFactory/
 |---|---|
 | Regola di comportamento del Requirement Analyst | `agents/requirement-analyst/` |
 | Regola di bootstrap di un nuovo progetto | `agents/factory-intake/` |
+| Regola di coordinamento conversazionale | `agents/factory-host/` |
 | Skill operativa stabile di un agente permanente | `agents/<agent-name>/<agent-name>-skills.md` |
 | Regola generale su come lavora un Developer temporaneo | `archetypes/developer.md` |
 | Conoscenza tecnica su PostgreSQL | `capabilities/postgres.md` |
@@ -379,6 +385,7 @@ La factory deve prevenire questi errori:
 * capability troppo generiche o trasformate in tutorial;
 * Agent Package troppo lunghi o pieni di contesto inutile;
 * Factory Intake trasformato in super-agente che produce requisiti, architettura o deliverable;
+* Factory Host trasformato in super-agente tecnico che salta gli agenti specialistici;
 * Knowledge Candidate integrate senza validazione;
 * Pipeline Supervisor trasformato in super-agente tecnico;
 * Runtime Adapter che assorbe logica decisionale;
@@ -406,11 +413,12 @@ La factory deve prevenire questi errori:
 ## MVP 2 - Agenti permanenti
 
 1. Factory Intake
-2. Requirement Analyst
-3. Architect
-4. Pipeline Designer
-5. Pipeline Supervisor
-6. Knowledge Evolution
+2. Factory Host
+3. Requirement Analyst
+4. Architect
+5. Pipeline Designer
+6. Pipeline Supervisor
+7. Knowledge Evolution
 
 ## MVP 3 - Subagenti temporanei
 
@@ -442,6 +450,7 @@ Definito:
 * principi invarianti;
 * agenti permanenti;
 * Factory Intake;
+* Factory Host;
 * subagenti temporanei;
 * archetype;
 * capability;
@@ -463,6 +472,7 @@ Implementato nella baseline operativa:
 * capability iniziali;
 * Manual Execution Adapter;
 * Codex Runtime Adapter;
+* Codex Conversation Adapter;
 * Codex Project Bootstrap Adapter;
 * Project Workspace Template;
 * primo pilota manuale.
