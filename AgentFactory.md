@@ -61,6 +61,7 @@ Queste regole devono rimanere valide anche se cambiano runtime, modelli AI, stru
 | Concetto | Definizione |
 |---|---|
 | Agenti permanenti | Ruoli stabili della factory. Definiscono e governano il processo principale. |
+| Factory Intake | Agente permanente che riceve una richiesta grezza, crea il Project Workspace iniziale e prepara il primo Agent Package per Requirement Analyst. |
 | Subagenti temporanei | Agenti creati per uno specifico progetto o task. Possono essere archiviati o distrutti a fine lavoro. |
 | Archetype | Scheletro riutilizzabile e approvato per generare subagenti temporanei di un tipo ricorrente. Definisce ruolo, responsabilità, input, output, limiti e formato dei deliverable. Non contiene conoscenza tecnica specifica e non limita la creazione di agenti ad hoc. |
 | Capability | Conoscenza tecnica operativa riutilizzabile: best practice, checklist, failure mode, rischi, criteri di revisione e lezioni apprese. Non è un tutorial. |
@@ -78,6 +79,8 @@ Queste regole devono rimanere valide anche se cambiano runtime, modelli AI, stru
 
 ```text
 User Request
+→ Factory Intake
+→ Project Bootstrap
 → Requirement Analyst
 → Requirements Blueprint
 → Architect
@@ -101,6 +104,7 @@ Questo flusso separa analisi, progettazione, generazione degli agenti, esecuzion
 
 | Agente | Input principale | Output principale | Responsabilità | Limite |
 |---|---|---|---|---|
+| Factory Intake | Richiesta utente grezza | Project Workspace iniziale, bootstrap blueprint, Requirement Analyst Agent Package | Preserva la richiesta, crea il workspace e prepara il primo run della factory. | Non produce requisiti, architettura, execution plan o deliverable. |
 | Requirement Analyst | Richiesta utente | Requirements Blueprint | Chiarisce obiettivi, requisiti, vincoli, ambiguità, assunzioni e criteri di accettazione. | Non sceglie stack, architettura o agenti. |
 | Architect | Requirements Blueprint | Solution Blueprint | Propone architettura, stack, componenti, integrazioni, rischi tecnici e trade-off. | Non crea il team operativo e non implementa codice. |
 | Pipeline Designer | Requirements Blueprint, Solution Blueprint | Execution Blueprint | Progetta task force, workflow, handoff, review gate, responsabilità e criteri di completamento. | Non esegue direttamente il progetto e non aggiorna la knowledge base. |
@@ -175,6 +179,7 @@ Il file generato è un Agent Package temporaneo. Può essere usato da un Runtime
 | Artefatto | Creato da | Usato da | Contenuto essenziale |
 |---|---|---|---|
 | Requirements Blueprint | Requirement Analyst | Architect, Pipeline Designer | Obiettivo, requisiti funzionali e non funzionali, vincoli, assunzioni, ambiguità, criteri di accettazione, fuori scope, rischi iniziali. |
+| Project Bootstrap | Factory Intake | Requirement Analyst, Runtime Adapter, maintainer umano | Project Workspace iniziale, richiesta originale, bootstrap blueprint, primo Agent Package e prompt di avvio. |
 | Solution Blueprint | Architect | Pipeline Designer | Architettura, stack, componenti, flussi dati, integrazioni, sicurezza, trade-off, rischi tecnici, alternative scartate, strategia implementativa. |
 | Execution Blueprint | Pipeline Designer | Knowledge Compiler, Pipeline Supervisor | Team richiesto, archetype o definizioni ad hoc, capability, workflow, handoff, responsabilità, review gate, human gate, escalation, criteri di completamento. |
 | Agent Package | Knowledge Compiler | Runtime Adapter, Project Team | Identità, missione, input, output, responsabilità, limiti, conoscenza assegnata, tool, workflow, handoff, Definition of Done. |
@@ -268,6 +273,7 @@ AgentFactory/
 ├── README.md
 ├── AgentFactory.md
 ├── agents/
+│   ├── factory-intake/
 │   ├── requirement-analyst/
 │   │   ├── requirement-analyst.md
 │   │   └── requirement-analyst-skills.md
@@ -289,6 +295,7 @@ AgentFactory/
 │   └── react.md
 ├── standards/
 │   ├── agent-package-standard.md
+│   ├── project-bootstrap-standard.md
 │   ├── handoff-standard.md
 │   ├── human-gate-standard.md
 │   ├── capability-standard.md
@@ -299,6 +306,7 @@ AgentFactory/
 ├── runtime-adapters/
 │   ├── claude-code.md
 │   ├── codex.md
+│   ├── codex-project-bootstrap.md
 │   ├── opencode.md
 │   ├── openai-agents-sdk.md
 │   ├── langgraph.md
@@ -335,10 +343,12 @@ AgentFactory/
 | Tipo di conoscenza | Destinazione |
 |---|---|
 | Regola di comportamento del Requirement Analyst | `agents/requirement-analyst/` |
+| Regola di bootstrap di un nuovo progetto | `agents/factory-intake/` |
 | Skill operativa stabile di un agente permanente | `agents/<agent-name>/<agent-name>-skills.md` |
 | Regola generale su come lavora un Developer temporaneo | `archetypes/developer.md` |
 | Conoscenza tecnica su PostgreSQL | `capabilities/postgres.md` |
 | Formato obbligatorio di un Agent Package | `standards/agent-package-standard.md` |
+| Formato obbligatorio del bootstrap progetto | `standards/project-bootstrap-standard.md` |
 | Formato obbligatorio di un handoff | `standards/handoff-standard.md` |
 | Regola di adattamento per Claude Code | `runtime-adapters/claude-code.md` |
 | Decisione valida solo per un progetto | `projects/<project-name>/` |
@@ -368,6 +378,7 @@ La factory deve prevenire questi errori:
 * archetype usati come vincolo rigido invece che come conoscenza riutilizzabile;
 * capability troppo generiche o trasformate in tutorial;
 * Agent Package troppo lunghi o pieni di contesto inutile;
+* Factory Intake trasformato in super-agente che produce requisiti, architettura o deliverable;
 * Knowledge Candidate integrate senza validazione;
 * Pipeline Supervisor trasformato in super-agente tecnico;
 * Runtime Adapter che assorbe logica decisionale;
@@ -394,11 +405,12 @@ La factory deve prevenire questi errori:
 
 ## MVP 2 - Agenti permanenti
 
-1. Requirement Analyst
-2. Architect
-3. Pipeline Designer
-4. Pipeline Supervisor
-5. Knowledge Evolution
+1. Factory Intake
+2. Requirement Analyst
+3. Architect
+4. Pipeline Designer
+5. Pipeline Supervisor
+6. Knowledge Evolution
 
 ## MVP 3 - Subagenti temporanei
 
@@ -429,6 +441,7 @@ Definito:
 * confini del progetto;
 * principi invarianti;
 * agenti permanenti;
+* Factory Intake;
 * subagenti temporanei;
 * archetype;
 * capability;
@@ -441,35 +454,43 @@ Definito:
 * struttura repository;
 * MVP iniziale.
 
-Da sviluppare:
+Implementato nella baseline operativa:
 
-* standard dell'Agent Package;
-* standard degli handoff;
-* standard delle capability;
-* standard dei blueprint;
-* standard delle Knowledge Candidate;
-* standard degli Human Gate;
-* primi agenti permanenti;
-* primi archetype;
-* prime capability;
-* primi runtime adapter.
+* standard principali;
+* Factory Intake;
+* agenti permanenti principali;
+* archetype iniziali;
+* capability iniziali;
+* Manual Execution Adapter;
+* Codex Runtime Adapter;
+* Codex Project Bootstrap Adapter;
+* Project Workspace Template;
+* primo pilota manuale.
+
+Da sviluppare dopo la baseline:
+
+* runner automatico o semi-automatico;
+* adapter per altri runtime;
+* validatori automatici degli artefatti;
+* ulteriori capability tecniche;
+* progetti pilota software piu realistici.
 
 ---
 
 # 19. Prossimo passo
 
-Il prossimo passo è creare:
+Il prossimo passo operativo è usare:
 
 ```text
-standards/agent-package-standard.md
+runtime-adapters/codex-project-bootstrap.md
 ```
 
-Questo standard stabilisce il formato minimo di ogni Agent Package. Senza questo file, il Knowledge Compiler non ha un formato target stabile e i Runtime Adapter non hanno un contratto da tradurre.
+per avviare nuovi progetti da una richiesta grezza dell'utente.
 
-Subito dopo va creato:
+Subito dopo il bootstrap, il primo agente da eseguire è:
 
 ```text
-standards/handoff-standard.md
+Requirement Analyst
 ```
 
-Senza uno standard per gli handoff, la factory rischia di generare agenti formalmente corretti ma difficili da coordinare e supervisionare.
+Il Requirement Analyst produce il Requirements Blueprint e avvia il ciclo completo della factory.

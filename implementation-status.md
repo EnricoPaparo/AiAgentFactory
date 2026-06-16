@@ -18,6 +18,7 @@ Questo documento traccia lo stato di implementazione della factory rispetto alla
 | `README.md` | Mancante | Previsto nella struttura dichiarata. | Creare quando serve una pagina di ingresso sintetica. |
 | `AgentFactory.md` | Esistente | Documento architetturale principale presente. | Usarlo come riferimento per gli standard iniziali. |
 | `agents/` | Esistente | Cartella per agenti permanenti creata in Fase 2. | Usare come base per la generazione dei workflow. |
+| `agents/factory-intake/` | Esistente | Agente permanente per creare il Project Workspace iniziale da una richiesta grezza. | Usare per nuovi progetti. |
 | `agents/requirement-analyst/` | Esistente | Produce Requirements Blueprint conforme allo standard. | Validare nella prima esecuzione pilota. |
 | `agents/architect/` | Esistente | Produce Solution Blueprint conforme allo standard. | Validare nella prima esecuzione pilota. |
 | `agents/pipeline-designer/` | Esistente | Produce Execution Blueprint conforme allo standard. | Validare nella prima esecuzione pilota. |
@@ -43,6 +44,7 @@ Questo documento traccia lo stato di implementazione della factory rispetto alla
 | `capabilities/documentation.md` | Esistente | Capability trasversale per documentazione operativa. | Usare con Documentation Writer. |
 | `standards/` | Esistente | Cartella centrale per i contratti degli artefatti creata in Fase 1. | Mantenere gli standard come contratti vivi. |
 | `standards/agent-package-standard.md` | Esistente | Contratto centrale tra Knowledge Compiler, Agent Package e Runtime Adapter. Supporta sorgente da archetype o definizione ad hoc. | Usare per generare Agent Package. |
+| `standards/project-bootstrap-standard.md` | Esistente | Contratto per bootstrap automatico di un nuovo Project Workspace. | Usare con Factory Intake. |
 | `standards/handoff-standard.md` | Esistente | Contratto minimo per passaggi tra agenti o fasi. | Usare per Execution Blueprint e agenti permanenti. |
 | `standards/human-gate-standard.md` | Esistente | Contratto per validazioni umane bloccanti. | Usare in Execution Blueprint, Pipeline Supervisor e runtime adapter. |
 | `standards/capability-standard.md` | Esistente | Contratto per capability operative riutilizzabili. | Usare in Fase 4. |
@@ -53,6 +55,7 @@ Questo documento traccia lo stato di implementazione della factory rispetto alla
 | `runtime-adapters/` | Esistente | Cartella per traduzione verso runtime specifici creata in Fase 5. | Estendere solo dopo la prima esecuzione manuale. |
 | `runtime-adapters/manual-execution.md` | Esistente | Adapter per eseguire Agent Package senza orchestratore automatico. | Usare nella prima esecuzione pilota. |
 | `runtime-adapters/codex.md` | Esistente | Adapter per trasformare Agent Package in sessioni Codex ripetibili. | Usare per i prossimi run agentici. |
+| `runtime-adapters/codex-project-bootstrap.md` | Esistente | Adapter prompt per avviare un nuovo progetto da una richiesta utente grezza. | Usare prima del Requirement Analyst. |
 | `runtime-adapters/claude-code.md` | Mancante | Adapter citato nella struttura di esempio. | Rinviare. |
 | `runtime-adapters/opencode.md` | Mancante | Adapter citato nella struttura di esempio. | Rinviare. |
 | `runtime-adapters/openai-agents-sdk.md` | Mancante | Adapter citato nella struttura di esempio. | Rinviare. |
@@ -82,13 +85,14 @@ Questo documento traccia lo stato di implementazione della factory rispetto alla
 9. La Fase 5 ha creato il Manual Execution Adapter per eseguire Agent Package con controllo Human Gate, handoff e Knowledge Candidate.
 10. La Fase 6 ha creato il Project Workspace Template con struttura tracciabile e regole minime per ogni cartella.
 11. Il Codex Runtime Adapter definisce prompt, preflight, Human Gate handling e output finali per eseguire un Agent Package in una chat Codex.
+12. Factory Intake e Codex Project Bootstrap permettono di partire da una sola idea utente creando workspace e primo Agent Package senza bootstrap manuale.
 
 ## Prossimo step consigliato
 
-Creare il primo progetto pilota copiando:
+Usare Factory Intake per avviare nuovi progetti da una richiesta grezza:
 
 ```text
-projects/_template/
+runtime-adapters/codex-project-bootstrap.md
 ```
 
-Criterio di completamento del prossimo step: il progetto pilota deve produrre Requirements Blueprint, Solution Blueprint, Execution Blueprint, Agent Package, handoff, review evidence e almeno una retrospettiva o Knowledge Candidate se emerge una lezione riutilizzabile.
+Criterio di completamento del prossimo step: una richiesta utente deve generare automaticamente Project Workspace, initial request, bootstrap blueprint, Requirement Analyst Agent Package e prompt per il primo run.
