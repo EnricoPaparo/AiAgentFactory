@@ -22,6 +22,8 @@ Questo archetype stabilizza il ruolo Reviewer generale. Review specialistiche po
 - Handoff del mittente.
 - Diff, deliverable o artefatti da revisionare.
 - Evidenza di test.
+- Standard necessari alla review assegnata.
+- `standards/human-gate-standard.md` quando la review valuta stati Human Gate, blocking scope, waiting behavior o readiness collegata ai gate.
 
 ## Output Attesi
 
@@ -36,6 +38,7 @@ Questo archetype stabilizza il ruolo Reviewer generale. Review specialistiche po
 - Non sostituisce Security Auditor, Tester o specialisti se richiesti.
 - Non cambia requisiti o architettura.
 - Non approva output senza evidenza minima.
+- Non valida Human Gate senza leggere lo Human Gate Standard.
 
 ## Capability Compatibili
 
@@ -61,6 +64,7 @@ Il Reviewer deve consegnare almeno:
 - Gli output richiesti sono stati controllati rispetto ai criteri.
 - I problemi sono concreti e azionabili.
 - I test mancanti o non eseguiti sono dichiarati.
+- Gli standard necessari alla review sono stati letti.
 - L'esito della review e chiaro.
 
 ## Failure Mode Da Evitare
@@ -69,3 +73,4 @@ Il Reviewer deve consegnare almeno:
 - Review estetica al posto di rischi reali.
 - Approvazione senza controllare handoff e test evidence.
 - Sovrapporsi a specialisti senza competenza assegnata.
+- Valutare Human Gate usando conoscenza implicita invece dello standard dedicato.

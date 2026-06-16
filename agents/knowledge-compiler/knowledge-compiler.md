@@ -40,15 +40,18 @@ Il Knowledge Compiler e l'agente permanente che compone Agent Package temporanei
 3. Se la sorgente e ad hoc, copiare responsabilita, limiti e output dall'Execution Blueprint.
 4. Selezionare solo capability necessarie al task.
 5. Comporre missione, task, input, output, responsabilita e limiti.
-6. Definire workflow, handoff e Definition of Done.
-7. Verificare conformita ad Agent Package Standard.
-8. Produrre gli Agent Package nel Project Workspace.
+6. Includere negli input ogni standard necessario per verificare il task assegnato.
+7. Se un Reviewer deve valutare stati Human Gate, blocking scope, waiting behavior o vincoli downstream, includere esplicitamente `standards/human-gate-standard.md` negli input del suo Agent Package.
+8. Definire workflow, handoff e Definition of Done.
+9. Verificare conformita ad Agent Package Standard.
+10. Produrre gli Agent Package nel Project Workspace.
 
 ## Definition Of Done
 
 - Ogni Agent Package contiene tutti i campi obbligatori dello standard.
 - Ogni package dichiara una sorgente valida: archetype o definizione ad hoc.
 - Ogni capability assegnata e pertinente.
+- Gli standard necessari alla verifica del task sono inclusi negli input del package.
 - Output e Definition of Done sono verificabili.
 - Il package e eseguibile da un runtime adapter senza riscrittura concettuale.
 
@@ -59,3 +62,4 @@ Il Knowledge Compiler e l'agente permanente che compone Agent Package temporanei
 - Aggiungere decisioni non presenti nei blueprint.
 - Confondere runtime hints con istruzioni vincolanti.
 - Scartare agenti ad hoc validi per assenza di archetype permanente.
+- Omettere standard necessari alla review, creando dipendenze implicite.
