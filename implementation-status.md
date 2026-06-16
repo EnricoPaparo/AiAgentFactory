@@ -53,10 +53,11 @@ Questo documento traccia lo stato di implementazione della factory rispetto alla
 | `runtime-adapters/` | Esistente | Cartella per traduzione verso runtime specifici creata in Fase 5. | Estendere solo dopo la prima esecuzione manuale. |
 | `runtime-adapters/manual-execution.md` | Esistente | Adapter per eseguire Agent Package senza orchestratore automatico. | Usare nella prima esecuzione pilota. |
 | `runtime-adapters/codex.md` | Esistente | Adapter per trasformare Agent Package in sessioni Codex ripetibili. | Usare per i prossimi run agentici. |
-| `runtime-adapters/claude-code.md` | Mancante | Adapter citato nella struttura di esempio. | Rinviare. |
+| `runtime-adapters/claude-code.md` | Esistente | Adapter per eseguire Agent Package in sessioni Claude Code (CLI, IDE, web). Supporta CLAUDE.md e primo messaggio. | Usare per agent task su repository con accesso filesystem e git. |
+| `runtime-adapters/openai-agents-sdk.md` | Esistente | Adapter per tradurre Agent Package in Agent/Runner OpenAI Agents SDK (Python). Include gestione Human Gate tramite tool e handoff come file. | Usare per pipeline Python multi-agente con orchestrazione programmatica. |
+| `runtime-adapters/github-actions.md` | Esistente | Adapter per eseguire Agent Package come job CI/CD GitHub Actions. Human Gate tramite GitHub Environments, handoff tramite artifact. | Usare per pipeline automatizzate su repository GitHub con audit trail CI. |
+| `runtime-adapters/langgraph.md` | Esistente | Adapter per tradurre Execution Blueprint in grafo LangGraph. Supporta interrupt() per Human Gate, routing condizionale e checkpointing. | Usare per workflow stateful con routing condizionale e human-in-the-loop. |
 | `runtime-adapters/opencode.md` | Mancante | Adapter citato nella struttura di esempio. | Rinviare. |
-| `runtime-adapters/openai-agents-sdk.md` | Mancante | Adapter citato nella struttura di esempio. | Rinviare. |
-| `runtime-adapters/langgraph.md` | Mancante | Adapter citato nella struttura di esempio. | Rinviare. |
 | `projects/` | Esistente | Cartella per workspace temporanei di progetto creata in Fase 6. | Usare per la prima esecuzione pilota. |
 | `projects/_template/` | Esistente | Template operativo per progetti con input, blueprint, generated-agents, handoff, human-gates, deliverable, reviews e knowledge-candidates. | Copiare per creare il primo progetto pilota. |
 
@@ -82,6 +83,10 @@ Questo documento traccia lo stato di implementazione della factory rispetto alla
 9. La Fase 5 ha creato il Manual Execution Adapter per eseguire Agent Package con controllo Human Gate, handoff e Knowledge Candidate.
 10. La Fase 6 ha creato il Project Workspace Template con struttura tracciabile e regole minime per ogni cartella.
 11. Il Codex Runtime Adapter definisce prompt, preflight, Human Gate handling e output finali per eseguire un Agent Package in una chat Codex.
+12. Il Claude Code Runtime Adapter copre sessioni CLI, IDE e web con supporto CLAUDE.md e regole per operazioni git controllate.
+13. Il GitHub Actions Runtime Adapter mappa Agent Package su job CI/CD con Human Gate tramite Environment approval e handoff tramite artifact.
+14. Il LangGraph Runtime Adapter traduce Execution Blueprint in StateGraph con interrupt() per Human Gate, routing condizionale e checkpointing.
+15. Il OpenAI Agents SDK Runtime Adapter traduce Agent Package in Agent/Runner con tool per Human Gate, handoff e Knowledge Candidate.
 
 ## Prossimo step consigliato
 
