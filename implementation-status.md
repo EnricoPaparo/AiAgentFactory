@@ -50,15 +50,15 @@ Questo documento traccia lo stato di implementazione della factory rispetto alla
 | `standards/solution-blueprint-standard.md` | Esistente | Contratto per output dell'Architect. | Usare in Fase 2. |
 | `standards/execution-blueprint-standard.md` | Esistente | Contratto per output del Pipeline Designer. | Usare in Fase 2. |
 | `standards/knowledge-candidate-standard.md` | Esistente | Contratto per proposte di evoluzione controllata della conoscenza. | Usare in Fase 2 e Fase 7. |
-| `runtime-adapters/` | Mancante | Cartella per traduzione verso runtime specifici. | Creare in Fase 5. |
-| `runtime-adapters/manual-execution.md` | Mancante | Adapter piu importante per validare la factory senza automazione. | Creare prima degli adapter tecnici. |
+| `runtime-adapters/` | Esistente | Cartella per traduzione verso runtime specifici creata in Fase 5. | Estendere solo dopo la prima esecuzione manuale. |
+| `runtime-adapters/manual-execution.md` | Esistente | Adapter per eseguire Agent Package senza orchestratore automatico. | Usare nella prima esecuzione pilota. |
 | `runtime-adapters/codex.md` | Mancante | Adapter utile per usare Agent Package in Codex. | Creare dopo una prima esecuzione manuale. |
 | `runtime-adapters/claude-code.md` | Mancante | Adapter citato nella struttura di esempio. | Rinviare. |
 | `runtime-adapters/opencode.md` | Mancante | Adapter citato nella struttura di esempio. | Rinviare. |
 | `runtime-adapters/openai-agents-sdk.md` | Mancante | Adapter citato nella struttura di esempio. | Rinviare. |
 | `runtime-adapters/langgraph.md` | Mancante | Adapter citato nella struttura di esempio. | Rinviare. |
-| `projects/` | Mancante | Cartella per workspace temporanei di progetto. | Creare in Fase 6. |
-| `projects/_template/` | Mancante | Template operativo per progetti. | Creare in Fase 6. |
+| `projects/` | Esistente | Cartella per workspace temporanei di progetto creata in Fase 6. | Usare per la prima esecuzione pilota. |
+| `projects/_template/` | Esistente | Template operativo per progetti con input, blueprint, generated-agents, handoff, human-gates, deliverable, reviews e knowledge-candidates. | Copiare per creare il primo progetto pilota. |
 
 ## Stato MVP
 
@@ -67,7 +67,7 @@ Questo documento traccia lo stato di implementazione della factory rispetto alla
 | MVP 1 - Standardizzazione | Completato | Gli standard minimi, incluso Human Gate Standard, sono presenti in `standards/`. | Validare durante la prima esecuzione pilota. |
 | MVP 2 - Agenti permanenti | Completato | I sei agenti permanenti principali sono presenti in `agents/`. | Validare durante la prima esecuzione pilota. |
 | MVP 3 - Subagenti temporanei | Completato | I cinque archetype MVP sono presenti in `archetypes/`. | Validare con Knowledge Compiler e prima esecuzione pilota. |
-| MVP 4 - Prima esecuzione manuale | Non iniziato | Mancano adapter manuale e project template. | Creare `runtime-adapters/manual-execution.md`. |
+| MVP 4 - Prima esecuzione manuale | Pronto per pilota | Adapter manuale e project template presenti; manca il primo progetto pilota. | Creare un progetto piccolo da eseguire manualmente. |
 
 ## Osservazioni
 
@@ -79,13 +79,15 @@ Questo documento traccia lo stato di implementazione della factory rispetto alla
 6. La Fase 3 ha creato archetype iniziali come conoscenza riutilizzabile, non come lista chiusa dei soli agenti possibili.
 7. La Fase 4 ha creato capability iniziali trasversali e tecniche conformi al Capability Standard.
 8. Gli Human Gate sono stati introdotti come punti bloccanti di validazione umana, con standard dedicato e integrazione in Execution Blueprint, Pipeline Designer e Pipeline Supervisor.
+9. La Fase 5 ha creato il Manual Execution Adapter per eseguire Agent Package con controllo Human Gate, handoff e Knowledge Candidate.
+10. La Fase 6 ha creato il Project Workspace Template con struttura tracciabile e regole minime per ogni cartella.
 
 ## Prossimo step consigliato
 
-Creare il primo runtime adapter della Fase 5:
+Creare il primo progetto pilota copiando:
 
 ```text
-runtime-adapters/manual-execution.md
+projects/_template/
 ```
 
-Criterio di completamento del prossimo step: un Agent Package deve poter essere eseguito manualmente producendo handoff, review evidence e Knowledge Candidate quando necessario.
+Criterio di completamento del prossimo step: il progetto pilota deve produrre Requirements Blueprint, Solution Blueprint, Execution Blueprint, Agent Package, handoff, review evidence e almeno una retrospettiva o Knowledge Candidate se emerge una lezione riutilizzabile.
