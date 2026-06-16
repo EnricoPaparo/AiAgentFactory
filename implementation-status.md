@@ -52,7 +52,7 @@ Questo documento traccia lo stato di implementazione della factory rispetto alla
 | `standards/knowledge-candidate-standard.md` | Esistente | Contratto per proposte di evoluzione controllata della conoscenza. | Usare in Fase 2 e Fase 7. |
 | `runtime-adapters/` | Esistente | Cartella per traduzione verso runtime specifici creata in Fase 5. | Estendere solo dopo la prima esecuzione manuale. |
 | `runtime-adapters/manual-execution.md` | Esistente | Adapter per eseguire Agent Package senza orchestratore automatico. | Usare nella prima esecuzione pilota. |
-| `runtime-adapters/codex.md` | Mancante | Adapter utile per usare Agent Package in Codex. | Creare dopo una prima esecuzione manuale. |
+| `runtime-adapters/codex.md` | Esistente | Adapter per trasformare Agent Package in sessioni Codex ripetibili. | Usare per i prossimi run agentici. |
 | `runtime-adapters/claude-code.md` | Mancante | Adapter citato nella struttura di esempio. | Rinviare. |
 | `runtime-adapters/opencode.md` | Mancante | Adapter citato nella struttura di esempio. | Rinviare. |
 | `runtime-adapters/openai-agents-sdk.md` | Mancante | Adapter citato nella struttura di esempio. | Rinviare. |
@@ -81,6 +81,7 @@ Questo documento traccia lo stato di implementazione della factory rispetto alla
 8. Gli Human Gate sono stati introdotti come punti bloccanti di validazione umana, con standard dedicato e integrazione in Execution Blueprint, Pipeline Designer e Pipeline Supervisor.
 9. La Fase 5 ha creato il Manual Execution Adapter per eseguire Agent Package con controllo Human Gate, handoff e Knowledge Candidate.
 10. La Fase 6 ha creato il Project Workspace Template con struttura tracciabile e regole minime per ogni cartella.
+11. Il Codex Runtime Adapter definisce prompt, preflight, Human Gate handling e output finali per eseguire un Agent Package in una chat Codex.
 
 ## Prossimo step consigliato
 
