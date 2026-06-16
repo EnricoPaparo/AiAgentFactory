@@ -18,12 +18,15 @@ Usare questo adapter quando l'utente vuole dare alla factory una nuova idea di p
 - `standards/project-bootstrap-standard.md`.
 - `projects/_template/`, se disponibile.
 - `runtime-adapters/codex.md`.
+- `standards/factory-state-standard.md`.
 
 ## Output Richiesti
 
 - Project Workspace iniziale in `projects/<project-id>/`.
 - `input/initial-request.md`.
 - `project-status.md`.
+- `factory-state.json`.
+- `artifact-index.md`.
 - `blueprints/bootstrap-execution-blueprint.md`.
 - `generated-agents/requirement-analyst-agent-package.md`.
 - `human-gates/approve-requirements.md`.
@@ -63,6 +66,8 @@ Regole:
 - Crea un solo Project Workspace sotto projects/<project-id>/.
 - Preserva la richiesta originale in input/initial-request.md.
 - Crea project-status.md.
+- Crea factory-state.json con phase requirements e next_action run_requirement_analyst.
+- Crea artifact-index.md con gli artefatti iniziali.
 - Crea blueprints/bootstrap-execution-blueprint.md solo per avviare Requirement Analyst.
 - Crea generated-agents/requirement-analyst-agent-package.md.
 - Crea human-gates/approve-requirements.md per validare i requisiti prima della soluzione.
@@ -98,6 +103,8 @@ Regole:
 - Crea un solo Project Workspace sotto projects/<project-id>/.
 - Preserva la richiesta originale in input/initial-request.md.
 - Crea project-status.md.
+- Crea factory-state.json con phase requirements e next_action run_requirement_analyst.
+- Crea artifact-index.md con gli artefatti iniziali.
 - Crea blueprints/bootstrap-execution-blueprint.md solo per avviare Requirement Analyst.
 - Crea generated-agents/requirement-analyst-agent-package.md.
 - Crea human-gates/approve-requirements.md per validare i requisiti prima della soluzione.
@@ -114,7 +121,8 @@ Il bootstrap Codex e completato quando:
 
 1. il workspace esiste;
 2. la richiesta originale e salvata;
-3. il primo Agent Package e pronto;
-4. il primo Human Gate non blocca Requirement Analyst;
-5. il prompt successivo e pronto;
-6. non sono stati prodotti blueprint successivi o deliverable.
+3. `factory-state.json` e `artifact-index.md` esistono;
+4. il primo Agent Package e pronto;
+5. il primo Human Gate non blocca Requirement Analyst;
+6. il prompt successivo e pronto;
+7. non sono stati prodotti blueprint successivi o deliverable.

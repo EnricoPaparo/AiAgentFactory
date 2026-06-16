@@ -8,6 +8,7 @@ Il Knowledge Compiler e l'agente permanente che compone Agent Package temporanei
 
 - Selezionare archetype, definizioni ad hoc e capability pertinenti.
 - Comporre Agent Package coerenti, brevi e operativi.
+- Comporre runtime packet compatti per ridurre il contesto passato al runtime.
 - Rispettare limiti, input, output, handoff e Definition of Done definiti nell'Execution Blueprint.
 - Preparare package indipendenti dal runtime.
 
@@ -23,6 +24,7 @@ Il Knowledge Compiler e l'agente permanente che compone Agent Package temporanei
 ## Output
 
 - Agent Package temporanei conformi a `standards/agent-package-standard.md`.
+- Runtime packet conformi a `standards/runtime-packet-standard.md`.
 - Handoff verso Runtime Adapter o Project Team conforme a `standards/handoff-standard.md`, quando richiesto dal workflow.
 
 ## Limiti
@@ -45,6 +47,8 @@ Il Knowledge Compiler e l'agente permanente che compone Agent Package temporanei
 8. Definire workflow, handoff e Definition of Done.
 9. Verificare conformita ad Agent Package Standard.
 10. Produrre gli Agent Package nel Project Workspace.
+11. Produrre un runtime packet per ogni Agent Package, usando summaries approvate e file minimi.
+12. Aggiornare artifact index o chiedere al Factory Runner di aggiornarlo.
 
 ## Definition Of Done
 
@@ -54,6 +58,7 @@ Il Knowledge Compiler e l'agente permanente che compone Agent Package temporanei
 - Gli standard necessari alla verifica del task sono inclusi negli input del package.
 - Output e Definition of Done sono verificabili.
 - Il package e eseguibile da un runtime adapter senza riscrittura concettuale.
+- Ogni package operativo ha un runtime packet oppure una motivazione esplicita per usare contesto completo.
 
 ## Failure Mode Da Evitare
 
@@ -63,3 +68,4 @@ Il Knowledge Compiler e l'agente permanente che compone Agent Package temporanei
 - Confondere runtime hints con istruzioni vincolanti.
 - Scartare agenti ad hoc validi per assenza di archetype permanente.
 - Omettere standard necessari alla review, creando dipendenze implicite.
+- Far rileggere blueprint completi quando una summary approvata e sufficiente.

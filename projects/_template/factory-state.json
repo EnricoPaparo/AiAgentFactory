@@ -1,0 +1,11 @@
+{
+  "project_id": "",
+  "phase": "intake",
+  "status": "active",
+  "pending_gate": null,
+  "next_action": "capture_initial_request",
+  "artifact_index": "artifact-index.md",
+  "approved_summaries": [],
+  "runtime_packets": [],
+  "updated_at": ""
+}

@@ -52,6 +52,7 @@ La sessione Codex deve produrre solo gli output richiesti dal package, piu hando
 
 - Percorso repository.
 - Percorso Agent Package.
+- Percorso Runtime Packet collegato, se presente.
 - Percorso Execution Blueprint.
 - Percorso `runtime-adapters/codex.md`.
 - Percorso `runtime-adapters/manual-execution.md`.
@@ -71,16 +72,17 @@ La sessione Codex deve produrre solo gli output richiesti dal package, piu hando
 
 Prima di modificare file, Codex deve:
 
-1. leggere l'Agent Package;
-2. leggere l'Execution Blueprint;
-3. leggere `runtime-adapters/manual-execution.md`;
-4. leggere questo adapter;
-5. leggere gli standard indicati dal package;
-6. leggere capability assegnate;
-7. leggere archetype o definizione ad hoc indicata da `agent-source`;
-8. controllare Human Gate nel Project Workspace;
-9. controllare `git status`;
-10. fermarsi se un input obbligatorio manca o se un Human Gate `Pending` blocca il task.
+1. leggere il Runtime Packet collegato, se presente;
+2. leggere l'Agent Package;
+3. leggere l'Execution Blueprint solo se il Runtime Packet non contiene contesto sufficiente;
+4. leggere `runtime-adapters/manual-execution.md`;
+5. leggere questo adapter;
+6. leggere solo gli standard indicati dal package o dal packet;
+7. leggere capability assegnate necessarie al task;
+8. leggere archetype o definizione ad hoc indicata da `agent-source` solo se serve chiarire responsabilita o limiti;
+9. controllare Human Gate nel Project Workspace;
+10. controllare `git status`;
+11. fermarsi se un input obbligatorio manca o se un Human Gate `Pending` blocca il task.
 
 ## Regole Per Human Gate
 
@@ -128,13 +130,17 @@ runtime-adapters/manual-execution.md
 Agent Package da eseguire:
 <agent-package-path>
 
+Runtime Packet, se presente:
+<runtime-packet-path>
+
 Execution Blueprint:
 <execution-blueprint-path>
 
 Regole operative:
 - Esegui un solo Agent Package in questa chat.
 - Segui prima runtime-adapters/codex.md e runtime-adapters/manual-execution.md.
-- Leggi tutti gli input indicati nell'Agent Package prima di modificare file.
+- Leggi prima il Runtime Packet, se presente.
+- Leggi solo gli input indicati nell'Agent Package o nel Runtime Packet prima di modificare file.
 - Controlla gli Human Gate nel Project Workspace prima di procedere.
 - Se un Human Gate Pending blocca il task corrente, fermati e segnala stato blocked.
 - Rispetta boundaries, responsibilities, workflow e Definition of Done dell'Agent Package.
@@ -162,6 +168,9 @@ runtime-adapters/manual-execution.md
 Agent Package da eseguire:
 {{agent_package_path}}
 
+Runtime Packet, se presente:
+{{runtime_packet_path}}
+
 Execution Blueprint:
 {{execution_blueprint_path}}
 
@@ -171,7 +180,8 @@ Project Workspace:
 Regole operative:
 - Esegui un solo Agent Package in questa chat.
 - Segui prima runtime-adapters/codex.md e runtime-adapters/manual-execution.md.
-- Leggi tutti gli input indicati nell'Agent Package prima di modificare file.
+- Leggi prima il Runtime Packet, se presente.
+- Leggi solo gli input indicati nell'Agent Package o nel Runtime Packet prima di modificare file.
 - Controlla gli Human Gate nel Project Workspace prima di procedere.
 - Se un Human Gate Pending blocca il task corrente, fermati e segnala stato blocked.
 - Rispetta boundaries, responsibilities, workflow e Definition of Done dell'Agent Package.
@@ -277,6 +287,7 @@ Regole operative:
 - Saltare Human Gate perche la decisione sembra ovvia.
 - Modificare conoscenza permanente mentre si esegue un agente temporaneo.
 - Allargare il task oltre l'Agent Package.
+- Rileggere blueprint completi quando un Runtime Packet contiene il contesto approvato sufficiente.
 - Produrre output richiesti ma dimenticare handoff.
 - Creare Knowledge Candidate e poi integrarla direttamente.
 - Confondere review approval con Human Gate approval.
@@ -286,7 +297,7 @@ Regole operative:
 Questo adapter e applicato correttamente quando:
 
 1. il prompt include repository, Agent Package, Execution Blueprint e Project Workspace;
-2. Codex legge adapter, package, blueprint, capability e standard rilevanti;
+2. Codex legge adapter, Runtime Packet se presente, package, capability e standard rilevanti;
 3. Human Gate sono controllati prima delle modifiche;
 4. Codex modifica solo file coerenti con l'Agent Package;
 5. output e handoff richiesti sono prodotti;

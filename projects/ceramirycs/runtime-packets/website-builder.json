@@ -1,0 +1,44 @@
+{
+  "packet_id": "website-builder",
+  "project_id": "ceramirycs",
+  "agent_package": "generated-agents/website-builder-agent-package.md",
+  "agent_role": "Website Builder",
+  "context_budget": "low-medium",
+  "task": "Create the static two-page CeraMirycs website under deliverables/site.",
+  "approved_context": [
+    "summaries/requirements-summary.md",
+    "summaries/solution-summary.md",
+    "summaries/execution-summary.md"
+  ],
+  "required_files": [
+    "generated-agents/website-builder-agent-package.md",
+    "standards/handoff-standard.md"
+  ],
+  "must_not": [
+    "Do not invent realistic contact data.",
+    "Do not add backend, CMS, forms, analytics, maps, ecommerce, external embeds or deployment.",
+    "Do not claim specific products, prices, locations or social handles not provided by the user."
+  ],
+  "expected_outputs": [
+    "deliverables/site/index.html",
+    "deliverables/site/contact.html",
+    "deliverables/site/assets/styles.css",
+    "handoffs/website-builder-to-site-reviewer.md"
+  ],
+  "handoff_required": "handoffs/website-builder-to-site-reviewer.md",
+  "gate_status": {
+    "approve-requirements": "Approved",
+    "approve-solution-blueprint": "Approved",
+    "approve-execution-plan": "Approved"
+  },
+  "fallback_full_context": [
+    "blueprints/requirements-blueprint.md",
+    "blueprints/solution-blueprint.md",
+    "blueprints/execution-blueprint.md"
+  ],
+  "verification_commands": [
+    "Search deliverables/site for email-like strings, phone-like strings and social handles.",
+    "Confirm required files exist."
+  ],
+  "token_notes": "Read summaries first. Use full blueprints only if summaries conflict with the Agent Package."
+}

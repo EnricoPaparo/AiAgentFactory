@@ -20,6 +20,7 @@ Questo documento traccia lo stato di implementazione della factory rispetto alla
 | `agents/` | Esistente | Cartella per agenti permanenti creata in Fase 2. | Usare come base per la generazione dei workflow. |
 | `agents/factory-intake/` | Esistente | Agente permanente per creare il Project Workspace iniziale da una richiesta grezza. | Usare per nuovi progetti. |
 | `agents/factory-host/` | Esistente | Coordinatore conversazionale per eseguire piu fasi e Agent Package nella stessa chat. | Usare con `runtime-adapters/codex-conversation.md`. |
+| `agents/factory-runner/` | Esistente | Runner a stato macchina per ridurre inferenza e token di contesto. | Usare con `factory-state.json` nei nuovi progetti. |
 | `agents/requirement-analyst/` | Esistente | Produce Requirements Blueprint conforme allo standard. | Validare nella prima esecuzione pilota. |
 | `agents/architect/` | Esistente | Produce Solution Blueprint conforme allo standard. | Validare nella prima esecuzione pilota. |
 | `agents/pipeline-designer/` | Esistente | Produce Execution Blueprint conforme allo standard. | Validare nella prima esecuzione pilota. |
@@ -45,6 +46,8 @@ Questo documento traccia lo stato di implementazione della factory rispetto alla
 | `capabilities/documentation.md` | Esistente | Capability trasversale per documentazione operativa. | Usare con Documentation Writer. |
 | `standards/` | Esistente | Cartella centrale per i contratti degli artefatti creata in Fase 1. | Mantenere gli standard come contratti vivi. |
 | `standards/agent-package-standard.md` | Esistente | Contratto centrale tra Knowledge Compiler, Agent Package e Runtime Adapter. Supporta sorgente da archetype o definizione ad hoc. | Usare per generare Agent Package. |
+| `standards/factory-state-standard.md` | Esistente | Contratto per `factory-state.json`, lo stato macchina compatto del Project Workspace. | Usare per ripresa ed esecuzione elegante. |
+| `standards/runtime-packet-standard.md` | Esistente | Contratto per contesto operativo compresso degli agenti temporanei. | Usare dopo Knowledge Compiler. |
 | `standards/project-bootstrap-standard.md` | Esistente | Contratto per bootstrap automatico di un nuovo Project Workspace. | Usare con Factory Intake. |
 | `standards/handoff-standard.md` | Esistente | Contratto minimo per passaggi tra agenti o fasi. | Usare per Execution Blueprint e agenti permanenti. |
 | `standards/human-gate-standard.md` | Esistente | Contratto per validazioni umane bloccanti. | Usare in Execution Blueprint, Pipeline Supervisor e runtime adapter. |
@@ -90,16 +93,18 @@ Questo documento traccia lo stato di implementazione della factory rispetto alla
 12. Factory Intake e Codex Project Bootstrap permettono di partire da una sola idea utente creando workspace e primo Agent Package senza bootstrap manuale.
 13. Factory Host e Codex Conversation Adapter permettono di coordinare piu agenti e Human Gate nella stessa chat, riducendo il passaggio manuale di prompt.
 14. Il pilot end-to-end ora richiede quattro approval espliciti: requisiti, architettura, piano/team agenti e lavoro finito.
+15. Factory Runner, Factory State e Runtime Packet introducono una modalita piu elegante e token-efficient: stato macchina compatto, summaries approvate e contesto minimo per agente.
 
 ## Prossimo step consigliato
 
-Usare Factory Host per avviare o riprendere progetti in modalita conversazionale:
+Usare Factory Host + Factory Runner per avviare o riprendere progetti in modalita conversazionale:
 
 ```text
 runtime-adapters/codex-conversation.md
+agents/factory-runner/factory-runner.md
 ```
 
-Criterio di completamento del prossimo step: una richiesta utente deve poter avanzare nella stessa chat attraverso blueprint, Human Gate, Agent Package temporanei, execution e review.
+Criterio di completamento del prossimo step: una richiesta utente deve poter avanzare nella stessa chat attraverso `factory-state.json`, blueprint, Human Gate, summaries, runtime packet, Agent Package temporanei, execution e review.
 
 Per la prova reale CeraMirycs usare:
 

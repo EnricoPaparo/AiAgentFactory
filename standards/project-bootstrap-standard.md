@@ -24,6 +24,8 @@ Si usa quando un utente fornisce una nuova idea di progetto e la factory deve cr
 | `source-request` | Richiesta utente originale preservata. |
 | `workspace-path` | Percorso del Project Workspace creato. |
 | `initial-request-path` | Percorso del file con la richiesta iniziale. |
+| `factory-state-path` | Percorso dello stato macchina compatto. |
+| `artifact-index-path` | Percorso dell'indice artefatti. |
 | `bootstrap-execution-blueprint-path` | Percorso del blueprint minimo per avviare Requirement Analyst. |
 | `first-agent-package-path` | Percorso dell'Agent Package del Requirement Analyst. |
 | `human-gates` | Human Gate iniziali, se necessari. |
@@ -37,6 +39,8 @@ Un bootstrap valido crea almeno:
 projects/<project-id>/
 |-- README.md
 |-- project-status.md
+|-- factory-state.json
+|-- artifact-index.md
 |-- input/initial-request.md
 |-- blueprints/bootstrap-execution-blueprint.md
 |-- generated-agents/requirement-analyst-agent-package.md
@@ -54,10 +58,12 @@ Un Project Bootstrap e valido quando:
 1. la richiesta utente e preservata senza riscrittura sostanziale;
 2. il `project-id` e stabile, descrittivo e in kebab-case;
 3. il workspace contiene tutte le cartelle minime;
-4. il primo Agent Package puo essere eseguito con un runtime adapter;
-5. il bootstrap non sceglie architettura, stack o piano operativo completo;
-6. eventuali Human Gate iniziali dichiarano status, decision owner e blocking scope;
-7. il prossimo passo e chiaro per l'utente o per il runtime.
+4. `factory-state.json` dichiara fase e prossima azione senza richiedere inferenza larga;
+5. `artifact-index.md` elenca gli artefatti iniziali;
+6. il primo Agent Package puo essere eseguito con un runtime adapter;
+7. il bootstrap non sceglie architettura, stack o piano operativo completo;
+8. eventuali Human Gate iniziali dichiarano status, decision owner e blocking scope;
+9. il prossimo passo e chiaro per l'utente o per il runtime.
 
 ## Failure Mode
 
@@ -78,10 +84,14 @@ Un Project Bootstrap e valido quando:
 - project-id: simple-landing-page
 - workspace-path: projects/simple-landing-page
 - source-request: input/initial-request.md
+- factory-state: projects/simple-landing-page/factory-state.json
+- artifact-index: projects/simple-landing-page/artifact-index.md
 
 ## Created Artifacts
 
 - projects/simple-landing-page/input/initial-request.md
+- projects/simple-landing-page/factory-state.json
+- projects/simple-landing-page/artifact-index.md
 - projects/simple-landing-page/blueprints/bootstrap-execution-blueprint.md
 - projects/simple-landing-page/generated-agents/requirement-analyst-agent-package.md
 - projects/simple-landing-page/human-gates/approve-requirements.md

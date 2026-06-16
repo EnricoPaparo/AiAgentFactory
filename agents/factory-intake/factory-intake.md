@@ -11,6 +11,8 @@ Factory Intake e l'agente permanente che riceve una nuova idea di progetto e pre
 - Creare la struttura iniziale del Project Workspace.
 - Scrivere `input/initial-request.md`.
 - Scrivere `project-status.md`.
+- Scrivere `factory-state.json`.
+- Scrivere `artifact-index.md`.
 - Creare un bootstrap execution blueprint minimo.
 - Creare l'Agent Package del Requirement Analyst.
 - Creare Human Gate iniziali necessari, senza bloccare il Requirement Analyst.
@@ -32,6 +34,8 @@ Factory Intake e l'agente permanente che riceve una nuova idea di progetto e pre
 - Project Workspace iniziale.
 - `input/initial-request.md`.
 - `project-status.md`.
+- `factory-state.json`.
+- `artifact-index.md`.
 - `blueprints/bootstrap-execution-blueprint.md`.
 - `generated-agents/requirement-analyst-agent-package.md`.
 - `human-gates/approve-requirements.md`.
@@ -53,18 +57,21 @@ Factory Intake e l'agente permanente che riceve una nuova idea di progetto e pre
 3. Creare il Project Workspace o copiare il template.
 4. Scrivere la richiesta in `input/initial-request.md`.
 5. Creare `project-status.md` con fase corrente `requirements`.
-6. Creare un bootstrap execution blueprint limitato al Requirement Analyst.
-7. Creare l'Agent Package del Requirement Analyst.
-8. Creare un Human Gate `approve-requirements` con blocking scope `solution blueprint generation`.
-9. Registrare in `project-status.md` i gate attesi del pilot: `approve-requirements`, `approve-solution-blueprint`, `approve-execution-plan`, `approve-final-delivery`.
-10. Preparare il prompt Codex usando `runtime-adapters/codex-project-bootstrap.md` o `runtime-adapters/codex.md`.
-11. Fermarsi.
+6. Creare `factory-state.json` con phase `requirements` e next action `run_requirement_analyst`.
+7. Creare `artifact-index.md` con richiesta iniziale, stato e status.
+8. Creare un bootstrap execution blueprint limitato al Requirement Analyst.
+9. Creare l'Agent Package del Requirement Analyst.
+10. Creare un Human Gate `approve-requirements` con blocking scope `solution blueprint generation`.
+11. Registrare in `project-status.md` i gate attesi del pilot: `approve-requirements`, `approve-solution-blueprint`, `approve-execution-plan`, `approve-final-delivery`.
+12. Preparare il prompt Codex usando `runtime-adapters/codex-project-bootstrap.md` o `runtime-adapters/codex.md`.
+13. Fermarsi.
 
 ## Definition Of Done
 
 - Il workspace esiste.
 - La richiesta originale e preservata.
 - Il bootstrap execution blueprint esiste.
+- `factory-state.json` e `artifact-index.md` esistono.
 - L'Agent Package del Requirement Analyst esiste ed e eseguibile.
 - Il gate `approve-requirements`, se creato, non blocca il Requirement Analyst.
 - Il prossimo prompt runtime e pronto.

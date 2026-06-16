@@ -63,16 +63,19 @@ Queste regole devono rimanere valide anche se cambiano runtime, modelli AI, stru
 | Agenti permanenti | Ruoli stabili della factory. Definiscono e governano il processo principale. |
 | Factory Intake | Agente permanente che riceve una richiesta grezza, crea il Project Workspace iniziale e prepara il primo Agent Package per Requirement Analyst. |
 | Factory Host | Agente permanente conversazionale che coordina fasi, Agent Package, handoff e Human Gate nella stessa sessione runtime. |
+| Factory Runner | Agente permanente operativo che usa stato macchina, artifact index e runtime packet per rendere il flusso riprendibile e token-efficient. |
 | Subagenti temporanei | Agenti creati per uno specifico progetto o task. Possono essere archiviati o distrutti a fine lavoro. |
 | Archetype | Scheletro riutilizzabile e approvato per generare subagenti temporanei di un tipo ricorrente. Definisce ruolo, responsabilità, input, output, limiti e formato dei deliverable. Non contiene conoscenza tecnica specifica e non limita la creazione di agenti ad hoc. |
 | Capability | Conoscenza tecnica operativa riutilizzabile: best practice, checklist, failure mode, rischi, criteri di revisione e lezioni apprese. Non è un tutorial. |
 | Agent Package | Pacchetto operativo che descrive un agente pronto per essere eseguito da un runtime. È indipendente dal runtime. |
+| Runtime Packet | Contesto compatto, task-specifico, generato per eseguire un Agent Package senza rileggere tutta la factory. |
 | Knowledge Compiler | Strato concettuale che compone Agent Package a partire da archetype o definizioni ad hoc, capability, contesto progetto, task e criteri di completamento. |
 | Runtime Adapter | Regole di adattamento che traducono un Agent Package generico nel formato richiesto da uno specifico runtime. |
 | Project Workspace | Spazio temporaneo del progetto: input, blueprint, agenti generati, handoff, deliverable, review e Knowledge Candidate. |
 | Knowledge Candidate | Proposta di miglioramento nata durante un progetto. Può diventare conoscenza permanente solo dopo valutazione e approvazione. |
 | Handoff | Consegna formale tra agenti o fasi. Deve rendere verificabile cosa è stato prodotto e cosa deve accadere dopo. |
 | Human Gate | Punto di controllo in cui la factory deve fermarsi e attendere una decisione umana prima di proseguire. |
+| Factory State | Stato macchina compatto del Project Workspace, usato dal runtime per sapere fase, gate pending e prossima azione. |
 
 ---
 
@@ -81,6 +84,7 @@ Queste regole devono rimanere valide anche se cambiano runtime, modelli AI, stru
 ```text
 User Request
 → Factory Host
+→ Factory Runner
 → Factory Intake
 → Project Bootstrap
 → Requirement Analyst
@@ -91,6 +95,7 @@ User Request
 → Execution Blueprint
 → Knowledge Compiler
 → Agent Package temporanei
+→ Runtime Packet
 → Runtime Adapter
 → Project Team Execution
 → Pipeline Supervisor Review
@@ -108,6 +113,7 @@ Questo flusso separa analisi, progettazione, generazione degli agenti, esecuzion
 |---|---|---|---|---|
 | Factory Intake | Richiesta utente grezza | Project Workspace iniziale, bootstrap blueprint, Requirement Analyst Agent Package | Preserva la richiesta, crea il workspace e prepara il primo run della factory. | Non produce requisiti, architettura, execution plan o deliverable. |
 | Factory Host | Richiesta utente o Project Workspace | Stato conversazionale, avanzamento fasi, richieste Human Gate, handoff | Coordina gli agenti e mantiene il processo nella stessa conversazione runtime. | Non sostituisce agenti specialistici e non decide Human Gate. |
+| Factory Runner | Factory State, Project Workspace, gate e artifact index | Prossima azione, runtime context minimo, stato aggiornato | Riduce inferenza e token decidendo la prossima fase da stato macchina. | Non sostituisce agenti specialistici e non decide Human Gate. |
 | Requirement Analyst | Richiesta utente | Requirements Blueprint | Chiarisce obiettivi, requisiti, vincoli, ambiguità, assunzioni e criteri di accettazione. | Non sceglie stack, architettura o agenti. |
 | Architect | Requirements Blueprint | Solution Blueprint | Propone architettura, stack, componenti, integrazioni, rischi tecnici e trade-off. | Non crea il team operativo e non implementa codice. |
 | Pipeline Designer | Requirements Blueprint, Solution Blueprint | Execution Blueprint | Progetta task force, workflow, handoff, review gate, responsabilità e criteri di completamento. | Non esegue direttamente il progetto e non aggiorna la knowledge base. |
@@ -186,9 +192,11 @@ Il file generato è un Agent Package temporaneo. Può essere usato da un Runtime
 | Solution Blueprint | Architect | Pipeline Designer | Architettura, stack, componenti, flussi dati, integrazioni, sicurezza, trade-off, rischi tecnici, alternative scartate, strategia implementativa. |
 | Execution Blueprint | Pipeline Designer | Knowledge Compiler, Pipeline Supervisor | Team richiesto, archetype o definizioni ad hoc, capability, workflow, handoff, responsabilità, review gate, human gate, escalation, criteri di completamento. |
 | Agent Package | Knowledge Compiler | Runtime Adapter, Project Team | Identità, missione, input, output, responsabilità, limiti, conoscenza assegnata, tool, workflow, handoff, Definition of Done. |
+| Runtime Packet | Knowledge Compiler o Factory Runner | Runtime Adapter, Project Team | Task, contesto approvato minimo, file da leggere, vincoli, output, gate status e budget contesto. |
 | Handoff | Agente o fase mittente | Agente o fase destinataria, Supervisor | Output consegnato, decisioni prese, file coinvolti, rischi residui, problemi aperti, prossima azione. |
 | Review Report | Tester, Reviewer, Auditor o altro agente tecnico | Pipeline Supervisor | Esito controlli, problemi rilevati, gravità, raccomandazioni, approvazione o blocco. |
 | Human Gate | Pipeline Designer o Pipeline Supervisor | Pipeline Supervisor, Runtime Adapter, maintainer umano | Decisione richiesta, contesto, opzioni, criteri di approvazione, blocking scope, decisione umana. |
+| Factory State | Factory Intake o Factory Runner | Factory Host, Runtime Adapter, Pipeline Supervisor | Fase corrente, status, pending gate, prossima azione, summaries approvate e runtime packet disponibili. |
 | Knowledge Candidate | Qualsiasi agente o fase | Knowledge Evolution | Proposta di miglioramento, contesto, motivazione, rischio, generalizzabilità, destinazione proposta. |
 
 ---
@@ -278,6 +286,7 @@ AgentFactory/
 ├── agents/
 │   ├── factory-intake/
 │   ├── factory-host/
+│   ├── factory-runner/
 │   ├── requirement-analyst/
 │   │   ├── requirement-analyst.md
 │   │   └── requirement-analyst-skills.md
@@ -299,6 +308,8 @@ AgentFactory/
 │   └── react.md
 ├── standards/
 │   ├── agent-package-standard.md
+│   ├── factory-state-standard.md
+│   ├── runtime-packet-standard.md
 │   ├── project-bootstrap-standard.md
 │   ├── handoff-standard.md
 │   ├── human-gate-standard.md
@@ -320,7 +331,9 @@ AgentFactory/
     └── _template/
         ├── input/
         ├── blueprints/
+        ├── summaries/
         ├── generated-agents/
+        ├── runtime-packets/
         ├── handoffs/
         ├── human-gates/
         ├── deliverables/
@@ -350,10 +363,13 @@ AgentFactory/
 | Regola di comportamento del Requirement Analyst | `agents/requirement-analyst/` |
 | Regola di bootstrap di un nuovo progetto | `agents/factory-intake/` |
 | Regola di coordinamento conversazionale | `agents/factory-host/` |
+| Regola di avanzamento da stato macchina | `agents/factory-runner/` |
 | Skill operativa stabile di un agente permanente | `agents/<agent-name>/<agent-name>-skills.md` |
 | Regola generale su come lavora un Developer temporaneo | `archetypes/developer.md` |
 | Conoscenza tecnica su PostgreSQL | `capabilities/postgres.md` |
 | Formato obbligatorio di un Agent Package | `standards/agent-package-standard.md` |
+| Formato obbligatorio dello stato macchina | `standards/factory-state-standard.md` |
+| Formato obbligatorio di un runtime packet | `standards/runtime-packet-standard.md` |
 | Formato obbligatorio del bootstrap progetto | `standards/project-bootstrap-standard.md` |
 | Formato obbligatorio di un handoff | `standards/handoff-standard.md` |
 | Regola di adattamento per Claude Code | `runtime-adapters/claude-code.md` |
@@ -386,6 +402,7 @@ La factory deve prevenire questi errori:
 * Agent Package troppo lunghi o pieni di contesto inutile;
 * Factory Intake trasformato in super-agente che produce requisiti, architettura o deliverable;
 * Factory Host trasformato in super-agente tecnico che salta gli agenti specialistici;
+* Factory Runner che ricalcola stato e contesto leggendo tutto invece di usare `factory-state.json`;
 * Knowledge Candidate integrate senza validazione;
 * Pipeline Supervisor trasformato in super-agente tecnico;
 * Runtime Adapter che assorbe logica decisionale;
@@ -409,16 +426,19 @@ La factory deve prevenire questi errori:
 6. `knowledge-candidate-standard.md`
 7. `capability-standard.md`
 8. `human-gate-standard.md`
+9. `factory-state-standard.md`
+10. `runtime-packet-standard.md`
 
 ## MVP 2 - Agenti permanenti
 
 1. Factory Intake
 2. Factory Host
-3. Requirement Analyst
-4. Architect
-5. Pipeline Designer
-6. Pipeline Supervisor
-7. Knowledge Evolution
+3. Factory Runner
+4. Requirement Analyst
+5. Architect
+6. Pipeline Designer
+7. Pipeline Supervisor
+8. Knowledge Evolution
 
 ## MVP 3 - Subagenti temporanei
 
@@ -451,6 +471,7 @@ Definito:
 * agenti permanenti;
 * Factory Intake;
 * Factory Host;
+* Factory Runner;
 * subagenti temporanei;
 * archetype;
 * capability;
@@ -475,6 +496,8 @@ Implementato nella baseline operativa:
 * Codex Conversation Adapter;
 * Codex Project Bootstrap Adapter;
 * Project Workspace Template;
+* Factory State;
+* Runtime Packet;
 * primo pilota manuale.
 
 Da sviluppare dopo la baseline:

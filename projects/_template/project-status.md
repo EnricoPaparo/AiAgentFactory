@@ -8,6 +8,8 @@
 - created-at:
 - updated-at:
 - owner:
+- factory-state: `factory-state.json`
+- artifact-index: `artifact-index.md`
 
 ## Current Phase
 
@@ -22,6 +24,7 @@
 | Solution | Pending | `blueprints/solution-blueprint.md` | Produced by Architect. |
 | Execution Plan | Pending | `blueprints/execution-blueprint.md` | Produced by Pipeline Designer. |
 | Agent Generation | Pending | `generated-agents/` | Produced by Knowledge Compiler. |
+| Runtime Packet Generation | Pending | `runtime-packets/` | Compressed context for execution. |
 | Execution | Pending | `deliverables/`, `handoffs/` | Executed through runtime adapter. |
 | Review | Pending | `reviews/` | Review gates and reports. |
 | Knowledge Evolution | Pending | `knowledge-candidates/` | Candidate evaluation. |

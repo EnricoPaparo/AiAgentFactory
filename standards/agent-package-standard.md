@@ -41,6 +41,7 @@ Si usa dopo l'approvazione di un Execution Blueprint, quando serve generare uno 
 | Campo | Descrizione |
 |---|---|
 | `runtime-hints` | Indicazioni non vincolanti per runtime adapter. |
+| `runtime-packet` | Percorso del runtime packet compatto collegato al package, se generato. |
 | `risk-notes` | Rischi specifici del task. |
 | `review-gates` | Gate di review collegati all'agente. |
 | `escalation-rules` | Quando fermarsi e chiedere supervisione. |
@@ -83,6 +84,8 @@ Si usa dopo l'approvazione di un Execution Blueprint, quando serve generare uno 
 
 ## Runtime Hints
 
+## Runtime Packet
+
 ## Risk Notes
 
 ## Review Gates
@@ -102,11 +105,13 @@ Un Agent Package e valido quando:
 4. responsabilita e limiti non si contraddicono;
 5. la Definition of Done permette al Pipeline Supervisor di decidere se il task e completato;
 6. il package non contiene conoscenza tecnica generica non necessaria al task;
-7. il package non include decisioni strategiche non presenti nei blueprint.
+7. il package non include decisioni strategiche non presenti nei blueprint;
+8. se esiste un runtime packet, il package e il packet non si contraddicono.
 
 ## Failure mode
 
 - Agent Package troppo lungo e pieno di contesto non operativo.
+- Agent Package usato come unico contesto runtime quando un packet compatto sarebbe sufficiente.
 - Capability assegnate solo per completezza, ma non usate dal task.
 - Task non verificabile.
 - Limiti assenti, con agente che invade responsabilita di altri ruoli.
