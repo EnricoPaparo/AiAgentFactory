@@ -98,6 +98,8 @@ Comandi minimi:
 ```text
 python tools/factory.py start "<idea>" --project-id <project-id>
 python tools/factory.py next projects/<project-id>
+python tools/factory.py run-next projects/<project-id> --dry-run
+python tools/factory.py run-next projects/<project-id> --execute
 python tools/factory.py validate projects/<project-id>
 python tools/factory.py packet projects/<project-id> <packet-id>
 python tools/factory.py approve projects/<project-id> <gate-id> --decision Approved
@@ -108,6 +110,8 @@ Su Windows usare il wrapper `.cmd`:
 ```text
 tools\factory.cmd start "<idea>" --project-id <project-id>
 tools\factory.cmd next projects\<project-id>
+tools\factory.cmd run-next projects\<project-id> --dry-run
+tools\factory.cmd run-next projects\<project-id> --execute
 tools\factory.cmd validate projects\<project-id>
 tools\factory.cmd packet projects\<project-id> <packet-id>
 tools\factory.cmd approve projects\<project-id> <gate-id> --decision Approved
@@ -115,7 +119,9 @@ tools\factory.cmd approve projects\<project-id> <gate-id> --decision Approved
 
 Il wrapper PowerShell `tools/factory.ps1` e disponibile, ma puo essere bloccato dalla execution policy locale.
 
-Questa CLI non chiama modelli AI. Gestisce bootstrap, stato, validazione, runtime packet e approval bookkeeping.
+Questa CLI chiama modelli AI solo con `run-next --execute`. Tutti gli altri comandi gestiscono bootstrap, stato, validazione, runtime packet e approval bookkeeping in modo deterministico.
+
+`run-next --dry-run` e il passaggio consigliato prima dell'esecuzione: valida lo stato, individua il prompt successivo e stampa il comando backend senza consumare token.
 
 ## Definition Of Done
 

@@ -29,6 +29,18 @@ Poi usa il prompt creato in:
 projects\ceramirycs\run-records\next-requirement-analyst-prompt.md
 ```
 
+Oppure prepara il lancio non interattivo con:
+
+```text
+tools\factory.cmd run-next projects\ceramirycs --dry-run
+```
+
+Quando vuoi delegare davvero al backend Codex:
+
+```text
+tools\factory.cmd run-next projects\ceramirycs --execute
+```
+
 ```text
 Esegui AgentFactory su questa idea:
 Voglio creare un sito web minimale e semplicissimo per Miriam e le sue produzioni di ceramica cozy.

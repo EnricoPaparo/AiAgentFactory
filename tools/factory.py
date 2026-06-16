@@ -10,6 +10,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import shutil
+import subprocess
 import re
 import sys
 from datetime import datetime
@@ -515,6 +517,20 @@ Regole:
 """
 
 
+def next_prompt_path(project: Path, state: dict[str, Any]) -> Path:
+    next_action = state.get("next_action")
+    if next_action == "run_requirement_analyst":
+        path = project / "run-records" / "next-requirement-analyst-prompt.md"
+        if path.exists():
+            return path
+    die(f"no prompt mapping for next_action: {next_action}")
+
+
+def codex_command(prompt_path: Path, codex_bin: str) -> list[str]:
+    prompt = prompt_path.read_text(encoding="utf-8")
+    return [codex_bin, "exec", prompt]
+
+
 def cmd_next(args: argparse.Namespace) -> None:
     project = project_path(args.project)
     state = read_state(project)
@@ -597,6 +613,55 @@ def cmd_start(args: argparse.Namespace) -> None:
     print("next_action: run_requirement_analyst")
     print(f"run_record: {record}")
     print(f"next_prompt: {prompt_path}")
+
+
+def cmd_run_next(args: argparse.Namespace) -> None:
+    project = project_path(args.project)
+    errors = validate_project(project)
+    if errors:
+        for error in errors:
+            print(f"FAIL: {error}")
+        raise SystemExit(1)
+
+    state = read_state(project)
+    if state.get("pending_gate"):
+        die(f"pending gate blocks execution: {state['pending_gate']}")
+
+    prompt_path = next_prompt_path(project, state)
+    codex_bin = args.codex_bin or shutil.which("codex") or "codex"
+    command = codex_command(prompt_path, codex_bin)
+
+    if args.dry_run or not args.execute:
+        print("mode: dry-run")
+        print("command:")
+        print(f"{codex_bin} exec <prompt-from-file>")
+        print(f"prompt: {prompt_path}")
+        create_run_record(
+            project=project,
+            action="run-next-dry-run",
+            status="info",
+            inputs=["factory-state.json", str(prompt_path.relative_to(project))],
+            outputs=[],
+            checks=["Validated project state.", "Prepared codex exec command."],
+            token_notes="Dry run only; no model call executed.",
+        )
+        return
+
+    record = create_run_record(
+        project=project,
+        action="run-next",
+        status="info",
+        inputs=["factory-state.json", str(prompt_path.relative_to(project))],
+        outputs=[],
+        checks=["Validated project state.", "Starting codex exec."],
+        token_notes="Delegating next prompt to codex exec; token usage is external to this deterministic runner.",
+    )
+    print(f"run_record: {record}")
+    try:
+        completed = subprocess.run(command, cwd=Path.cwd(), text=True)
+    except OSError as exc:
+        die(f"failed to start codex exec: {exc}")
+    raise SystemExit(completed.returncode)
 
 
 def cmd_packet(args: argparse.Namespace) -> None:
@@ -733,6 +798,13 @@ def build_parser() -> argparse.ArgumentParser:
     p_start.add_argument("--project-id")
     p_start.add_argument("--force", action="store_true")
     p_start.set_defaults(func=cmd_start)
+
+    p_run_next = sub.add_parser("run-next", help="prepare or execute the next prompt through codex exec")
+    p_run_next.add_argument("project")
+    p_run_next.add_argument("--codex-bin")
+    p_run_next.add_argument("--execute", action="store_true", help="actually run codex exec")
+    p_run_next.add_argument("--dry-run", action="store_true", help="print command without execution")
+    p_run_next.set_defaults(func=cmd_run_next)
 
     p_next = sub.add_parser("next", help="show current phase, pending gate and next action")
     p_next.add_argument("project")
