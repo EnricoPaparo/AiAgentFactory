@@ -70,6 +70,20 @@ APPROVAL_PHASE_MAP = {
     "approve-final-delivery": ("closed", "none"),
 }
 
+PROJECT_DIRS = [
+    "input",
+    "blueprints",
+    "summaries",
+    "generated-agents",
+    "runtime-packets",
+    "handoffs",
+    "human-gates",
+    "deliverables",
+    "reviews",
+    "run-records",
+    "knowledge-candidates",
+]
+
 
 def die(message: str) -> None:
     print(f"ERROR: {message}", file=sys.stderr)
@@ -96,6 +110,43 @@ def load_json(path: Path) -> dict[str, Any]:
 
 def write_json(path: Path, value: dict[str, Any]) -> None:
     path.write_text(json.dumps(value, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+
+
+def kebab_case(value: str) -> str:
+    slug = re.sub(r"[^a-zA-Z0-9]+", "-", value.strip().lower()).strip("-")
+    slug = re.sub(r"-+", "-", slug)
+    return slug or "agentfactory-project"
+
+
+def infer_project_id(idea: str) -> str:
+    quoted = re.findall(r'"([^"]+)"', idea)
+    if quoted:
+        return kebab_case(quoted[0])[:64].strip("-")
+    words = re.findall(r"[A-Za-zÀ-ÿ0-9]+", idea)
+    stop = {
+        "voglio",
+        "creare",
+        "un",
+        "una",
+        "per",
+        "con",
+        "che",
+        "deve",
+        "fare",
+        "sito",
+        "web",
+        "landing",
+        "page",
+        "app",
+        "progetto",
+    }
+    selected = [word for word in words if word.lower() not in stop][:5]
+    return kebab_case(" ".join(selected))[:64].strip("-") or "agentfactory-project"
+
+
+def write_text(path: Path, text: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text.rstrip() + "\n", encoding="utf-8")
 
 
 def read_state(project: Path) -> dict[str, Any]:
@@ -174,6 +225,296 @@ def create_run_record(
     return path
 
 
+def bootstrap_readme(project_id: str) -> str:
+    return f"""# Project Workspace: {project_id}
+
+## Purpose
+
+Workspace AgentFactory creato da `tools/factory.py start`.
+
+## Current Phase
+
+Requirements.
+
+## Primary Artifacts
+
+- `input/initial-request.md`
+- `factory-state.json`
+- `artifact-index.md`
+- `project-status.md`
+- `blueprints/bootstrap-execution-blueprint.md`
+- `generated-agents/requirement-analyst-agent-package.md`
+- `human-gates/approve-requirements.md`
+"""
+
+
+def bootstrap_status(project_id: str, today: str) -> str:
+    return f"""# Project Status: {project_id}
+
+## Metadata
+
+- project-id: {project_id}
+- status: active
+- current-phase: requirements
+- current-agent: Requirement Analyst
+- factory-state: factory-state.json
+- artifact-index: artifact-index.md
+- created-at: {today}
+- updated-at: {today}
+- owner: Human Maintainer
+
+## Phase Checklist
+
+| Phase | Status | Main Artifact | Notes |
+|---|---|---|---|
+| Intake | Completed | `input/initial-request.md` | Initial request captured. |
+| Requirements | Pending | `blueprints/requirements-blueprint.md` | Next action. |
+| Solution | Pending | `blueprints/solution-blueprint.md` | Blocked by `approve-requirements`. |
+| Execution Plan | Pending | `blueprints/execution-blueprint.md` | Not started. |
+| Agent Generation | Pending | `generated-agents/` | Not started. |
+| Execution | Pending | `deliverables/`, `handoffs/` | Not started. |
+| Review | Pending | `reviews/` | Not started. |
+| Run Records | Active | `run-records/` | Bootstrap record created. |
+| Knowledge Evolution | Pending | `knowledge-candidates/` | Not started. |
+| Closure | Pending | final handoff | Not started. |
+
+## Active Human Gates
+
+| Gate | Status | Blocking Scope | Decision Owner |
+|---|---|---|---|
+| approve-requirements | Pending | solution blueprint generation | Human Maintainer |
+| approve-solution-blueprint | Expected | execution blueprint generation | Human Maintainer |
+| approve-execution-plan | Expected | agent package generation and project execution | Human Maintainer |
+| approve-final-delivery | Expected | project closure | Human Maintainer |
+
+## Next Action
+
+Run Requirement Analyst and produce `blueprints/requirements-blueprint.md`.
+"""
+
+
+def bootstrap_blueprint(project_id: str, today: str) -> str:
+    return f"""# Bootstrap Execution Blueprint: {project_id}
+
+## Metadata
+
+- project-id: {project_id}
+- created-by: Factory Intake
+- created-at: {today}
+- runtime-adapter: runtime-adapters/codex-conversation.md
+- runner: tools/factory.py start
+
+## Scope
+
+Create the minimum Project Workspace and prepare Requirement Analyst execution only.
+
+## Source Request
+
+- projects/{project_id}/input/initial-request.md
+
+## Created Bootstrap Artifacts
+
+- projects/{project_id}/README.md
+- projects/{project_id}/project-status.md
+- projects/{project_id}/factory-state.json
+- projects/{project_id}/artifact-index.md
+- projects/{project_id}/input/initial-request.md
+- projects/{project_id}/blueprints/bootstrap-execution-blueprint.md
+- projects/{project_id}/generated-agents/requirement-analyst-agent-package.md
+- projects/{project_id}/human-gates/approve-requirements.md
+
+## First Agent
+
+- agent-role: Requirement Analyst
+- permanent-agent-source: agents/requirement-analyst/requirement-analyst.md
+- expected-output: projects/{project_id}/blueprints/requirements-blueprint.md
+
+## Human Gates
+
+- approve-requirements: created as Pending; blocks `solution blueprint generation`, not Requirement Analyst.
+
+## Out Of Scope
+
+- Requirements Blueprint content.
+- Architecture decisions.
+- Stack decisions.
+- Temporary operational agent generation.
+- Deliverable implementation.
+
+## Next Runtime Action
+
+Run Requirement Analyst in Codex or a future backend, then stop at `approve-requirements`.
+"""
+
+
+def requirement_package(project_id: str) -> str:
+    return f"""# Agent Package: requirement-analyst-{project_id}
+
+## Metadata
+
+- project-id: {project_id}
+- package-id: requirement-analyst-{project_id}
+- agent-role: Requirement Analyst
+- agent-source: permanent agent `agents/requirement-analyst/requirement-analyst.md`
+- runtime-adapter: runtime-adapters/codex-conversation.md
+
+## Task
+
+Transform the initial request into a verifiable Requirements Blueprint for this project.
+
+## Inputs
+
+- projects/{project_id}/input/initial-request.md
+- agents/requirement-analyst/requirement-analyst.md
+- standards/requirements-blueprint-standard.md
+- standards/handoff-standard.md
+
+## Expected Outputs
+
+- projects/{project_id}/blueprints/requirements-blueprint.md
+- projects/{project_id}/handoffs/requirement-analyst-to-architect.md
+
+## Boundaries
+
+- Do not choose architecture or technology stack.
+- Do not implement deliverables.
+- Preserve explicit user constraints.
+- Separate assumptions from requirements.
+
+## Workflow
+
+1. Read the initial request.
+2. Extract goal, output, requirements, constraints, assumptions, ambiguities and out-of-scope items.
+3. Write acceptance criteria suitable for final review.
+4. Produce handoff to Architect.
+5. Stop at `approve-requirements`.
+
+## Definition Of Done
+
+- Requirements Blueprint follows `standards/requirements-blueprint-standard.md`.
+- Functional requirements are verifiable.
+- Handoff to Architect is present.
+- No architecture or stack decision is made.
+"""
+
+
+def approve_requirements_gate(project_id: str, today: str) -> str:
+    return f"""# Human Gate: approve-requirements
+
+## Metadata
+
+- gate-id: approve-requirements
+- project-id: {project_id}
+- status: Pending
+- requested-by: Requirement Analyst
+- decision-owner: Human Maintainer
+- created-at: {today}
+- decided-at:
+- expires-at:
+
+## Decision Required
+
+Approve the Requirements Blueprint before Architect generates the Solution Blueprint.
+
+## Context
+
+- Initial request: projects/{project_id}/input/initial-request.md
+- Future Requirements Blueprint: projects/{project_id}/blueprints/requirements-blueprint.md
+- Bootstrap blueprint: projects/{project_id}/blueprints/bootstrap-execution-blueprint.md
+
+## Options
+
+- Approved
+- Changes Requested
+- Rejected
+
+## Approval Criteria
+
+- Requirements preserve the original user intent.
+- Constraints are explicit and verifiable.
+- Ambiguities and assumptions are separated.
+- No architecture, stack or implementation decision is included.
+
+## Impact If Approved
+
+Architect may generate the Solution Blueprint.
+
+## Impact If Rejected
+
+The project remains blocked and must not proceed to architecture.
+
+## Return To Phase
+
+Requirement Analyst.
+
+## Blocking Scope
+
+Solution blueprint generation.
+
+## Human Decision
+
+- decision:
+- decided-by:
+- decided-at:
+- notes:
+"""
+
+
+def artifact_index(project_id: str) -> str:
+    return f"""# Artifact Index: {project_id}
+
+## Core Artifacts
+
+| Artifact | Path | Status | Notes |
+|---|---|---|---|
+| Initial request | `input/initial-request.md` | Completed | Preserved user idea. |
+| Factory state | `factory-state.json` | Active | Next action is Requirement Analyst. |
+| Project status | `project-status.md` | Active | Human-readable status. |
+| Bootstrap blueprint | `blueprints/bootstrap-execution-blueprint.md` | Completed | Created by Factory start. |
+| Requirement Analyst package | `generated-agents/requirement-analyst-agent-package.md` | Ready | First agent package. |
+| approve-requirements gate | `human-gates/approve-requirements.md` | Pending | Blocks solution generation. |
+
+## Approved Summaries
+
+| Summary | Source | Gate | Status |
+|---|---|---|---|
+
+## Runtime Packets
+
+| Packet | Agent package | Status |
+|---|---|---|
+
+## Run Records
+
+| Record | Action | Status |
+|---|---|---|
+| `run-records/` | bootstrap-start | completed |
+"""
+
+
+def requirement_prompt(project_id: str) -> str:
+    return f"""Esegui il Requirement Analyst per questo progetto AgentFactory.
+
+Repository:
+<repository-path>
+
+Project Workspace:
+projects/{project_id}
+
+Agent Package:
+projects/{project_id}/generated-agents/requirement-analyst-agent-package.md
+
+Regole:
+- Leggi l'Agent Package e gli input indicati.
+- Produci `projects/{project_id}/blueprints/requirements-blueprint.md`.
+- Produci `projects/{project_id}/handoffs/requirement-analyst-to-architect.md`.
+- Non scegliere architettura, stack o piano operativo.
+- Non implementare deliverable.
+- Quando hai finito, fermati su `human-gates/approve-requirements.md` e chiedi approval.
+- Aggiorna `factory-state.json` a phase `requirements_approval`, status `waiting_for_human`, pending_gate `approve-requirements`, next_action `wait_for_human_approval`.
+"""
+
+
 def cmd_next(args: argparse.Namespace) -> None:
     project = project_path(args.project)
     state = read_state(project)
@@ -187,6 +528,75 @@ def cmd_next(args: argparse.Namespace) -> None:
         text = gate.read_text(encoding="utf-8")
         print(f"gate_file: {gate}")
         print(f"gate_status: {gate_status(text)}")
+
+
+def cmd_start(args: argparse.Namespace) -> None:
+    idea = args.idea.strip()
+    if not idea:
+        die("idea cannot be empty")
+
+    repo = Path.cwd()
+    projects_dir = repo / "projects"
+    projects_dir.mkdir(exist_ok=True)
+    project_id = kebab_case(args.project_id) if args.project_id else infer_project_id(idea)
+    project = projects_dir / project_id
+    if project.exists() and not args.force:
+        die(f"project already exists: {project}. Use --force only if you intentionally want to reuse it.")
+
+    project.mkdir(exist_ok=True)
+    for name in PROJECT_DIRS:
+        (project / name).mkdir(exist_ok=True)
+
+    today = datetime.now().strftime("%Y-%m-%d")
+    write_text(project / "README.md", bootstrap_readme(project_id))
+    write_text(project / "input" / "initial-request.md", f"# Initial Request: {project_id}\n\n{idea}")
+    write_text(project / "project-status.md", bootstrap_status(project_id, today))
+    write_text(project / "artifact-index.md", artifact_index(project_id))
+    write_text(project / "blueprints" / "bootstrap-execution-blueprint.md", bootstrap_blueprint(project_id, today))
+    write_text(project / "generated-agents" / "requirement-analyst-agent-package.md", requirement_package(project_id))
+    write_text(project / "human-gates" / "approve-requirements.md", approve_requirements_gate(project_id, today))
+
+    state = {
+        "project_id": project_id,
+        "phase": "requirements",
+        "status": "active",
+        "pending_gate": None,
+        "next_action": "run_requirement_analyst",
+        "artifact_index": "artifact-index.md",
+        "approved_summaries": [],
+        "runtime_packets": [],
+        "run_records": "run-records/",
+        "updated_at": today,
+    }
+    write_json(project / "factory-state.json", state)
+
+    record = create_run_record(
+        project=project,
+        action="start",
+        status="completed",
+        inputs=["user idea"],
+        outputs=[
+            "README.md",
+            "input/initial-request.md",
+            "project-status.md",
+            "factory-state.json",
+            "artifact-index.md",
+            "blueprints/bootstrap-execution-blueprint.md",
+            "generated-agents/requirement-analyst-agent-package.md",
+            "human-gates/approve-requirements.md",
+        ],
+        checks=["Project workspace created.", "Requirement Analyst package created.", "approve-requirements gate created."],
+        token_notes="Bootstrap handled deterministically by CLI; no model context required.",
+    )
+
+    prompt_path = project / "run-records" / "next-requirement-analyst-prompt.md"
+    write_text(prompt_path, requirement_prompt(project_id).replace("<repository-path>", str(repo)))
+
+    print(f"project_id: {project_id}")
+    print(f"workspace: {project}")
+    print("next_action: run_requirement_analyst")
+    print(f"run_record: {record}")
+    print(f"next_prompt: {prompt_path}")
 
 
 def cmd_packet(args: argparse.Namespace) -> None:
@@ -317,6 +727,12 @@ def cmd_approve(args: argparse.Namespace) -> None:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="factory", description="Minimal AgentFactory operational runner")
     sub = parser.add_subparsers(dest="command", required=True)
+
+    p_start = sub.add_parser("start", help="bootstrap a new project workspace from an idea")
+    p_start.add_argument("idea")
+    p_start.add_argument("--project-id")
+    p_start.add_argument("--force", action="store_true")
+    p_start.set_defaults(func=cmd_start)
 
     p_next = sub.add_parser("next", help="show current phase, pending gate and next action")
     p_next.add_argument("project")

@@ -17,6 +17,18 @@ Questa prova deve verificare soprattutto il flusso degli Human Gate, non solo la
 
 ## Prompt Breve Da Usare In Una Nuova Chat Codex
 
+Prima puoi creare il workspace deterministico con:
+
+```text
+tools\factory.cmd start "Voglio creare un sito web minimale e semplicissimo per Miriam e le sue produzioni di ceramica cozy. L'attivita si chiama CeraMirycs. Il sito deve essere moderno, caldo, artigianale e pulito. Bastano una landing page e una pagina contatti. I veri contatti devono restare vuoti o indicati come da definire: email, telefono, indirizzo e Instagram. Non inventare dati di contatto realistici." --project-id ceramirycs
+```
+
+Poi usa il prompt creato in:
+
+```text
+projects\ceramirycs\run-records\next-requirement-analyst-prompt.md
+```
+
 ```text
 Esegui AgentFactory su questa idea:
 Voglio creare un sito web minimale e semplicissimo per Miriam e le sue produzioni di ceramica cozy.

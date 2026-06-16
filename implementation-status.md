@@ -69,7 +69,7 @@ Questo documento traccia lo stato di implementazione della factory rispetto alla
 | `runtime-adapters/langgraph.md` | Mancante | Adapter citato nella struttura di esempio. | Rinviare. |
 | `projects/` | Esistente | Cartella per workspace temporanei di progetto creata in Fase 6. | Usare per la prima esecuzione pilota. |
 | `projects/_template/` | Esistente | Template operativo per progetti con input, blueprint, generated-agents, handoff, human-gates, deliverable, reviews e knowledge-candidates. | Copiare per creare il primo progetto pilota. |
-| `tools/factory.py` | Esistente | CLI deterministica per next action, validate, packet display e approval bookkeeping. | Estendere verso `codex exec` solo dopo validazione. |
+| `tools/factory.py` | Esistente | CLI deterministica per start, next action, validate, packet display e approval bookkeeping. | Estendere verso `codex exec` solo dopo validazione. |
 | `tools/factory.cmd` | Esistente | Wrapper Windows per usare la CLI anche quando `python` non e nel PATH. | Usare su Windows. |
 | `tools/factory.ps1` | Esistente | Wrapper PowerShell alternativo, soggetto a execution policy locale. | Usare solo se consentito. |
 
@@ -99,7 +99,7 @@ Questo documento traccia lo stato di implementazione della factory rispetto alla
 13. Factory Host e Codex Conversation Adapter permettono di coordinare piu agenti e Human Gate nella stessa chat, riducendo il passaggio manuale di prompt.
 14. Il pilot end-to-end ora richiede quattro approval espliciti: requisiti, architettura, piano/team agenti e lavoro finito.
 15. Factory Runner, Factory State e Runtime Packet introducono una modalita piu elegante e token-efficient: stato macchina compatto, summaries approvate e contesto minimo per agente.
-16. La Fase 9 introduce Operational Runner: Context Compiler, Run Record Standard e CLI minima `tools/factory.py` per spostare validazioni e approval bookkeeping fuori dal modello AI.
+16. La Fase 9 introduce Operational Runner: Context Compiler, Run Record Standard e CLI minima `tools/factory.py` per spostare bootstrap, validazioni e approval bookkeeping fuori dal modello AI.
 
 ## Prossimo step consigliato
 
@@ -115,6 +115,7 @@ Criterio di completamento del prossimo step: una richiesta utente deve poter ava
 Comandi operativi minimi:
 
 ```text
+python tools/factory.py start "<idea>" --project-id <project-id>
 python tools/factory.py next projects/<project-id>
 python tools/factory.py validate projects/<project-id>
 python tools/factory.py packet projects/<project-id> <packet-id>
@@ -124,6 +125,7 @@ python tools/factory.py approve projects/<project-id> <gate-id> --decision Appro
 Su Windows:
 
 ```text
+tools\factory.cmd start "<idea>" --project-id <project-id>
 tools\factory.cmd next projects\<project-id>
 tools\factory.cmd validate projects\<project-id>
 tools\factory.cmd packet projects\<project-id> <packet-id>
