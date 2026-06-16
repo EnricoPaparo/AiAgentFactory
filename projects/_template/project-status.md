@@ -31,6 +31,10 @@
 
 | Gate | Status | Blocking Scope | Decision Owner |
 |---|---|---|---|
+| approve-requirements | Expected | solution blueprint generation | Human Maintainer |
+| approve-solution-blueprint | Expected | execution blueprint generation | Human Maintainer |
+| approve-execution-plan | Expected | agent package generation and project execution | Human Maintainer |
+| approve-final-delivery | Expected | project closure | Human Maintainer |
 
 ## Active Agents
 

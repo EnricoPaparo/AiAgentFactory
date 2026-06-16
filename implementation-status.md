@@ -89,6 +89,7 @@ Questo documento traccia lo stato di implementazione della factory rispetto alla
 11. Il Codex Runtime Adapter definisce prompt, preflight, Human Gate handling e output finali per eseguire un Agent Package in una chat Codex.
 12. Factory Intake e Codex Project Bootstrap permettono di partire da una sola idea utente creando workspace e primo Agent Package senza bootstrap manuale.
 13. Factory Host e Codex Conversation Adapter permettono di coordinare piu agenti e Human Gate nella stessa chat, riducendo il passaggio manuale di prompt.
+14. Il pilot end-to-end ora richiede quattro approval espliciti: requisiti, architettura, piano/team agenti e lavoro finito.
 
 ## Prossimo step consigliato
 
@@ -99,3 +100,9 @@ runtime-adapters/codex-conversation.md
 ```
 
 Criterio di completamento del prossimo step: una richiesta utente deve poter avanzare nella stessa chat attraverso blueprint, Human Gate, Agent Package temporanei, execution e review.
+
+Per la prova reale CeraMirycs usare:
+
+```text
+runbooks/ceramirycs-real-pilot.md
+```

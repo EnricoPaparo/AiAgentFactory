@@ -21,6 +21,7 @@ L'Architect e l'agente permanente che trasforma un Requirements Blueprint valido
 
 - Solution Blueprint conforme a `standards/solution-blueprint-standard.md`.
 - Handoff verso Pipeline Designer conforme a `standards/handoff-standard.md`, quando richiesto dal workflow.
+- Human Gate `approve-solution-blueprint` quando il workflow richiede approvazione umana prima dell'Execution Blueprint.
 
 ## Limiti
 
@@ -39,6 +40,7 @@ L'Architect e l'agente permanente che trasforma un Requirements Blueprint valido
 5. Registrare sicurezza, trade-off e alternative scartate.
 6. Definire strategia implementativa incrementale.
 7. Produrre il Solution Blueprint.
+8. Preparare o aggiornare il gate `approve-solution-blueprint` con blocking scope `execution blueprint generation`.
 
 ## Definition Of Done
 

@@ -26,7 +26,7 @@ Usare questo adapter quando l'utente vuole dare alla factory una nuova idea di p
 - `project-status.md`.
 - `blueprints/bootstrap-execution-blueprint.md`.
 - `generated-agents/requirement-analyst-agent-package.md`.
-- eventuale `human-gates/approve-requirements.md`.
+- `human-gates/approve-requirements.md`.
 - prompt pronto per eseguire il Requirement Analyst.
 
 ## Regole
@@ -65,7 +65,8 @@ Regole:
 - Crea project-status.md.
 - Crea blueprints/bootstrap-execution-blueprint.md solo per avviare Requirement Analyst.
 - Crea generated-agents/requirement-analyst-agent-package.md.
-- Crea human-gates/approve-requirements.md se serve validare i requisiti prima della soluzione.
+- Crea human-gates/approve-requirements.md per validare i requisiti prima della soluzione.
+- Registra in project-status.md i gate attesi del pilot: approve-requirements, approve-solution-blueprint, approve-execution-plan, approve-final-delivery.
 - Non produrre Requirements Blueprint.
 - Non scegliere stack, architettura o design tecnico.
 - Non implementare deliverable.
@@ -90,8 +91,8 @@ Project Bootstrap Standard:
 standards/project-bootstrap-standard.md
 
 Richiesta utente originale:
-Voglio un minimale e semplicissimo sito web moderno in stile cozy che riguarda la ceramica.
-Basta una landing page e una pagina contatti inventata lasciando vuoti i veri contatti.
+Voglio un minimale e semplicissimo sito web moderno per una piccola attivita artigianale.
+Basta una landing page e una pagina contatti lasciando vuoti i veri contatti.
 
 Regole:
 - Crea un solo Project Workspace sotto projects/<project-id>/.
@@ -99,7 +100,8 @@ Regole:
 - Crea project-status.md.
 - Crea blueprints/bootstrap-execution-blueprint.md solo per avviare Requirement Analyst.
 - Crea generated-agents/requirement-analyst-agent-package.md.
-- Crea human-gates/approve-requirements.md se serve validare i requisiti prima della soluzione.
+- Crea human-gates/approve-requirements.md per validare i requisiti prima della soluzione.
+- Registra in project-status.md i gate attesi del pilot: approve-requirements, approve-solution-blueprint, approve-execution-plan, approve-final-delivery.
 - Non produrre Requirements Blueprint.
 - Non scegliere stack, architettura o design tecnico.
 - Non implementare deliverable.

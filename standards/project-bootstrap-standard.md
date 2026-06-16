@@ -71,20 +71,20 @@ Un Project Bootstrap e valido quando:
 ## Esempio minimo
 
 ```markdown
-# Project Bootstrap: ceramic-cozy-landing
+# Project Bootstrap: simple-landing-page
 
 ## Metadata
 
-- project-id: ceramic-cozy-landing
-- workspace-path: projects/ceramic-cozy-landing
+- project-id: simple-landing-page
+- workspace-path: projects/simple-landing-page
 - source-request: input/initial-request.md
 
 ## Created Artifacts
 
-- projects/ceramic-cozy-landing/input/initial-request.md
-- projects/ceramic-cozy-landing/blueprints/bootstrap-execution-blueprint.md
-- projects/ceramic-cozy-landing/generated-agents/requirement-analyst-agent-package.md
-- projects/ceramic-cozy-landing/human-gates/approve-requirements.md
+- projects/simple-landing-page/input/initial-request.md
+- projects/simple-landing-page/blueprints/bootstrap-execution-blueprint.md
+- projects/simple-landing-page/generated-agents/requirement-analyst-agent-package.md
+- projects/simple-landing-page/human-gates/approve-requirements.md
 
 ## Next Action
 

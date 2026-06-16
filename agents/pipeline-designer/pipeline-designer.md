@@ -52,6 +52,7 @@ Il Pipeline Designer e l'agente permanente che trasforma requisiti e soluzione i
 - Ogni output ha un responsabile.
 - Ogni review gate ha criterio e destinatario.
 - Ogni Human Gate richiesto ha decisione, owner e blocking scope.
+- Per un progetto software end-to-end, l'Execution Blueprint include almeno `approve-execution-plan` prima della generazione degli Agent Package e `approve-final-delivery` prima della chiusura.
 - Ogni handoff e verificabile.
 
 ## Failure Mode Da Evitare

@@ -46,17 +46,30 @@ Factory Host non sostituisce gli agenti specialistici. Mantiene lo stato del pro
 1. Identificare se esiste gia un Project Workspace.
 2. Se non esiste, eseguire Factory Intake e creare bootstrap.
 3. Eseguire Requirement Analyst e produrre Requirements Blueprint.
-4. Se esiste Human Gate sui requisiti, fermarsi e chiedere approvazione.
+4. Fermarsi su `approve-requirements` e chiedere approvazione dei requisiti.
 5. Dopo approvazione, eseguire Architect e produrre Solution Blueprint.
-6. Se esiste Human Gate sulla soluzione, fermarsi e chiedere approvazione.
+6. Fermarsi su `approve-solution-blueprint` e chiedere approvazione di architettura, stack, trade-off e rischi.
 7. Eseguire Pipeline Designer e produrre Execution Blueprint.
-8. Se esiste Human Gate sul piano, fermarsi e chiedere approvazione.
+8. Fermarsi su `approve-execution-plan` e chiedere approvazione del team di agenti temporanei, workflow, handoff, review gate e Human Gate finali.
 9. Eseguire Knowledge Compiler e generare Agent Package temporanei.
 10. Eseguire ogni Agent Package attraverso il Runtime Adapter appropriato.
 11. Richiedere review quando prevista.
 12. Far verificare Pipeline Supervisor.
-13. Fermarsi sui gate finali.
+13. Fermarsi su `approve-final-delivery` e chiedere approvazione del lavoro finito.
 14. Avviare Knowledge Evolution per candidate prodotte.
+
+## Gate Minimi Per Progetti Software
+
+Per un progetto software completo, Factory Host deve aspettarsi questi Human Gate minimi:
+
+| Gate | Dopo quale fase | Blocking scope |
+|---|---|---|
+| `approve-requirements` | Requirements Blueprint | `solution blueprint generation` |
+| `approve-solution-blueprint` | Solution Blueprint | `execution blueprint generation` |
+| `approve-execution-plan` | Execution Blueprint | `agent package generation and project execution` |
+| `approve-final-delivery` | Review e Pipeline Supervisor | `project closure` |
+
+Factory Host puo aggiungere altri gate se il rischio lo richiede, ma non deve rimuovere questi quattro gate da un pilot end-to-end senza decisione esplicita dell'utente.
 
 ## Regola Human Gate
 

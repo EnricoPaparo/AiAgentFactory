@@ -22,15 +22,17 @@ User idea
 -> Factory Host
 -> Factory Intake
 -> Requirement Analyst
--> Human Gate
+-> Human Gate: approve-requirements
 -> Architect
--> Human Gate
+-> Human Gate: approve-solution-blueprint
 -> Pipeline Designer
+-> Human Gate: approve-execution-plan
 -> Knowledge Compiler
 -> Agent Packages
 -> Runtime Adapter per Agent Package
 -> Reviewer
 -> Pipeline Supervisor
+-> Human Gate: approve-final-delivery
 -> Knowledge Evolution
 ```
 
@@ -123,6 +125,7 @@ Regole:
 - Produci gli artefatti fase per fase.
 - Dopo ogni Human Gate Pending, fermati e chiedi Approved / Changes Requested / Rejected.
 - Dopo approval, prosegui con la fase successiva.
+- Per un pilot end-to-end usa almeno questi gate: approve-requirements, approve-solution-blueprint, approve-execution-plan, approve-final-delivery.
 - Non saltare Requirement Analyst, Architect, Pipeline Designer o Knowledge Compiler quando richiesti.
 - Crea ed esegui Agent Package temporanei quando il progetto arriva alla fase operativa.
 - Ogni fase deve scrivere file nel Project Workspace.
@@ -163,9 +166,10 @@ Questo adapter e applicato correttamente quando:
 2. Codex crea o riprende il Project Workspace;
 3. Codex produce artefatti fase per fase;
 4. Codex chiede approval inline sui Human Gate;
-5. Codex prosegue dopo approvazione senza richiedere nuovo prompt agente;
-6. gli Agent Package temporanei vengono generati e usati;
-7. il progetto mantiene stato persistente nel workspace.
+5. Codex applica i gate minimi: requisiti, architettura, piano/team agenti, lavoro finito;
+6. Codex prosegue dopo approvazione senza richiedere nuovo prompt agente;
+7. gli Agent Package temporanei vengono generati e usati;
+8. il progetto mantiene stato persistente nel workspace.
 
 ## Failure Mode Da Evitare
 

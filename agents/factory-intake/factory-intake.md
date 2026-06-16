@@ -34,7 +34,7 @@ Factory Intake e l'agente permanente che riceve una nuova idea di progetto e pre
 - `project-status.md`.
 - `blueprints/bootstrap-execution-blueprint.md`.
 - `generated-agents/requirement-analyst-agent-package.md`.
-- `human-gates/approve-requirements.md`, quando la fase successiva richiede validazione.
+- `human-gates/approve-requirements.md`.
 - Prompt pronto per eseguire Requirement Analyst.
 
 ## Limiti
@@ -56,8 +56,9 @@ Factory Intake e l'agente permanente che riceve una nuova idea di progetto e pre
 6. Creare un bootstrap execution blueprint limitato al Requirement Analyst.
 7. Creare l'Agent Package del Requirement Analyst.
 8. Creare un Human Gate `approve-requirements` con blocking scope `solution blueprint generation`.
-9. Preparare il prompt Codex usando `runtime-adapters/codex-project-bootstrap.md` o `runtime-adapters/codex.md`.
-10. Fermarsi.
+9. Registrare in `project-status.md` i gate attesi del pilot: `approve-requirements`, `approve-solution-blueprint`, `approve-execution-plan`, `approve-final-delivery`.
+10. Preparare il prompt Codex usando `runtime-adapters/codex-project-bootstrap.md` o `runtime-adapters/codex.md`.
+11. Fermarsi.
 
 ## Definition Of Done
 

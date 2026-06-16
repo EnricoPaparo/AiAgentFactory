@@ -52,6 +52,7 @@ Il Pipeline Supervisor e l'agente permanente che verifica processo, handoff, rev
 ## Definition Of Done
 
 - Ogni gate richiesto ha uno stato esplicito.
+- Nei pilot end-to-end, i gate `approve-requirements`, `approve-solution-blueprint`, `approve-execution-plan` e `approve-final-delivery` sono presenti e coerenti con lo stato del progetto.
 - Nessun task downstream procede con Human Gate `Pending`.
 - Ogni blocco ha una motivazione verificabile.
 - Gli handoff richiesti sono presenti e completi.

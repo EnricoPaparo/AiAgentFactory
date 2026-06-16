@@ -92,6 +92,7 @@ Un Execution Blueprint e valido quando:
 8. ogni agente dichiara se deriva da archetype o da definizione ad hoc;
 9. ogni Human Gate dichiara decisione richiesta, decision owner e blocking scope;
 10. nessun task downstream dipende da Human Gate `Pending`.
+11. per un progetto software end-to-end include almeno il gate `approve-execution-plan` prima di generare Agent Package e il gate `approve-final-delivery` prima della chiusura.
 
 ## Failure mode
 
@@ -159,6 +160,7 @@ Sorgenti:
 
 ## Human Gates
 
+- approve-execution-plan: validazione umana del team di agenti, workflow, handoff, review gate e piano operativo prima della generazione degli Agent Package.
 - approve-final-delivery: validazione umana prima della chiusura progetto.
 
 ## Completion Criteria

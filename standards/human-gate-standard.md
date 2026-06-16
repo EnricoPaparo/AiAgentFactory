@@ -110,6 +110,17 @@ Un Human Gate e valido quando:
 
 Quando esiste un Human Gate `Pending`, nessun agente o runtime adapter deve eseguire task downstream inclusi nel `blocking-scope`. Il Pipeline Supervisor deve fermare il processo e chiedere la decisione umana.
 
+## Gate Minimi Per Pilot End-To-End
+
+Un pilot software end-to-end deve usare almeno questi gate:
+
+| Gate | Decisione richiesta | Blocking scope |
+|---|---|---|
+| `approve-requirements` | Approvare i requisiti prima di scegliere architettura e stack. | `solution blueprint generation` |
+| `approve-solution-blueprint` | Approvare architettura, stack, trade-off e rischi prima del piano operativo. | `execution blueprint generation` |
+| `approve-execution-plan` | Approvare team di agenti, workflow, handoff, review gate e gate finali prima di generare/eseguire Agent Package. | `agent package generation and project execution` |
+| `approve-final-delivery` | Approvare il lavoro finito dopo review e verifica del Pipeline Supervisor. | `project closure` |
+
 ## Failure Mode
 
 - Gate umano trattato come semplice nota.
