@@ -23,7 +23,7 @@ Si usa dopo l'approvazione di un Execution Blueprint, quando serve generare uno 
 | `package-id` | Identificativo in kebab-case, unico nel progetto. |
 | `project-id` | Identificativo del progetto workspace. |
 | `agent-role` | Ruolo operativo dell'agente temporaneo. |
-| `source-archetype` | Percorso dell'archetype usato. |
+| `agent-source` | Sorgente del ruolo: archetype esistente o definizione ad hoc nell'Execution Blueprint. |
 | `assigned-capabilities` | Elenco delle capability assegnate con percorso. |
 | `mission` | Obiettivo specifico dell'agente in questo progetto. |
 | `task` | Task assegnato, espresso in modo verificabile. |
@@ -56,7 +56,9 @@ Si usa dopo l'approvazione di un Execution Blueprint, quando serve generare uno 
 - package-id:
 - project-id:
 - agent-role:
-- source-archetype:
+- agent-source:
+  - type:
+  - reference:
 - assigned-capabilities:
 
 ## Mission
@@ -94,7 +96,7 @@ Si usa dopo l'approvazione di un Execution Blueprint, quando serve generare uno 
 
 Un Agent Package e valido quando:
 
-1. il ruolo deriva da un archetype esistente o dichiarato come assunto;
+1. il ruolo deriva da un archetype esistente oppure da una definizione ad hoc presente nell'Execution Blueprint;
 2. ogni capability assegnata e pertinente al task;
 3. input e output sono verificabili;
 4. responsabilita e limiti non si contraddicono;
@@ -110,6 +112,7 @@ Un Agent Package e valido quando:
 - Limiti assenti, con agente che invade responsabilita di altri ruoli.
 - Runtime hints trasformati in logica decisionale.
 - Definition of Done vaga o non misurabile.
+- Archetype trattato come requisito obbligatorio anche quando serve un agente ad hoc.
 
 ## Esempio minimo
 
@@ -121,7 +124,9 @@ Un Agent Package e valido quando:
 - package-id: developer-node-api
 - project-id: demo-api
 - agent-role: Developer
-- source-archetype: archetypes/developer.md
+- agent-source:
+  - type: archetype
+  - reference: archetypes/developer.md
 - assigned-capabilities:
   - capabilities/node.md
   - capabilities/testing-strategy.md

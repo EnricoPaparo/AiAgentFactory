@@ -24,20 +24,25 @@ Questo documento traccia lo stato di implementazione della factory rispetto alla
 | `agents/pipeline-supervisor/` | Esistente | Verifica processo, handoff e review gate. | Validare nella prima esecuzione pilota. |
 | `agents/knowledge-evolution/` | Esistente | Valuta Knowledge Candidate senza integrazione automatica. | Validare dopo la prima esecuzione pilota. |
 | `agents/knowledge-compiler/` | Esistente | Incluso esplicitamente per chiudere la lacuna tra flusso e struttura di esempio. | Usare dopo la creazione degli archetype. |
-| `archetypes/` | Mancante | Cartella per subagenti temporanei non ancora creata. | Creare in Fase 3. |
-| `archetypes/developer.md` | Mancante | Archetype MVP previsto. | Creare in Fase 3. |
-| `archetypes/tester.md` | Mancante | Archetype MVP previsto. | Creare in Fase 3. |
-| `archetypes/reviewer.md` | Mancante | Archetype MVP previsto. | Creare in Fase 3. |
-| `archetypes/security-auditor.md` | Mancante | Archetype MVP previsto. | Creare in Fase 3. |
-| `archetypes/documentation-writer.md` | Mancante | Archetype MVP previsto. | Creare in Fase 3. |
-| `capabilities/` | Mancante | Cartella per conoscenza tecnica riutilizzabile non ancora creata. | Creare in Fase 4. |
-| `capabilities/node.md` | Mancante | Capability citata nella struttura di esempio. | Valutare se includerla nel primo set. |
+| `archetypes/` | Esistente | Cartella per archetype riutilizzabili creata in Fase 3. | Validare durante generazione Agent Package. |
+| `archetypes/developer.md` | Esistente | Archetype MVP previsto. | Validare nella prima esecuzione pilota. |
+| `archetypes/tester.md` | Esistente | Archetype MVP previsto. | Validare nella prima esecuzione pilota. |
+| `archetypes/reviewer.md` | Esistente | Archetype MVP previsto. | Validare nella prima esecuzione pilota. |
+| `archetypes/security-auditor.md` | Esistente | Archetype MVP previsto. | Validare quando serve un gate sicurezza. |
+| `archetypes/documentation-writer.md` | Esistente | Archetype MVP previsto. | Validare quando serve documentazione. |
+| `capabilities/` | Esistente | Cartella per conoscenza tecnica riutilizzabile creata in Fase 4. | Validare durante generazione Agent Package. |
+| `capabilities/git-workflow.md` | Esistente | Capability trasversale per repository Git. | Usare nei task con modifiche versionate. |
+| `capabilities/code-review.md` | Esistente | Capability trasversale per review tecnica. | Usare con Reviewer. |
+| `capabilities/testing-strategy.md` | Esistente | Capability trasversale per verifiche e test. | Usare con Developer, Tester e Reviewer. |
+| `capabilities/node.md` | Esistente | Capability citata nella struttura di esempio. | Usare nei progetti Node. |
 | `capabilities/java.md` | Mancante | Capability citata nella struttura di esempio. | Rinviare se non necessaria al primo progetto pilota. |
 | `capabilities/postgres.md` | Mancante | Capability citata nella struttura di esempio. | Rinviare se non necessaria al primo progetto pilota. |
 | `capabilities/docker.md` | Mancante | Capability citata nella struttura di esempio. | Rinviare se non necessaria al primo progetto pilota. |
-| `capabilities/react.md` | Mancante | Capability citata nella struttura di esempio. | Valutare se includerla nel primo set. |
+| `capabilities/react.md` | Esistente | Capability citata nella struttura di esempio. | Usare nei progetti React. |
+| `capabilities/api-security.md` | Esistente | Capability trasversale per API HTTP e sicurezza applicativa. | Usare con Security Auditor o Reviewer. |
+| `capabilities/documentation.md` | Esistente | Capability trasversale per documentazione operativa. | Usare con Documentation Writer. |
 | `standards/` | Esistente | Cartella centrale per i contratti degli artefatti creata in Fase 1. | Mantenere gli standard come contratti vivi. |
-| `standards/agent-package-standard.md` | Esistente | Contratto centrale tra Knowledge Compiler, Agent Package e Runtime Adapter. | Usare per definire Knowledge Compiler e archetype. |
+| `standards/agent-package-standard.md` | Esistente | Contratto centrale tra Knowledge Compiler, Agent Package e Runtime Adapter. Supporta sorgente da archetype o definizione ad hoc. | Usare per generare Agent Package. |
 | `standards/handoff-standard.md` | Esistente | Contratto minimo per passaggi tra agenti o fasi. | Usare per Execution Blueprint e agenti permanenti. |
 | `standards/capability-standard.md` | Esistente | Contratto per capability operative riutilizzabili. | Usare in Fase 4. |
 | `standards/requirements-blueprint-standard.md` | Esistente | Contratto per output del Requirement Analyst. | Usare in Fase 2. |
@@ -60,8 +65,8 @@ Questo documento traccia lo stato di implementazione della factory rispetto alla
 |---|---|---|---|
 | MVP 1 - Standardizzazione | Completato | Tutti i sette standard minimi sono presenti in `standards/`. | Validare durante la prima esecuzione pilota. |
 | MVP 2 - Agenti permanenti | Completato | I sei agenti permanenti principali sono presenti in `agents/`. | Validare durante la prima esecuzione pilota. |
-| MVP 3 - Subagenti temporanei | Non iniziato | La cartella `archetypes/` non esiste. | Creare archetype temporanei in Fase 3. |
-| MVP 4 - Prima esecuzione manuale | Non iniziato | Mancano standard, agenti, archetype, adapter manuale e project template. | Preparare prima MVP 1-3 e `runtime-adapters/manual-execution.md`. |
+| MVP 3 - Subagenti temporanei | Completato | I cinque archetype MVP sono presenti in `archetypes/`. | Validare con Knowledge Compiler e prima esecuzione pilota. |
+| MVP 4 - Prima esecuzione manuale | Non iniziato | Mancano adapter manuale e project template. | Creare `runtime-adapters/manual-execution.md`. |
 
 ## Osservazioni
 
@@ -69,13 +74,16 @@ Questo documento traccia lo stato di implementazione della factory rispetto alla
 2. `AgentFactory.md` cita `Knowledge Compiler` come agente permanente e nel flusso end-to-end, ma la struttura di esempio non include `agents/knowledge-compiler/`. Conviene includerlo esplicitamente nella Fase 2 per evitare una lacuna strutturale.
 3. La Fase 1 ha creato i contratti minimi per Agent Package, handoff, blueprint, capability e Knowledge Candidate.
 4. La Fase 2 ha creato agenti permanenti con input, output, limiti, workflow e Definition of Done collegati agli standard.
+5. Il flusso e stato corretto per supportare agenti temporanei da archetype esistenti o da definizioni ad hoc nell'Execution Blueprint.
+6. La Fase 3 ha creato archetype iniziali come conoscenza riutilizzabile, non come lista chiusa dei soli agenti possibili.
+7. La Fase 4 ha creato capability iniziali trasversali e tecniche conformi al Capability Standard.
 
 ## Prossimo step consigliato
 
-Creare gli archetype dei subagenti temporanei della Fase 3, iniziando da:
+Creare il primo runtime adapter della Fase 5:
 
 ```text
-archetypes/developer.md
+runtime-adapters/manual-execution.md
 ```
 
-Criterio di completamento del prossimo step: ogni archetype deve poter essere usato dal Knowledge Compiler per generare un Agent Package conforme a `standards/agent-package-standard.md`.
+Criterio di completamento del prossimo step: un Agent Package deve poter essere eseguito manualmente producendo handoff, review evidence e Knowledge Candidate quando necessario.

@@ -45,7 +45,7 @@ Queste regole devono rimanere valide anche se cambiano runtime, modelli AI, stru
 
 1. La conoscenza permanente è la risorsa principale della factory.
 2. Gli agenti di progetto sono istanze temporanee, create per uno specifico progetto o task.
-3. Un subagente temporaneo nasce sempre da un archetype, da capability pertinenti e dal contesto del task.
+3. Un subagente temporaneo può nascere da un archetype esistente oppure da una definizione ad hoc nell'Execution Blueprint, insieme a capability pertinenti e contesto del task.
 4. I runtime sono intercambiabili e non devono contenere la logica principale della factory.
 5. Prima si definiscono ruoli, responsabilità, contratti e workflow; poi si decide come eseguirli tecnicamente.
 6. Il codice è uno strumento operativo, non il centro della factory.
@@ -62,10 +62,10 @@ Queste regole devono rimanere valide anche se cambiano runtime, modelli AI, stru
 |---|---|
 | Agenti permanenti | Ruoli stabili della factory. Definiscono e governano il processo principale. |
 | Subagenti temporanei | Agenti creati per uno specifico progetto o task. Possono essere archiviati o distrutti a fine lavoro. |
-| Archetype | Scheletro di un subagente temporaneo. Definisce ruolo, responsabilità, input, output, limiti e formato dei deliverable. Non contiene conoscenza tecnica specifica. |
+| Archetype | Scheletro riutilizzabile e approvato per generare subagenti temporanei di un tipo ricorrente. Definisce ruolo, responsabilità, input, output, limiti e formato dei deliverable. Non contiene conoscenza tecnica specifica e non limita la creazione di agenti ad hoc. |
 | Capability | Conoscenza tecnica operativa riutilizzabile: best practice, checklist, failure mode, rischi, criteri di revisione e lezioni apprese. Non è un tutorial. |
 | Agent Package | Pacchetto operativo che descrive un agente pronto per essere eseguito da un runtime. È indipendente dal runtime. |
-| Knowledge Compiler | Strato concettuale che compone Agent Package a partire da archetype, capability, contesto progetto, task e criteri di completamento. |
+| Knowledge Compiler | Strato concettuale che compone Agent Package a partire da archetype o definizioni ad hoc, capability, contesto progetto, task e criteri di completamento. |
 | Runtime Adapter | Regole di adattamento che traducono un Agent Package generico nel formato richiesto da uno specifico runtime. |
 | Project Workspace | Spazio temporaneo del progetto: input, blueprint, agenti generati, handoff, deliverable, review e Knowledge Candidate. |
 | Knowledge Candidate | Proposta di miglioramento nata durante un progetto. Può diventare conoscenza permanente solo dopo valutazione e approvazione. |
@@ -103,7 +103,7 @@ Questo flusso separa analisi, progettazione, generazione degli agenti, esecuzion
 | Requirement Analyst | Richiesta utente | Requirements Blueprint | Chiarisce obiettivi, requisiti, vincoli, ambiguità, assunzioni e criteri di accettazione. | Non sceglie stack, architettura o agenti. |
 | Architect | Requirements Blueprint | Solution Blueprint | Propone architettura, stack, componenti, integrazioni, rischi tecnici e trade-off. | Non crea il team operativo e non implementa codice. |
 | Pipeline Designer | Requirements Blueprint, Solution Blueprint | Execution Blueprint | Progetta task force, workflow, handoff, review gate, responsabilità e criteri di completamento. | Non esegue direttamente il progetto e non aggiorna la knowledge base. |
-| Knowledge Compiler | Execution Blueprint, archetype, capability, contesto, task | Agent Package temporanei | Compone agenti coerenti, pertinenti e utilizzabili dal runtime. | Non decide strategia progettuale e non supervisiona l'esecuzione. |
+| Knowledge Compiler | Execution Blueprint, archetype o definizioni ad hoc, capability, contesto, task | Agent Package temporanei | Compone agenti coerenti, pertinenti e utilizzabili dal runtime. | Non decide strategia progettuale e non supervisiona l'esecuzione. |
 | Pipeline Supervisor | Execution Blueprint, handoff, deliverable, review | Approvazioni, blocchi, richieste di revisione | Verifica rispetto del processo, presenza degli output, coerenza degli handoff e completamento dei review gate. | Non sostituisce Developer, Tester, Reviewer o Security Auditor. |
 | Knowledge Evolution | Knowledge Candidate | Proposte accettate, respinte o integrate | Classifica e valuta le proposte, distinguendo conoscenza locale da conoscenza riutilizzabile. | Non integra automaticamente ogni proposta. |
 
@@ -120,16 +120,38 @@ I subagenti temporanei sono creati per uno specifico progetto o task. Esempi:
 * Documentation Writer;
 * DevOps Specialist.
 
-Un subagente temporaneo nasce dalla combinazione di:
+Un subagente temporaneo nasce dalla combinazione di una sorgente di ruolo, capability pertinenti e contesto operativo.
+
+La sorgente di ruolo può essere:
+
+* un archetype esistente, quando il ruolo è ricorrente e stabilizzato;
+* una definizione ad hoc nell'Execution Blueprint, quando il ruolo è nuovo, raro o sperimentale.
+
+Un agente ad hoc può generare una Knowledge Candidate per creare un nuovo archetype se dimostra utilità riutilizzabile.
+
+Composizione tipica da archetype:
 
 ```text
-archetype
+archetype esistente
 + capability pertinenti
 + contesto del progetto
 + task corrente
 + tool disponibili
 + regole operative
 + criteri di completamento
+```
+
+Composizione tipica da definizione ad hoc:
+
+```text
+definizione ad hoc nell'Execution Blueprint
++ capability pertinenti
++ contesto del progetto
++ task corrente
++ tool disponibili
++ regole operative
++ criteri di completamento
+= Agent Package temporaneo
 ```
 
 Esempio:
@@ -153,7 +175,7 @@ Il file generato è un Agent Package temporaneo. Può essere usato da un Runtime
 |---|---|---|---|
 | Requirements Blueprint | Requirement Analyst | Architect, Pipeline Designer | Obiettivo, requisiti funzionali e non funzionali, vincoli, assunzioni, ambiguità, criteri di accettazione, fuori scope, rischi iniziali. |
 | Solution Blueprint | Architect | Pipeline Designer | Architettura, stack, componenti, flussi dati, integrazioni, sicurezza, trade-off, rischi tecnici, alternative scartate, strategia implementativa. |
-| Execution Blueprint | Pipeline Designer | Knowledge Compiler, Pipeline Supervisor | Team richiesto, archetype, capability, workflow, handoff, responsabilità, review gate, escalation, criteri di completamento. |
+| Execution Blueprint | Pipeline Designer | Knowledge Compiler, Pipeline Supervisor | Team richiesto, archetype o definizioni ad hoc, capability, workflow, handoff, responsabilità, review gate, escalation, criteri di completamento. |
 | Agent Package | Knowledge Compiler | Runtime Adapter, Project Team | Identità, missione, input, output, responsabilità, limiti, conoscenza assegnata, tool, workflow, handoff, Definition of Done. |
 | Handoff | Agente o fase mittente | Agente o fase destinataria, Supervisor | Output consegnato, decisioni prese, file coinvolti, rischi residui, problemi aperti, prossima azione. |
 | Review Report | Tester, Reviewer, Auditor o altro agente tecnico | Pipeline Supervisor | Esito controlli, problemi rilevati, gravità, raccomandazioni, approvazione o blocco. |
@@ -339,6 +361,7 @@ Regola guida: se una conoscenza è locale, resta nel Project Workspace; se è ri
 La factory deve prevenire questi errori:
 
 * agenti con responsabilità sovrapposte;
+* archetype usati come vincolo rigido invece che come conoscenza riutilizzabile;
 * capability troppo generiche o trasformate in tutorial;
 * Agent Package troppo lunghi o pieni di contesto inutile;
 * Knowledge Candidate integrate senza validazione;

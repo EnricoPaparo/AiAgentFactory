@@ -24,7 +24,7 @@ Si usa dopo Requirements Blueprint e Solution Blueprint validi, prima della gene
 | `requirements-source` | Percorso del Requirements Blueprint. |
 | `solution-source` | Percorso del Solution Blueprint. |
 | `execution-goal` | Obiettivo operativo della pipeline. |
-| `required-agents` | Agenti temporanei richiesti con ruolo e motivazione. |
+| `required-agents` | Agenti temporanei richiesti con ruolo, sorgente e motivazione. La sorgente puo essere `archetype` o `ad-hoc-definition`. |
 | `agent-inputs` | Input assegnati a ciascun agente. |
 | `agent-outputs` | Output attesi da ciascun agente. |
 | `workflow` | Sequenza di lavoro. |
@@ -85,7 +85,8 @@ Un Execution Blueprint e valido quando:
 4. i review gate sono eseguibili, non solo dichiarati;
 5. i criteri di completamento si collegano ai criteri di accettazione;
 6. non aggiorna conoscenza permanente direttamente;
-7. non contiene dettagli runtime-specifici obbligatori.
+7. non contiene dettagli runtime-specifici obbligatori;
+8. ogni agente dichiara se deriva da archetype o da definizione ad hoc.
 
 ## Failure mode
 
@@ -116,6 +117,11 @@ Implementare e verificare endpoint `GET /health`.
 
 - Developer: implementa endpoint e test.
 - Reviewer: verifica codice, test e handoff.
+
+Sorgenti:
+
+- Developer: archetype `archetypes/developer.md`.
+- Reviewer: archetype `archetypes/reviewer.md`.
 
 ## Agent Inputs
 
