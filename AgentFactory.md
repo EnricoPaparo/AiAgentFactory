@@ -76,6 +76,7 @@ Queste regole devono rimanere valide anche se cambiano runtime, modelli AI, stru
 | Handoff | Consegna formale tra agenti o fasi. Deve rendere verificabile cosa è stato prodotto e cosa deve accadere dopo. |
 | Human Gate | Punto di controllo in cui la factory deve fermarsi e attendere una decisione umana prima di proseguire. |
 | Factory State | Stato macchina compatto del Project Workspace, usato dal runtime per sapere fase, gate pending e prossima azione. |
+| Run Record | Record auditabile di una singola azione operativa: approval, validazione, esecuzione agente, review o supervisione. |
 
 ---
 
@@ -197,6 +198,7 @@ Il file generato è un Agent Package temporaneo. Può essere usato da un Runtime
 | Review Report | Tester, Reviewer, Auditor o altro agente tecnico | Pipeline Supervisor | Esito controlli, problemi rilevati, gravità, raccomandazioni, approvazione o blocco. |
 | Human Gate | Pipeline Designer o Pipeline Supervisor | Pipeline Supervisor, Runtime Adapter, maintainer umano | Decisione richiesta, contesto, opzioni, criteri di approvazione, blocking scope, decisione umana. |
 | Factory State | Factory Intake o Factory Runner | Factory Host, Runtime Adapter, Pipeline Supervisor | Fase corrente, status, pending gate, prossima azione, summaries approvate e runtime packet disponibili. |
+| Run Record | Factory Runner, Runtime Adapter o agente temporaneo | Pipeline Supervisor, Human Maintainer, Knowledge Evolution | Input usati, output prodotti, verifiche, stato, note token e rischi residui di una singola azione. |
 | Knowledge Candidate | Qualsiasi agente o fase | Knowledge Evolution | Proposta di miglioramento, contesto, motivazione, rischio, generalizzabilità, destinazione proposta. |
 
 ---
@@ -287,6 +289,7 @@ AgentFactory/
 │   ├── factory-intake/
 │   ├── factory-host/
 │   ├── factory-runner/
+│   ├── context-compiler/
 │   ├── requirement-analyst/
 │   │   ├── requirement-analyst.md
 │   │   └── requirement-analyst-skills.md
@@ -310,6 +313,7 @@ AgentFactory/
 │   ├── agent-package-standard.md
 │   ├── factory-state-standard.md
 │   ├── runtime-packet-standard.md
+│   ├── run-record-standard.md
 │   ├── project-bootstrap-standard.md
 │   ├── handoff-standard.md
 │   ├── human-gate-standard.md
@@ -338,6 +342,7 @@ AgentFactory/
         ├── human-gates/
         ├── deliverables/
         ├── reviews/
+        ├── run-records/
         └── knowledge-candidates/
 ```
 
@@ -364,12 +369,14 @@ AgentFactory/
 | Regola di bootstrap di un nuovo progetto | `agents/factory-intake/` |
 | Regola di coordinamento conversazionale | `agents/factory-host/` |
 | Regola di avanzamento da stato macchina | `agents/factory-runner/` |
+| Regola di compilazione contesto minimo | `agents/context-compiler/` |
 | Skill operativa stabile di un agente permanente | `agents/<agent-name>/<agent-name>-skills.md` |
 | Regola generale su come lavora un Developer temporaneo | `archetypes/developer.md` |
 | Conoscenza tecnica su PostgreSQL | `capabilities/postgres.md` |
 | Formato obbligatorio di un Agent Package | `standards/agent-package-standard.md` |
 | Formato obbligatorio dello stato macchina | `standards/factory-state-standard.md` |
 | Formato obbligatorio di un runtime packet | `standards/runtime-packet-standard.md` |
+| Formato obbligatorio di un run record | `standards/run-record-standard.md` |
 | Formato obbligatorio del bootstrap progetto | `standards/project-bootstrap-standard.md` |
 | Formato obbligatorio di un handoff | `standards/handoff-standard.md` |
 | Regola di adattamento per Claude Code | `runtime-adapters/claude-code.md` |
@@ -403,6 +410,7 @@ La factory deve prevenire questi errori:
 * Factory Intake trasformato in super-agente che produce requisiti, architettura o deliverable;
 * Factory Host trasformato in super-agente tecnico che salta gli agenti specialistici;
 * Factory Runner che ricalcola stato e contesto leggendo tutto invece di usare `factory-state.json`;
+* esecuzioni non auditabili per assenza di run record;
 * Knowledge Candidate integrate senza validazione;
 * Pipeline Supervisor trasformato in super-agente tecnico;
 * Runtime Adapter che assorbe logica decisionale;
@@ -428,6 +436,7 @@ La factory deve prevenire questi errori:
 8. `human-gate-standard.md`
 9. `factory-state-standard.md`
 10. `runtime-packet-standard.md`
+11. `run-record-standard.md`
 
 ## MVP 2 - Agenti permanenti
 
@@ -472,6 +481,7 @@ Definito:
 * Factory Intake;
 * Factory Host;
 * Factory Runner;
+* Context Compiler;
 * subagenti temporanei;
 * archetype;
 * capability;
@@ -498,6 +508,7 @@ Implementato nella baseline operativa:
 * Project Workspace Template;
 * Factory State;
 * Runtime Packet;
+* Run Record Standard;
 * primo pilota manuale.
 
 Da sviluppare dopo la baseline:

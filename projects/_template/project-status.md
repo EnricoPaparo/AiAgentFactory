@@ -27,6 +27,7 @@
 | Runtime Packet Generation | Pending | `runtime-packets/` | Compressed context for execution. |
 | Execution | Pending | `deliverables/`, `handoffs/` | Executed through runtime adapter. |
 | Review | Pending | `reviews/` | Review gates and reports. |
+| Run Records | Pending | `run-records/` | Operational audit records. |
 | Knowledge Evolution | Pending | `knowledge-candidates/` | Candidate evaluation. |
 | Closure | Pending | final handoff | Pipeline Supervisor closure. |
 

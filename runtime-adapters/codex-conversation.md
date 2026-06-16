@@ -122,6 +122,7 @@ Regole:
 - Crea o aggiorna factory-state.json.
 - Fermati sui gate: requisiti, architettura, piano/team agenti, lavoro finito.
 - Usa summaries e runtime packet per ridurre il contesto degli agenti temporanei.
+- Usa tools/factory.py per validazioni, next action, packet display e approval bookkeeping quando possibile.
 ```
 
 ## Prompt Di Avvio
@@ -155,6 +156,7 @@ Regole:
 - Crea o aggiorna factory-state.json.
 - Se non esiste un Project Workspace, avvia Factory Intake.
 - Produci gli artefatti fase per fase.
+- Usa tools/factory.py validate quando esiste factory-state.json.
 - Dopo ogni Human Gate Pending, fermati e chiedi Approved / Changes Requested / Rejected.
 - Dopo approval, prosegui con la fase successiva.
 - Per un pilot end-to-end usa almeno questi gate: approve-requirements, approve-solution-blueprint, approve-execution-plan, approve-final-delivery.
@@ -209,7 +211,8 @@ Questo adapter e applicato correttamente quando:
 7. Codex prosegue dopo approvazione senza richiedere nuovo prompt agente;
 8. gli Agent Package temporanei vengono generati e usati;
 9. i runtime packet comprimono il contesto operativo;
-10. il progetto mantiene stato persistente nel workspace.
+10. le azioni deterministiche sono registrate in run-records;
+11. il progetto mantiene stato persistente nel workspace.
 
 ## Failure Mode Da Evitare
 

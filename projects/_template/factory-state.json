@@ -7,5 +7,6 @@
   "artifact_index": "artifact-index.md",
   "approved_summaries": [],
   "runtime_packets": [],
+  "run_records": "run-records/",
   "updated_at": ""
 }

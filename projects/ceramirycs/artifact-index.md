@@ -29,6 +29,12 @@
 | `runtime-packets/website-builder.json` | `generated-agents/website-builder-agent-package.md` | Used |
 | `runtime-packets/site-reviewer.json` | `generated-agents/site-reviewer-agent-package.md` | Used |
 
+## Run Records
+
+| Record | Action | Status |
+|---|---|---|
+| `run-records/` | operational audit trail | Ready |
+
 ## Open Gate
 
 - `human-gates/approve-final-delivery.md`: Pending; blocks project closure.

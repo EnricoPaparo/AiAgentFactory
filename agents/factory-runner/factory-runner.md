@@ -13,6 +13,7 @@ Factory Runner non sostituisce Factory Host. Factory Host mantiene la conversazi
 - Bloccare il processo quando un Human Gate `Pending` copre il prossimo task.
 - Preparare contesto minimo per ogni fase o agente temporaneo.
 - Usare runtime packet compressi invece di far rileggere tutta la factory a ogni agente.
+- Creare run record per azioni operative deterministiche e per esecuzioni delegate.
 - Aggiornare stato, artifact index e prossimo passo dopo ogni fase.
 - Mantenere l'esperienza utente centrata su una singola richiesta e approval inline.
 
@@ -23,6 +24,7 @@ Factory Runner non sostituisce Factory Host. Factory Host mantiene la conversazi
 - `project-status.md`.
 - Human Gate rilevanti.
 - Artifact index e summaries, se presenti.
+- Run records, se presenti.
 - Factory Host e adapter conversazionale.
 
 ## Output
@@ -30,6 +32,7 @@ Factory Runner non sostituisce Factory Host. Factory Host mantiene la conversazi
 - `factory-state.json` aggiornato.
 - `summaries/` aggiornate quando una blueprint viene approvata.
 - `runtime-packets/` per gli agenti temporanei.
+- `run-records/` per audit operativo.
 - Prossima azione esplicita.
 - Eventuale richiesta di Human Gate in chat.
 
@@ -78,14 +81,44 @@ Un agente temporaneo non deve leggere documenti lunghi se un runtime packet appr
 3. Se bloccato, restituire solo la richiesta di approval.
 4. Se non bloccato, preparare il contesto minimo per la fase corrente.
 5. Eseguire o delegare la fase prevista tramite Factory Host.
-6. Aggiornare artefatti, summaries, runtime packet e stato.
-7. Restituire prossimo gate o prossima azione.
+6. Creare run record per l'azione svolta.
+7. Aggiornare artefatti, summaries, runtime packet e stato.
+8. Restituire prossimo gate o prossima azione.
+
+## CLI Minima
+
+Il primo runner deterministico vive in:
+
+```text
+tools/factory.py
+```
+
+Comandi minimi:
+
+```text
+python tools/factory.py next projects/<project-id>
+python tools/factory.py validate projects/<project-id>
+python tools/factory.py packet projects/<project-id> <packet-id>
+python tools/factory.py approve projects/<project-id> <gate-id> --decision Approved
+```
+
+Su Windows usare il wrapper `.cmd`:
+
+```text
+tools\factory.cmd next projects\<project-id>
+tools\factory.cmd validate projects\<project-id>
+```
+
+Il wrapper PowerShell `tools/factory.ps1` e disponibile, ma puo essere bloccato dalla execution policy locale.
+
+Questa CLI non chiama modelli AI. Gestisce solo stato, validazione, runtime packet e approval bookkeeping.
 
 ## Definition Of Done
 
 - Lo stato corrente e leggibile da `factory-state.json`.
 - Ogni fase produce o aggiorna solo gli artefatti necessari.
 - Ogni agente temporaneo ha un runtime packet o una motivazione esplicita per leggere documenti completi.
+- Ogni azione deterministica rilevante ha un run record.
 - Nessun Human Gate `Pending` viene superato.
 - L'utente puo continuare con risposte brevi: `Approved`, `Changes Requested` o `Rejected`.
 
@@ -96,3 +129,4 @@ Un agente temporaneo non deve leggere documenti lunghi se un runtime packet appr
 - Usare summaries non approvate per decisioni downstream.
 - Proseguire con `next_action` quando `pending_gate` e ancora `Pending`.
 - Nascondere all'utente quale gate sta approvando.
+- Far consumare token a un modello per validazioni deterministiche che puo fare la CLI.

@@ -32,6 +32,7 @@ projects/<project-id>/factory-state.json
 | `artifact_index` | Percorso dell'indice artefatti. |
 | `approved_summaries` | Summaries approvate disponibili. |
 | `runtime_packets` | Runtime packet disponibili per agenti temporanei. |
+| `run_records` | Cartella o indice dei run record disponibili. |
 | `updated_at` | Data ultimo aggiornamento. |
 
 ## Fasi ammesse
@@ -62,6 +63,7 @@ projects/<project-id>/factory-state.json
   "artifact_index": "artifact-index.md",
   "approved_summaries": [],
   "runtime_packets": [],
+  "run_records": "run-records/",
   "updated_at": "YYYY-MM-DD"
 }
 ```
@@ -72,4 +74,5 @@ projects/<project-id>/factory-state.json
 - `next_action` deve essere abbastanza esplicita da permettere al Factory Runner di riprendere senza inferenza larga.
 - Le summaries diventano `approved_summaries` solo dopo il gate corrispondente.
 - I runtime packet devono essere rigenerati quando cambia l'Execution Blueprint o viene richiesto un cambio gate.
+- Le approval gestite dal runner devono creare un run record.
 - `project-status.md` resta leggibile per l'umano; `factory-state.json` e la fonte compatta per il runtime.

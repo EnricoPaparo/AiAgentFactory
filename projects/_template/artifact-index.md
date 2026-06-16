@@ -23,3 +23,8 @@ Il Factory Runner usa questo file per evitare discovery larga e riletture inutil
 
 | Packet | Agent package | Status |
 |---|---|---|
+
+## Run Records
+
+| Record | Action | Status |
+|---|---|---|

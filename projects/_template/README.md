@@ -18,6 +18,7 @@ Copiare `projects/_template/` in `projects/<project-id>/` e aggiornare:
 - Human Gate in `human-gates/`
 - deliverable in `deliverables/`
 - review in `reviews/`
+- run record in `run-records/`
 - Knowledge Candidate in `knowledge-candidates/`
 
 ## Regole
@@ -29,6 +30,7 @@ Copiare `projects/_template/` in `projects/<project-id>/` e aggiornare:
 - I deliverable finali devono essere collegati ai criteri di accettazione.
 - `factory-state.json` e la fonte compatta per riprendere il processo senza rileggere tutto il workspace.
 - I runtime packet riducono il contesto passato agli agenti temporanei.
+- I run record rendono auditabili approval, validazioni, esecuzioni e review.
 
 ## Struttura
 
@@ -47,5 +49,6 @@ projects/<project-id>/
 |-- human-gates/
 |-- deliverables/
 |-- reviews/
+|-- run-records/
 `-- knowledge-candidates/
 ```

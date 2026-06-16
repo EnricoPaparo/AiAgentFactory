@@ -34,6 +34,7 @@ Regole:
 - Parti da zero: se esiste gia un workspace CeraMirycs precedente, fermati e segnala il conflitto invece di riusarlo.
 - Mantieni tutto nella stessa chat.
 - Crea o aggiorna factory-state.json.
+- Usa tools/factory.py per validare stato, mostrare next action e gestire approval se appropriato.
 - Produci gli artefatti fase per fase dentro projects/<project-id>/.
 - Usa almeno questi Human Gate: approve-requirements, approve-solution-blueprint, approve-execution-plan, approve-final-delivery.
 - Dopo ogni Human Gate Pending, fermati e chiedimi Approved / Changes Requested / Rejected.
