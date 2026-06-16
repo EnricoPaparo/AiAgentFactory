@@ -4,14 +4,14 @@
 
 - project-id: pilot-agent-package-validation
 - project-name: Agent Package Validation Pilot
-- status: ready-for-manual-execution
+- status: completed
 - created-at: 2026-06-16
 - updated-at: 2026-06-16
 - owner: Human Maintainer
 
 ## Current Phase
 
-- manual execution
+- closure
 
 ## Phase Checklist
 
@@ -22,32 +22,32 @@
 | Solution | Completed | `blueprints/solution-blueprint.md` | Document-based solution ready. |
 | Execution Plan | Completed | `blueprints/execution-blueprint.md` | Documentation Writer and Reviewer selected. |
 | Agent Generation | Completed | `generated-agents/` | Two Agent Packages generated. |
-| Execution | Pending | `deliverables/`, `handoffs/` | Start with Documentation Writer. |
-| Review | Pending | `reviews/` | Reviewer runs after first handoff. |
-| Knowledge Evolution | Pending | `knowledge-candidates/` | Create only if reusable lessons emerge. |
-| Closure | Pending | final handoff | Blocked by final Human Gate. |
+| Execution | Completed | `deliverables/`, `handoffs/` | Documentation Writer completed. |
+| Review | Completed | `reviews/checklist-review.md` | Reviewer approved. |
+| Knowledge Evolution | Pending | `knowledge-candidates/` | One candidate proposed for later evaluation. |
+| Closure | Completed | `handoffs/pipeline-supervisor-closure.md` | Final Human Gate approved. |
 
 ## Active Human Gates
 
 | Gate | Status | Blocking Scope | Decision Owner |
 |---|---|---|---|
-| approve-final-delivery | Pending | project closure | Human Maintainer |
+| approve-final-delivery | Approved | project closure | Human Maintainer |
 
 ## Active Agents
 
 | Agent Package | Role | Status | Current Owner |
 |---|---|---|---|
-| documentation-writer-agent-package.md | Documentation Writer | ready | Manual Execution |
-| reviewer-agent-package.md | Reviewer | waiting-for-handoff | Manual Execution |
+| documentation-writer-agent-package.md | Documentation Writer | completed | Manual Execution |
+| reviewer-agent-package.md | Reviewer | completed | Manual Execution |
 
 ## Open Issues
 
-- None.
+- Knowledge Candidate remains Proposed pending Knowledge Evolution.
 
 ## Residual Risks
 
-- The pilot may reveal missing fields in handoff or Agent Package standards.
+- Reviewer identified one non-blocking process improvement candidate.
 
 ## Next Action
 
-- Execute `generated-agents/documentation-writer-agent-package.md` with `runtime-adapters/manual-execution.md`.
+- Evaluate `knowledge-candidates/explicit-human-gate-standard-input-for-reviewers.md` in a future Knowledge Evolution pass.

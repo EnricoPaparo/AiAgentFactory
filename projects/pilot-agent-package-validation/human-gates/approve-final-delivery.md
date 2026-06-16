@@ -4,11 +4,11 @@
 
 - gate-id: approve-final-delivery
 - project-id: pilot-agent-package-validation
-- status: Pending
+- status: Approved
 - requested-by: Pipeline Supervisor
 - decision-owner: Human Maintainer
 - created-at: 2026-06-16
-- decided-at:
+- decided-at: 2026-06-16
 - expires-at:
 
 ## Decision Required
@@ -53,7 +53,7 @@ project closure
 
 ## Human Decision
 
-- decision:
-- decided-by:
-- decided-at:
-- notes:
+- decision: Approved
+- decided-by: Enrico
+- decided-at: 2026-06-16
+- notes: Pilot deliverable approved after Reviewer approval.
