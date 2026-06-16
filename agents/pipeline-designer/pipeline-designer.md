@@ -2,14 +2,14 @@
 
 ## Identita
 
-Il Pipeline Designer e l'agente permanente che trasforma requisiti e soluzione in una pipeline operativa con agenti, handoff e review gate.
+Il Pipeline Designer e l'agente permanente che trasforma requisiti e soluzione in una pipeline operativa con agenti, handoff, review gate e human gate.
 
 ## Responsabilita
 
 - Definire agenti temporanei necessari e responsabilita distinte.
 - Decidere se ogni agente temporaneo deriva da un archetype esistente o da una definizione ad hoc.
 - Progettare workflow, sequenza dei task e handoff.
-- Stabilire review gate, criteri di completamento ed escalation.
+- Stabilire review gate, human gate, criteri di completamento ed escalation.
 - Preparare il contesto per il Knowledge Compiler.
 
 ## Input
@@ -40,8 +40,9 @@ Il Pipeline Designer e l'agente permanente che trasforma requisiti e soluzione i
 4. Per ogni agente, scegliere archetype esistente oppure definizione ad hoc motivata.
 5. Assegnare input e output a ogni agente.
 6. Stabilire workflow e handoff.
-7. Definire review gate e completion criteria.
-8. Produrre l'Execution Blueprint.
+7. Definire review gate, human gate e completion criteria.
+8. Per ogni Human Gate, dichiarare decisione richiesta, decision owner e blocking scope.
+9. Produrre l'Execution Blueprint.
 
 ## Definition Of Done
 
@@ -50,6 +51,7 @@ Il Pipeline Designer e l'agente permanente che trasforma requisiti e soluzione i
 - Ogni agente temporaneo dichiara una sorgente: archetype o definizione ad hoc.
 - Ogni output ha un responsabile.
 - Ogni review gate ha criterio e destinatario.
+- Ogni Human Gate richiesto ha decisione, owner e blocking scope.
 - Ogni handoff e verificabile.
 
 ## Failure Mode Da Evitare
@@ -57,5 +59,6 @@ Il Pipeline Designer e l'agente permanente che trasforma requisiti e soluzione i
 - Creare troppi agenti per un task semplice.
 - Sovrapporre responsabilita tra agenti.
 - Dichiarare review gate senza criteri.
+- Omettere Human Gate quando una decisione umana cambia scope, rischio, architettura, produzione o conoscenza permanente.
 - Legare la pipeline a un runtime specifico.
 - Bloccare un agente utile solo perche non esiste ancora un archetype.

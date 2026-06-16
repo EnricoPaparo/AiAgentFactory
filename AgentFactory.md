@@ -70,6 +70,7 @@ Queste regole devono rimanere valide anche se cambiano runtime, modelli AI, stru
 | Project Workspace | Spazio temporaneo del progetto: input, blueprint, agenti generati, handoff, deliverable, review e Knowledge Candidate. |
 | Knowledge Candidate | Proposta di miglioramento nata durante un progetto. Può diventare conoscenza permanente solo dopo valutazione e approvazione. |
 | Handoff | Consegna formale tra agenti o fasi. Deve rendere verificabile cosa è stato prodotto e cosa deve accadere dopo. |
+| Human Gate | Punto di controllo in cui la factory deve fermarsi e attendere una decisione umana prima di proseguire. |
 
 ---
 
@@ -175,10 +176,11 @@ Il file generato è un Agent Package temporaneo. Può essere usato da un Runtime
 |---|---|---|---|
 | Requirements Blueprint | Requirement Analyst | Architect, Pipeline Designer | Obiettivo, requisiti funzionali e non funzionali, vincoli, assunzioni, ambiguità, criteri di accettazione, fuori scope, rischi iniziali. |
 | Solution Blueprint | Architect | Pipeline Designer | Architettura, stack, componenti, flussi dati, integrazioni, sicurezza, trade-off, rischi tecnici, alternative scartate, strategia implementativa. |
-| Execution Blueprint | Pipeline Designer | Knowledge Compiler, Pipeline Supervisor | Team richiesto, archetype o definizioni ad hoc, capability, workflow, handoff, responsabilità, review gate, escalation, criteri di completamento. |
+| Execution Blueprint | Pipeline Designer | Knowledge Compiler, Pipeline Supervisor | Team richiesto, archetype o definizioni ad hoc, capability, workflow, handoff, responsabilità, review gate, human gate, escalation, criteri di completamento. |
 | Agent Package | Knowledge Compiler | Runtime Adapter, Project Team | Identità, missione, input, output, responsabilità, limiti, conoscenza assegnata, tool, workflow, handoff, Definition of Done. |
 | Handoff | Agente o fase mittente | Agente o fase destinataria, Supervisor | Output consegnato, decisioni prese, file coinvolti, rischi residui, problemi aperti, prossima azione. |
 | Review Report | Tester, Reviewer, Auditor o altro agente tecnico | Pipeline Supervisor | Esito controlli, problemi rilevati, gravità, raccomandazioni, approvazione o blocco. |
+| Human Gate | Pipeline Designer o Pipeline Supervisor | Pipeline Supervisor, Runtime Adapter, maintainer umano | Decisione richiesta, contesto, opzioni, criteri di approvazione, blocking scope, decisione umana. |
 | Knowledge Candidate | Qualsiasi agente o fase | Knowledge Evolution | Proposta di miglioramento, contesto, motivazione, rischio, generalizzabilità, destinazione proposta. |
 
 ---
@@ -288,6 +290,7 @@ AgentFactory/
 ├── standards/
 │   ├── agent-package-standard.md
 │   ├── handoff-standard.md
+│   ├── human-gate-standard.md
 │   ├── capability-standard.md
 │   ├── requirements-blueprint-standard.md
 │   ├── solution-blueprint-standard.md
@@ -306,6 +309,7 @@ AgentFactory/
         ├── blueprints/
         ├── generated-agents/
         ├── handoffs/
+        ├── human-gates/
         ├── deliverables/
         ├── reviews/
         └── knowledge-candidates/
@@ -371,6 +375,7 @@ La factory deve prevenire questi errori:
 * blueprint incompleti usati come se fossero stabili;
 * handoff vaghi o non verificabili;
 * review gate dichiarati ma non eseguiti.
+* Human Gate dichiarati ma bypassati o lasciati in `Pending` mentre il workflow prosegue.
 
 ---
 
@@ -385,6 +390,7 @@ La factory deve prevenire questi errori:
 5. `execution-blueprint-standard.md`
 6. `knowledge-candidate-standard.md`
 7. `capability-standard.md`
+8. `human-gate-standard.md`
 
 ## MVP 2 - Agenti permanenti
 
@@ -442,6 +448,7 @@ Da sviluppare:
 * standard delle capability;
 * standard dei blueprint;
 * standard delle Knowledge Candidate;
+* standard degli Human Gate;
 * primi agenti permanenti;
 * primi archetype;
 * prime capability;

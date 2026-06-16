@@ -44,6 +44,7 @@ Questo documento traccia lo stato di implementazione della factory rispetto alla
 | `standards/` | Esistente | Cartella centrale per i contratti degli artefatti creata in Fase 1. | Mantenere gli standard come contratti vivi. |
 | `standards/agent-package-standard.md` | Esistente | Contratto centrale tra Knowledge Compiler, Agent Package e Runtime Adapter. Supporta sorgente da archetype o definizione ad hoc. | Usare per generare Agent Package. |
 | `standards/handoff-standard.md` | Esistente | Contratto minimo per passaggi tra agenti o fasi. | Usare per Execution Blueprint e agenti permanenti. |
+| `standards/human-gate-standard.md` | Esistente | Contratto per validazioni umane bloccanti. | Usare in Execution Blueprint, Pipeline Supervisor e runtime adapter. |
 | `standards/capability-standard.md` | Esistente | Contratto per capability operative riutilizzabili. | Usare in Fase 4. |
 | `standards/requirements-blueprint-standard.md` | Esistente | Contratto per output del Requirement Analyst. | Usare in Fase 2. |
 | `standards/solution-blueprint-standard.md` | Esistente | Contratto per output dell'Architect. | Usare in Fase 2. |
@@ -63,7 +64,7 @@ Questo documento traccia lo stato di implementazione della factory rispetto alla
 
 | MVP | Stato | Evidenza | Prossimo step |
 |---|---|---|---|
-| MVP 1 - Standardizzazione | Completato | Tutti i sette standard minimi sono presenti in `standards/`. | Validare durante la prima esecuzione pilota. |
+| MVP 1 - Standardizzazione | Completato | Gli standard minimi, incluso Human Gate Standard, sono presenti in `standards/`. | Validare durante la prima esecuzione pilota. |
 | MVP 2 - Agenti permanenti | Completato | I sei agenti permanenti principali sono presenti in `agents/`. | Validare durante la prima esecuzione pilota. |
 | MVP 3 - Subagenti temporanei | Completato | I cinque archetype MVP sono presenti in `archetypes/`. | Validare con Knowledge Compiler e prima esecuzione pilota. |
 | MVP 4 - Prima esecuzione manuale | Non iniziato | Mancano adapter manuale e project template. | Creare `runtime-adapters/manual-execution.md`. |
@@ -77,6 +78,7 @@ Questo documento traccia lo stato di implementazione della factory rispetto alla
 5. Il flusso e stato corretto per supportare agenti temporanei da archetype esistenti o da definizioni ad hoc nell'Execution Blueprint.
 6. La Fase 3 ha creato archetype iniziali come conoscenza riutilizzabile, non come lista chiusa dei soli agenti possibili.
 7. La Fase 4 ha creato capability iniziali trasversali e tecniche conformi al Capability Standard.
+8. Gli Human Gate sono stati introdotti come punti bloccanti di validazione umana, con standard dedicato e integrazione in Execution Blueprint, Pipeline Designer e Pipeline Supervisor.
 
 ## Prossimo step consigliato
 

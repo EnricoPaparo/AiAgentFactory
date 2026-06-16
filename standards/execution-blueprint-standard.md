@@ -2,7 +2,7 @@
 
 ## Scopo
 
-Definire il formato minimo dell'Execution Blueprint. Questo artefatto trasforma requisiti e soluzione in una pipeline operativa con agenti, workflow, handoff, review gate e criteri di completamento.
+Definire il formato minimo dell'Execution Blueprint. Questo artefatto trasforma requisiti e soluzione in una pipeline operativa con agenti, workflow, handoff, review gate, human gate e criteri di completamento.
 
 ## Creato da
 
@@ -30,6 +30,7 @@ Si usa dopo Requirements Blueprint e Solution Blueprint validi, prima della gene
 | `workflow` | Sequenza di lavoro. |
 | `handoffs` | Handoff richiesti tra fasi o agenti. |
 | `review-gates` | Controlli obbligatori e responsabili. |
+| `human-gates` | Punti in cui la pipeline deve fermarsi e attendere validazione umana. Usare `None` se assenti. |
 | `completion-criteria` | Criteri di completamento del progetto. |
 | `escalation-rules` | Condizioni di blocco o richiesta supervisione. |
 
@@ -64,6 +65,8 @@ Si usa dopo Requirements Blueprint e Solution Blueprint validi, prima della gene
 
 ## Review Gates
 
+## Human Gates
+
 ## Completion Criteria
 
 ## Escalation Rules
@@ -86,13 +89,17 @@ Un Execution Blueprint e valido quando:
 5. i criteri di completamento si collegano ai criteri di accettazione;
 6. non aggiorna conoscenza permanente direttamente;
 7. non contiene dettagli runtime-specifici obbligatori;
-8. ogni agente dichiara se deriva da archetype o da definizione ad hoc.
+8. ogni agente dichiara se deriva da archetype o da definizione ad hoc;
+9. ogni Human Gate dichiara decisione richiesta, decision owner e blocking scope;
+10. nessun task downstream dipende da Human Gate `Pending`.
 
 ## Failure mode
 
 - Troppi agenti per un task semplice.
 - Responsabilita sovrapposte tra agenti.
 - Review gate non assegnati.
+- Human gate necessario ma non dichiarato.
+- Workflow che prosegue nonostante Human Gate `Pending`.
 - Handoff mancanti tra implementazione e review.
 - Pipeline legata prematuramente a un runtime.
 
@@ -149,6 +156,10 @@ Sorgenti:
 
 - Code review.
 - Test evidence review.
+
+## Human Gates
+
+- approve-final-delivery: validazione umana prima della chiusura progetto.
 
 ## Completion Criteria
 
