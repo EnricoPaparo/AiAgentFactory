@@ -1,3 +1,26 @@
+---
+standard: execution-blueprint
+applies-to: "projects/*/blueprints/execution-blueprint.md"
+required-sections:
+  - "## Requirements Source"
+  - "## Solution Source"
+  - "## Execution Goal"
+  - "## Required Agents"
+  - "## Agent Inputs"
+  - "## Agent Outputs"
+  - "## Workflow"
+  - "## Handoffs"
+  - "## Review Gates"
+  - "## Human Gates"
+  - "## Completion Criteria"
+  - "## Escalation Rules"
+optional-sections:
+  - "## Parallelization Notes"
+  - "## Runtime Preferences"
+  - "## Knowledge Candidate Plan"
+  - "## Workflow Yml"
+---
+
 # Execution Blueprint Standard
 
 ## Scopo
@@ -41,6 +64,7 @@ Si usa dopo Requirements Blueprint e Solution Blueprint validi, prima della gene
 | `parallelization-notes` | Task eseguibili in parallelo. |
 | `runtime-preferences` | Preferenze non vincolanti per runtime adapter. |
 | `knowledge-candidate-plan` | Dove raccogliere lezioni e proposte. |
+| `workflow-yml` | Riferimento al file `blueprints/workflow.yml` generato contestualmente, consumato da `tools/orchestrate.py`. |
 
 ## Formato consigliato
 
@@ -76,6 +100,8 @@ Si usa dopo Requirements Blueprint e Solution Blueprint validi, prima della gene
 ## Runtime Preferences
 
 ## Knowledge Candidate Plan
+
+## Workflow Yml
 ```
 
 ## Criteri di validita

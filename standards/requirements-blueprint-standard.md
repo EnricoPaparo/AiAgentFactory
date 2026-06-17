@@ -1,3 +1,24 @@
+---
+standard: requirements-blueprint
+applies-to: "projects/*/blueprints/requirements-blueprint.md"
+required-sections:
+  - "## Source Request"
+  - "## Goal"
+  - "## Expected Output"
+  - "## Functional Requirements"
+  - "## Non-Functional Requirements"
+  - "## Constraints"
+  - "## Assumptions"
+  - "## Ambiguities"
+  - "## Out Of Scope"
+  - "## Acceptance Criteria"
+  - "## Initial Risks"
+optional-sections:
+  - "## Stakeholders"
+  - "## Priority Notes"
+  - "## Reference Materials"
+---
+
 # Requirements Blueprint Standard
 
 ## Scopo

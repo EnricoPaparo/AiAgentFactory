@@ -1,0 +1,81 @@
+name: Validate AgentFactory Artifacts
+
+on:
+  pull_request:
+    branches: [master]
+
+jobs:
+  validate:
+    name: Validate artifacts
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # necessario per confrontare con il branch base
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install pyyaml
+
+      - name: Detect changed files
+        id: changed
+        run: |
+          BASE="${{ github.base_ref }}"
+          CHANGED=$(git diff --name-only "origin/${BASE}...HEAD")
+
+          # Controlla se uno standard e stato modificato
+          if echo "$CHANGED" | grep -q 'standards/.*-standard\.md'; then
+            echo "standards_modified=true" >> "$GITHUB_OUTPUT"
+            echo "Uno o piu standard modificati — sara eseguito il full check."
+          else
+            echo "standards_modified=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          # Lista di file .md modificati (esclusi gli standard stessi)
+          MD_FILES=$(echo "$CHANGED" | grep '\.md$' | grep -v 'standards/' || true)
+          if [ -n "$MD_FILES" ]; then
+            echo "md_changed=true" >> "$GITHUB_OUTPUT"
+            # Salva la lista per lo step successivo
+            printf '%s\n' "$MD_FILES" > /tmp/changed_md.txt
+            echo "File .md modificati:"
+            echo "$MD_FILES"
+          else
+            echo "md_changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Se uno standard e stato modificato: rivalida TUTTO il repo
+      # Questo cattura cambiamenti agli standard che rompono artefatti gia esistenti
+      - name: Full check (standard modificato)
+        if: steps.changed.outputs.standards_modified == 'true'
+        run: |
+          echo "===== FULL CHECK ====="
+          echo "Uno standard e stato modificato. Valido tutti gli artefatti del repo."
+          python tools/validate.py --full-check
+
+      # Se nessuno standard e stato modificato: valida solo i file cambiati nella PR
+      - name: Validate changed artifacts
+        if: >
+          steps.changed.outputs.standards_modified == 'false' &&
+          steps.changed.outputs.md_changed == 'true'
+        run: |
+          echo "===== VALIDATE CHANGED FILES ====="
+          # Filtra i file che esistono sul disco (esclude file cancellati)
+          EXISTING=$(cat /tmp/changed_md.txt | while read f; do [ -f "$f" ] && echo "$f"; done)
+          if [ -z "$EXISTING" ]; then
+            echo "Nessun file .md aggiunto o modificato da validare."
+            exit 0
+          fi
+          echo "$EXISTING" | xargs python tools/validate.py
+
+      - name: No artifacts to validate
+        if: >
+          steps.changed.outputs.standards_modified == 'false' &&
+          steps.changed.outputs.md_changed == 'false'
+        run: |
+          echo "Nessun artefatto .md modificato in questa PR — skip validazione."

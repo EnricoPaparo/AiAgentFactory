@@ -1,0 +1,53 @@
+project: pilot-agent-package-validation
+version: "1.0"
+
+steps:
+
+  - id: knowledge-compiler
+    name: "Composizione Agent Package"
+    agent: agents/knowledge-compiler/knowledge-compiler.md
+    inputs:
+      - blueprints/execution-blueprint.md
+    outputs:
+      - generated-agents/documentation-writer.md
+      - generated-agents/reviewer.md
+
+  - id: documentation-writer
+    name: "Produzione Checklist"
+    package: generated-agents/documentation-writer.md
+    inputs:
+      - blueprints/requirements-blueprint.md
+      - blueprints/solution-blueprint.md
+      - blueprints/execution-blueprint.md
+      - standards/agent-package-standard.md
+      - standards/human-gate-standard.md
+      - standards/handoff-standard.md
+      - runtime-adapters/manual-execution.md
+    outputs:
+      - deliverables/agent-package-validation-checklist.md
+      - handoffs/documentation-writer-to-reviewer.md
+
+  - id: reviewer
+    name: "Review Checklist"
+    package: generated-agents/reviewer.md
+    inputs:
+      - handoffs/documentation-writer-to-reviewer.md
+      - deliverables/agent-package-validation-checklist.md
+      - blueprints/requirements-blueprint.md
+      - standards/agent-package-standard.md
+      - runtime-adapters/manual-execution.md
+    outputs:
+      - reviews/checklist-review.md
+      - handoffs/reviewer-to-pipeline-supervisor.md
+
+  - id: pipeline-supervisor
+    name: "Supervisione Finale"
+    agent: agents/pipeline-supervisor/pipeline-supervisor.md
+    inputs:
+      - handoffs/reviewer-to-pipeline-supervisor.md
+      - blueprints/execution-blueprint.md
+      - deliverables/agent-package-validation-checklist.md
+      - reviews/checklist-review.md
+    outputs:
+      - deliverables/supervisor-report.md
+    human-gate: approve-final-delivery
