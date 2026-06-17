@@ -436,6 +436,8 @@ class Orchestrator:
         if tc.name == "read_file":
             return self._tool_read_file(tc.arguments["path"])
         if tc.name == "write_file":
+            if "content" not in tc.arguments:
+                return "ERRORE: argomento 'content' mancante. Richiama write_file includendo il parametro content con il contenuto completo del file."
             return self._tool_write_file(tc.arguments["path"], tc.arguments["content"])
         if tc.name == "list_files":
             return self._tool_list_files(tc.arguments.get("path"))
