@@ -1,48 +1,48 @@
 # AiAgentFactory
 
-A structured knowledge repository for designing, generating, orchestrating, supervising, and evolving temporary teams of specialized AI agents for software development projects.
+Repository strutturato di conoscenza per progettare, generare, orchestrare, supervisionare ed evolvere team temporanei di agenti AI specializzati per progetti software.
 
-AiAgentFactory is **not** a runtime, framework, or prompt library. It is the architectural reference of the factory: it defines identities, boundaries, components, workflows, contracts, and invariant rules. Operational standards for individual artifacts live in `standards/`.
-
----
-
-## Why This Exists
-
-Large software projects run by AI agents fail in predictable ways: overlapping responsibilities, missing handoffs, no human checkpoints, and zero knowledge retention between runs. AiAgentFactory solves this by treating agent-based development as a **factory process** — with permanent governance roles, formal contracts between agents, mandatory human decision gates, and a controlled knowledge evolution cycle.
+AiAgentFactory **non è** un runtime, un framework, né una libreria di prompt. È il riferimento architetturale della factory: definisce identità, confini, componenti, workflow, contratti e regole invarianti. Gli standard operativi per i singoli artefatti vivono in `standards/`.
 
 ---
 
-## How It Works
+## Perché esiste
+
+I grandi progetti software gestiti da agenti AI falliscono in modo prevedibile: responsabilità sovrapposte, handoff mancanti, nessun checkpoint umano, nessuna retention della conoscenza tra una sessione e l'altra. AiAgentFactory risolve questo trattando lo sviluppo basato su agenti come un **processo di fabbrica** — con ruoli di governance permanenti, contratti formali tra agenti, Human Gate decisionali obbligatori e un ciclo controllato di evoluzione della conoscenza.
+
+---
+
+## Come Funziona
 
 ```text
-User Request
-  → Requirement Analyst       (clarifies requirements)
+Richiesta utente
+  → Requirement Analyst       (chiarisce i requisiti)
   → Requirements Blueprint
-  → Architect                 (designs the solution)
+  → Architect                 (progetta la soluzione)
   → Solution Blueprint
-  → Pipeline Designer         (designs the workflow)
+  → Pipeline Designer         (progetta il workflow)
   → Execution Blueprint
-  → Knowledge Compiler        (assembles agent packages)
+  → Knowledge Compiler        (assembla gli Agent Package)
   → Agent Package(s)
-  → Runtime Adapter           (translates to a specific runtime)
-  → Project Team Execution
-  → Pipeline Supervisor       (verifies process compliance)
-  → Knowledge Evolution       (reviews improvement proposals)
-  → controlled update of permanent knowledge
+  → Runtime Adapter           (traduce nel runtime scelto)
+  → Esecuzione del team temporaneo
+  → Pipeline Supervisor       (verifica la conformità del processo)
+  → Knowledge Evolution       (valuta le proposte di miglioramento)
+  → aggiornamento controllato della conoscenza permanente
 ```
 
-Each step produces a versioned artifact with an explicit owner, inputs, outputs, and a Definition of Done. Nothing advances without a verified handoff. Human decisions are enforced through blocking Human Gates.
+Ogni passo produce un artefatto versionato con proprietario, input, output e Definition of Done espliciti. Nulla avanza senza un handoff verificato. Le decisioni umane vengono imposte tramite Human Gate bloccanti.
 
 ---
 
-## Repository Structure
+## Struttura del Repository
 
 ```text
 AiAgentFactory/
-├── AgentFactory.md              # Full architectural reference (start here)
-├── implementation-status.md     # Current implementation progress
+├── AgentFactory.md              # Riferimento architetturale completo (inizia qui)
+├── implementation-status.md     # Stato di avanzamento dell'implementazione
 │
-├── agents/                      # Permanent factory agents (governance roles)
+├── agents/                      # Agenti permanenti della factory (ruoli di governance)
 │   ├── requirement-analyst/
 │   ├── architect/
 │   ├── pipeline-designer/
@@ -50,23 +50,17 @@ AiAgentFactory/
 │   ├── knowledge-compiler/
 │   └── knowledge-evolution/
 │
-├── archetypes/                  # Reusable templates for temporary agents
+├── archetypes/                  # Template riutilizzabili per agenti temporanei
 │   ├── developer.md
 │   ├── tester.md
 │   ├── reviewer.md
 │   ├── security-auditor.md
 │   └── documentation-writer.md
 │
-├── capabilities/                # Reusable operational knowledge packages
-│   ├── git-workflow.md
-│   ├── code-review.md
-│   ├── testing-strategy.md
-│   ├── node.md
-│   ├── react.md
-│   ├── api-security.md
-│   └── documentation.md
+├── capabilities/                # Pacchetti di conoscenza operativa riutilizzabile
+│   └── (emergono da Knowledge Candidate approvate)
 │
-├── standards/                   # Format contracts for all artifacts
+├── standards/                   # Contratti di formato per tutti gli artefatti
 │   ├── agent-package-standard.md
 │   ├── handoff-standard.md
 │   ├── human-gate-standard.md
@@ -74,115 +68,122 @@ AiAgentFactory/
 │   ├── requirements-blueprint-standard.md
 │   ├── solution-blueprint-standard.md
 │   ├── capability-standard.md
-│   └── knowledge-candidate-standard.md
+│   ├── knowledge-candidate-standard.md
+│   ├── permanent-agent-standard.md
+│   └── archetype-standard.md
 │
-├── runtime-adapters/            # Translation rules per runtime
+├── runtime-adapters/            # Regole di traduzione per runtime specifici
 │   ├── manual-execution.md
-│   └── codex.md
+│   ├── claude-code.md
+│   ├── opencode.md
+│   ├── openai-agents-sdk.md
+│   ├── github-actions.md
+│   └── langgraph.md
 │
-└── projects/                    # Project workspaces (temporary, per-project)
-    └── _template/               # Copy this to start a new project
+├── tools/                       # Strumenti a riga di comando
+│   ├── new-project.py           # Crea un nuovo project workspace
+│   ├── status.py                # Mostra lo stato di un progetto
+│   ├── validate.py              # Valida gli artefatti contro gli standard
+│   └── orchestrate.py          # Esegue automaticamente una pipeline di agenti
+│
+└── projects/                    # Project workspace (temporanei, per progetto)
+    └── _template/               # Copiare per iniziare un nuovo progetto
 ```
 
-**Where to put what:**
+**Dove mettere cosa:**
 
-| Knowledge type | Destination |
+| Tipo di conoscenza | Destinazione |
 |---|---|
-| Permanent agent behavior rule | `agents/<agent-name>/` |
-| Reusable temporary agent template | `archetypes/<role>.md` |
-| Reusable technical knowledge | `capabilities/<topic>.md` |
-| Artifact format contract | `standards/<artifact>-standard.md` |
-| Runtime translation rules | `runtime-adapters/<runtime>.md` |
-| Project-specific work | `projects/<project-id>/` |
-| Improvement proposal (not yet approved) | `projects/<project-id>/knowledge-candidates/` |
+| Regola di comportamento di un agente permanente | `agents/<nome-agente>/` |
+| Template riutilizzabile per agenti temporanei | `archetypes/<ruolo>.md` |
+| Conoscenza tecnica riutilizzabile | `capabilities/<argomento>.md` |
+| Contratto di formato per un artefatto | `standards/<artefatto>-standard.md` |
+| Regole di traduzione per un runtime | `runtime-adapters/<runtime>.md` |
+| Lavoro specifico di progetto | `projects/<project-id>/` |
+| Proposta di miglioramento (non ancora approvata) | `projects/<project-id>/knowledge-candidates/` |
 
 ---
 
-## Quickstart: Start a New Project
+## Avvio Rapido: Nuovo Progetto
 
-**Prerequisites:** The factory has at least MVP 1-3 complete (standards, permanent agents, archetypes). See `implementation-status.md`.
+**Prerequisiti:** Python 3.11+, `pip install pyyaml anthropic` (per l'orchestratore).
 
-**Step 1 — Create the project workspace**
+### Opzione A — con orchestratore automatico (consigliato)
 
 ```bash
-cp -r projects/_template projects/<your-project-id>
+# 1. Crea il workspace
+python tools/new-project.py mio-progetto --request "API REST per gestione utenti"
+
+# 2. Scrivi i dettagli in projects/mio-progetto/input/initial-request.md
+
+# 3. Crea blueprints/workflow.yml nel workspace
+#    (copia da projects/_template/blueprints/workflow.yml e adattalo)
+
+# 4. Avvia la pipeline
+export ANTHROPIC_API_KEY=sk-ant-...
+python tools/orchestrate.py mio-progetto --dry-run   # anteprima
+python tools/orchestrate.py mio-progetto             # esecuzione
 ```
 
-**Step 2 — Write the initial request**
+### Opzione B — manuale (OpenCode, Claude Code, ecc.)
 
-Create `projects/<your-project-id>/input/initial-request.md` with:
-- What the user or stakeholder wants
-- Known constraints and deadlines
-- Any relevant context or existing artifacts
+```bash
+# 1. Crea il workspace
+python tools/new-project.py mio-progetto
 
-**Step 3 — Run the factory flow**
+# 2. Compila projects/mio-progetto/input/initial-request.md
 
-Activate each permanent agent in sequence using the appropriate runtime adapter:
+# 3. Apri il runtime scelto e segui il runtime adapter corrispondente
+#    Esempio per OpenCode: runtime-adapters/opencode.md
+#    Esempio per Claude Code: runtime-adapters/claude-code.md
+```
 
-1. `agents/requirement-analyst/` → produces `blueprints/requirements-blueprint.md`
-2. `agents/architect/` → produces `blueprints/solution-blueprint.md`
-3. `agents/pipeline-designer/` → produces `blueprints/execution-blueprint.md`
-4. `agents/knowledge-compiler/` → produces `generated-agents/` packages
-5. Execute agents via `runtime-adapters/` of your choice
-6. `agents/pipeline-supervisor/` → verifies process compliance
-7. `agents/knowledge-evolution/` → evaluates any Knowledge Candidates produced
+**Rispetta sempre i Human Gate:** qualsiasi file in `human-gates/` con stato `Pending` **blocca** tutte le attività nel suo `blocking-scope`. Non avanzare finché una decisione umana non è registrata.
 
-**Step 4 — Respect Human Gates**
-
-Any `human-gates/` file with status `Pending` **blocks** all tasks in its `blocking-scope`. Do not advance the workflow until a human decision is recorded.
-
-**Step 5 — Collect Knowledge Candidates**
-
-At the end of the project, review `knowledge-candidates/`. Approved candidates become permanent knowledge through the Knowledge Evolution agent.
-
-See `projects/_template/README.md` for the complete folder guide.
+Consulta `projects/_template/README.md` per la guida completa cartella per cartella.
 
 ---
 
-## Key Documents
+## Documenti Chiave
 
-| Document | Purpose |
+| Documento | Scopo |
 |---|---|
-| `AgentFactory.md` | Full architectural reference — invariants, concepts, workflows |
-| `standards/agent-package-standard.md` | How to build a valid Agent Package |
-| `standards/handoff-standard.md` | Required fields for agent-to-agent delivery |
-| `standards/human-gate-standard.md` | How to define and enforce Human Gates |
-| `runtime-adapters/manual-execution.md` | How to run the factory without an orchestrator |
-| `runtime-adapters/codex.md` | How to run Agent Packages in Codex |
-| `CONTRIBUTING.md` | How to extend the factory (capabilities, archetypes, standards) |
-| `GLOSSARY.md` | Definitions of all factory terms |
+| `AgentFactory.md` | Riferimento architetturale completo — invarianti, concetti, workflow |
+| `standards/agent-package-standard.md` | Come costruire un Agent Package valido |
+| `standards/handoff-standard.md` | Campi obbligatori per la consegna tra agenti |
+| `standards/human-gate-standard.md` | Come definire e imporre i Human Gate |
+| `runtime-adapters/manual-execution.md` | Come eseguire la factory senza orchestratore |
+| `runtime-adapters/opencode.md` | Come eseguire Agent Package su OpenCode |
+| `runtime-adapters/claude-code.md` | Come eseguire Agent Package su Claude Code |
+| `CONTRIBUTING.md` | Come estendere la factory (capability, archetype, standard) |
+| `GLOSSARY.md` | Definizioni di tutti i termini della factory |
 
 ---
 
-## Current Status
+## Stato Corrente
 
-See `implementation-status.md` for the detailed progress tracker.
+Vedi `implementation-status.md` per il tracker dettagliato.
 
-**MVP summary:**
-- MVP 1 (Standards): Complete — all 8 format contracts defined
-- MVP 2 (Permanent Agents): Complete — all 6 permanent agents defined
-- MVP 3 (Archetypes): Complete — 5 base archetypes defined
-- MVP 4 (First Execution): Complete — pilot project executed end-to-end
-
----
-
-## Language Policy
-
-All documentation in this repository is written in **Italian**. New files and contributions should follow the same language. See `CONTRIBUTING.md` for contribution guidelines.
+**Riepilogo MVP:**
+- MVP 1 (Standard): Completo — 10 contratti di formato definiti con frontmatter YAML
+- MVP 2 (Agenti permanenti): Completo — 6 agenti permanenti definiti
+- MVP 3 (Archetype): Completo — 5 archetype base definiti
+- MVP 4 (Prima esecuzione): Completo — progetto pilota eseguito end-to-end
+- Tooling: Completo — `new-project.py`, `status.py`, `validate.py`, `orchestrate.py`
 
 ---
 
-## Invariant Rules
+## Regole Invarianti
 
-These rules hold regardless of runtime, AI model, or tooling changes:
+Queste regole valgono indipendentemente da runtime, modello AI o strumenti usati:
 
-1. Permanent knowledge is the factory's primary asset.
-2. Temporary agents are disposable — created per project, not permanent.
-3. No proposal generated during a project automatically updates permanent knowledge.
-4. Runtimes are interchangeable and must not contain factory decision logic.
-5. Roles, responsibilities, contracts, and workflows are defined before technical execution.
-6. Every significant step has explicit input, output, owner, and completion criteria.
-7. The Project Workspace contains temporary work, not approved knowledge.
-8. The Pipeline Supervisor validates process compliance — it is not an omniscient super-agent.
-9. A Pending Human Gate blocks all tasks in its declared blocking scope.
-10. Code is an operational tool, not the center of the factory.
+1. La conoscenza permanente è il principale asset della factory.
+2. Gli agenti temporanei sono usa e getta — creati per progetto, non permanenti.
+3. Nessuna proposta generata durante un progetto aggiorna automaticamente la conoscenza permanente.
+4. I runtime sono intercambiabili e non devono contenere logica decisionale della factory.
+5. Ruoli, responsabilità, contratti e workflow vengono definiti prima dell'esecuzione tecnica.
+6. Ogni passo significativo ha input, output, proprietario e criteri di completamento espliciti.
+7. Il Project Workspace contiene lavoro temporaneo, non conoscenza approvata.
+8. Il Pipeline Supervisor valida la conformità del processo — non è un super-agente onnisciente.
+9. Un Human Gate Pending blocca tutte le attività nel suo `blocking-scope` dichiarato.
+10. Il codice è uno strumento operativo, non il centro della factory.

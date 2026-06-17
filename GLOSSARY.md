@@ -1,191 +1,199 @@
-# Glossary
+# Glossario
 
-Precise definitions of all terms used in AiAgentFactory. When a term appears in any factory document, it has exactly the meaning defined here.
+Definizioni precise di tutti i termini usati in AiAgentFactory. Quando un termine compare in qualsiasi documento della factory, ha esattamente il significato qui definito.
 
 ---
 
 ## Agent Package
 
-A self-contained operational specification that describes a temporary agent ready to be executed by a runtime adapter. An Agent Package is runtime-agnostic — it does not depend on any specific execution environment.
+Specifica operativa autonoma che descrive un agente temporaneo pronto per essere eseguito da un runtime adapter. Un Agent Package è indipendente dal runtime — non dipende da nessun ambiente di esecuzione specifico.
 
-An Agent Package is composed by the **Knowledge Compiler** from:
-- a role source (existing archetype or ad-hoc definition in the Execution Blueprint)
-- relevant capabilities
-- project context
-- assigned task
-- available tools
-- operational rules
-- completion criteria
+Un Agent Package è composto dal **Knowledge Compiler** a partire da:
+- una sorgente di ruolo (archetype esistente o definizione ad hoc nell'Execution Blueprint)
+- capability pertinenti
+- contesto di progetto
+- task assegnato
+- strumenti disponibili
+- regole operative
+- criteri di completamento
 
-Format defined in: `standards/agent-package-standard.md`
+Formato definito in: `standards/agent-package-standard.md`
 
 ---
 
 ## Archetype
 
-A reusable, approved skeleton for generating temporary agents of a recurring type. An archetype defines role, responsibilities, inputs, outputs, boundaries, and Definition of Done. It does **not** contain technology-specific knowledge (that belongs in capabilities). Archetypes are a starting point, not a constraint — the Pipeline Designer can define ad-hoc agents when no existing archetype fits.
+Scheletro riutilizzabile e approvato per generare agenti temporanei di un tipo ricorrente. Un archetype definisce ruolo, responsabilità, input, output, confini e Definition of Done. **Non** contiene conoscenza tecnica specifica (quella appartiene alle capability). Gli archetype sono un punto di partenza, non un vincolo — il Pipeline Designer può definire agenti ad hoc quando nessun archetype esistente è adatto.
 
-Stored in: `archetypes/`
+Archiviati in: `archetypes/`
 
 ---
 
 ## Capability
 
-A package of reusable operational knowledge for a specific technology, domain, or practice. Capabilities contain best practices, checklists, failure modes, risks, and review criteria. They are **not** tutorials or introductions — they are operational references that agents use while executing a task.
+Pacchetto di conoscenza operativa riutilizzabile per una tecnologia, un dominio o una pratica specifica. Le capability contengono best practice, checklist, failure mode, rischi e criteri di revisione. **Non** sono tutorial o introduzioni — sono riferimenti operativi che gli agenti usano durante l'esecuzione di un task.
 
-Capabilities are assigned to temporary agents in the Agent Package. Multiple capabilities can be combined.
+Le capability vengono assegnate agli agenti temporanei nell'Agent Package. Più capability possono essere combinate.
 
-Examples: `node.md`, `api-security.md`, `git-workflow.md`
+Esempi: `node.md`, `api-security.md`, `git-workflow.md`
 
-Format defined in: `standards/capability-standard.md`  
-Stored in: `capabilities/`
+Formato definito in: `standards/capability-standard.md`
+Archiviate in: `capabilities/`
 
 ---
 
 ## Definition of Done (DoD)
 
-A set of verifiable conditions that determine when a task or artifact is complete. Every permanent agent, archetype, and Agent Package must define a Definition of Done. The Pipeline Supervisor uses the DoD to verify task completion without substituting for the technical agent.
+Insieme di condizioni verificabili che determinano quando un task o un artefatto è completo. Ogni agente permanente, archetype e Agent Package deve definire una Definition of Done. Il Pipeline Supervisor usa la DoD per verificare il completamento del task senza sostituirsi all'agente tecnico.
 
 ---
 
 ## Execution Blueprint
 
-The operational plan for a project. It defines the agent team (roles, sources, capabilities), the workflow (sequence, parallelism), handoff assignments, review gates, Human Gates, and completion criteria. The Execution Blueprint is produced by the **Pipeline Designer** and consumed by the **Knowledge Compiler** and **Pipeline Supervisor**.
+Il piano operativo di un progetto. Definisce il team di agenti (ruoli, sorgenti, capability), il workflow (sequenza, parallelismo), le assegnazioni di handoff, i gate di revisione, i Human Gate e i criteri di completamento. L'Execution Blueprint è prodotto dal **Pipeline Designer** e consumato dal **Knowledge Compiler** e dal **Pipeline Supervisor**.
 
-Format defined in: `standards/execution-blueprint-standard.md`
+Formato definito in: `standards/execution-blueprint-standard.md`
 
 ---
 
 ## Handoff
 
-A formal delivery contract between agents or phases. A handoff is not a narrative summary — it is a verifiable transfer of responsibility. Every handoff must declare: what was completed, what was produced, which files were touched, which decisions were made, what problems remain open, residual risks, the requested next action, and criteria to verify the output.
+Contratto di consegna formale tra agenti o fasi. Un handoff non è un riassunto narrativo — è un trasferimento verificabile di responsabilità. Ogni handoff deve dichiarare: cosa è stato completato, cosa è stato prodotto, quali file sono stati toccati, quali decisioni sono state prese, quali problemi rimangono aperti, rischi residui, l'azione successiva richiesta e i criteri per verificare l'output.
 
-A missing or vague handoff is a factory failure mode.
+Un handoff mancante o vago è un failure mode della factory.
 
-Format defined in: `standards/handoff-standard.md`
+Formato definito in: `standards/handoff-standard.md`
 
 ---
 
 ## Human Gate
 
-A mandatory decision point where the factory must stop and wait for a human decision before proceeding. Human Gates are defined by the **Pipeline Designer** and enforced by the **Pipeline Supervisor** and runtime adapters.
+Punto di decisione obbligatorio in cui la factory deve fermarsi e attendere una decisione umana prima di procedere. I Human Gate sono definiti dal **Pipeline Designer** e imposti dal **Pipeline Supervisor** e dai runtime adapter.
 
-**Key invariant:** When a Human Gate is `Pending`, **no task in its declared `blocking-scope` may execute**. There are no exceptions.
+**Invariante chiave:** Quando un Human Gate è `Pending`, **nessun task nel suo `blocking-scope` dichiarato può essere eseguito**. Non ci sono eccezioni.
 
-Human Gate statuses: `Pending` → `Approved` / `Rejected` / `Changes Requested` / `Expired` / `Cancelled`
+Stati del Human Gate: `Pending` → `Approved` / `Rejected` / `Changes Requested` / `Expired` / `Cancelled`
 
-Format defined in: `standards/human-gate-standard.md`
+Formato definito in: `standards/human-gate-standard.md`
 
 ---
 
 ## Knowledge Candidate
 
-A structured improvement proposal generated during a project. Any agent or phase can produce a Knowledge Candidate when it identifies a reusable lesson, a new best practice, a failure mode, or a gap in existing knowledge.
+Proposta di miglioramento strutturata generata durante un progetto. Qualsiasi agente o fase può produrre una Knowledge Candidate quando identifica una lezione riutilizzabile, una nuova best practice, un failure mode o una lacuna nella conoscenza esistente.
 
-Knowledge Candidates are temporary artifacts — they live in the project workspace. They become permanent knowledge **only** after evaluation and approval by the **Knowledge Evolution** agent.
+Le Knowledge Candidate sono artefatti temporanei — vivono nel project workspace. Diventano conoscenza permanente **solo** dopo la valutazione e l'approvazione da parte dell'agente **Knowledge Evolution**.
 
-Statuses: `Proposed` → `Reviewed` → `Accepted` → `Integrated`  
-&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;`→ Rejected`
+Stati: `Proposta` → `Revisionata` → `Accettata` → `Integrata`
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;`→ Rifiutata`
 
-Format defined in: `standards/knowledge-candidate-standard.md`
+Formato definito in: `standards/knowledge-candidate-standard.md`
 
 ---
 
 ## Knowledge Compiler
 
-The permanent agent responsible for composing Agent Packages. The Knowledge Compiler takes an Execution Blueprint, selects or receives archetypes or ad-hoc definitions, assigns relevant capabilities, and assembles complete, executable Agent Packages. It does not make project strategy decisions and does not supervise execution.
+Agente permanente responsabile della composizione degli Agent Package. Il Knowledge Compiler legge un Execution Blueprint, seleziona o riceve archetype o definizioni ad hoc, assegna capability pertinenti e assembla Agent Package completi ed eseguibili. Non prende decisioni strategiche di progetto e non supervisiona l'esecuzione.
 
-Defined in: `agents/knowledge-compiler/`
+Definito in: `agents/knowledge-compiler/`
 
 ---
 
 ## Knowledge Evolution
 
-The permanent agent responsible for evaluating Knowledge Candidates and deciding whether they become permanent knowledge. Knowledge Evolution distinguishes between locally useful knowledge (stays in the project) and genuinely reusable knowledge (promotes to permanent files). It never integrates a proposal automatically.
+Agente permanente responsabile della valutazione delle Knowledge Candidate e della decisione su quali diventano conoscenza permanente. Knowledge Evolution distingue tra conoscenza localmente utile (rimane nel progetto) e conoscenza genuinamente riutilizzabile (promossa a file permanenti). Non integra mai una proposta automaticamente.
 
-Defined in: `agents/knowledge-evolution/`
+Definito in: `agents/knowledge-evolution/`
 
 ---
 
-## Permanent Agent
+## Agente Permanente
 
-A stable governance role in the factory. Permanent agents define and govern the factory's core process — they do not do project implementation work. The six permanent agents are: Requirement Analyst, Architect, Pipeline Designer, Knowledge Compiler, Pipeline Supervisor, and Knowledge Evolution.
+Ruolo stabile di governance nella factory. Gli agenti permanenti definiscono e governano il processo centrale della factory — non svolgono lavoro di implementazione di progetto. I sei agenti permanenti sono: Requirement Analyst, Architect, Pipeline Designer, Knowledge Compiler, Pipeline Supervisor e Knowledge Evolution.
 
-Permanent agents have a single, clearly bounded responsibility. They do not overlap.
+Gli agenti permanenti hanno una singola responsabilità chiaramente delimitata. Non si sovrappongono.
 
-Stored in: `agents/`
+Archiviati in: `agents/`
 
 ---
 
 ## Pipeline Designer
 
-The permanent agent that transforms Requirements Blueprint and Solution Blueprint into an Execution Blueprint. The Pipeline Designer designs the agent team, the workflow, handoffs, review gates, and Human Gates. It does not execute the project and does not modify permanent knowledge.
+Agente permanente che trasforma Requirements Blueprint e Solution Blueprint in un Execution Blueprint. Il Pipeline Designer progetta il team di agenti, il workflow, gli handoff, i gate di revisione e i Human Gate. Non esegue il progetto e non modifica la conoscenza permanente.
 
-Defined in: `agents/pipeline-designer/`
+Definito in: `agents/pipeline-designer/`
 
 ---
 
 ## Pipeline Supervisor
 
-The permanent agent that verifies process compliance during and after project execution. The Pipeline Supervisor checks that handoffs are present and complete, review gates were executed, Human Gates were respected, and completion criteria are met. It does **not** substitute for technical agents (Developer, Tester, Reviewer, etc.) — it validates process, not technical correctness.
+Agente permanente che verifica la conformità del processo durante e dopo l'esecuzione del progetto. Il Pipeline Supervisor controlla che gli handoff siano presenti e completi, che i gate di revisione siano stati eseguiti, che i Human Gate siano stati rispettati e che i criteri di completamento siano soddisfatti. **Non** si sostituisce agli agenti tecnici (Developer, Tester, Reviewer, ecc.) — valida il processo, non la correttezza tecnica.
 
-Defined in: `agents/pipeline-supervisor/`
+Definito in: `agents/pipeline-supervisor/`
 
 ---
 
 ## Project Workspace
 
-The temporary working directory for a specific project. It contains all project-specific artifacts: input, blueprints, generated Agent Packages, handoffs, Human Gates, deliverables, reviews, and Knowledge Candidates. Project Workspaces contain **temporary knowledge only** — approved permanent knowledge changes go through Knowledge Evolution.
+Directory di lavoro temporanea per un progetto specifico. Contiene tutti gli artefatti specifici del progetto: input, blueprint, Agent Package generati, handoff, Human Gate, deliverable, review e Knowledge Candidate. I Project Workspace contengono **solo conoscenza temporanea** — le modifiche alla conoscenza permanente approvata passano per Knowledge Evolution.
 
-Template: `projects/_template/`  
-Stored in: `projects/<project-id>/`
+Template: `projects/_template/`
+Archiviati in: `projects/<project-id>/`
 
 ---
 
 ## Requirements Blueprint
 
-The structured artifact produced by the Requirement Analyst from a user request. It contains: objective, functional and non-functional requirements, constraints, assumptions, ambiguities, out-of-scope items, acceptance criteria, and initial risks. It does **not** contain architectural decisions or stack choices.
+Artefatto strutturato prodotto dal Requirement Analyst a partire da una richiesta utente. Contiene: obiettivo, requisiti funzionali e non funzionali, vincoli, assunzioni, ambiguità, elementi fuori scope, criteri di accettazione e rischi iniziali. **Non** contiene decisioni architetturali o scelte di stack.
 
-Format defined in: `standards/requirements-blueprint-standard.md`
+Formato definito in: `standards/requirements-blueprint-standard.md`
 
 ---
 
 ## Review Gate
 
-A mandatory checkpoint where a technical agent (Reviewer, Tester, Security Auditor, etc.) verifies a specific output before the workflow can advance. Review Gates are declared in the Execution Blueprint and enforced by the Pipeline Supervisor. A Review Gate that was declared but not executed is a factory failure mode.
+Checkpoint obbligatorio in cui un agente tecnico (Reviewer, Tester, Security Auditor, ecc.) verifica un output specifico prima che il workflow possa avanzare. I Review Gate sono dichiarati nell'Execution Blueprint e imposti dal Pipeline Supervisor. Un Review Gate dichiarato ma non eseguito è un failure mode della factory.
 
 ---
 
 ## Runtime Adapter
 
-A set of translation rules that convert a generic Agent Package into the format and execution model required by a specific runtime (e.g., Codex, manual execution, OpenAI Agents SDK, LangGraph). Runtime Adapters translate — they do not contain factory decision logic. The factory's core logic (roles, standards, handoffs, gates) remains the same regardless of which runtime adapter is used.
+Insieme di regole di traduzione che convertono un Agent Package generico nel formato e nel modello di esecuzione richiesto da un runtime specifico (es. OpenCode, esecuzione manuale, Claude Code, OpenAI Agents SDK, LangGraph). I Runtime Adapter traducono — non contengono logica decisionale della factory. La logica centrale della factory (ruoli, standard, handoff, gate) rimane invariata indipendentemente dal runtime adapter usato.
 
-Stored in: `runtime-adapters/`
+Archiviati in: `runtime-adapters/`
 
 ---
 
 ## Solution Blueprint
 
-The technical design artifact produced by the Architect from a Requirements Blueprint. It contains: proposed architecture, tech stack, components, data flows, integrations, security strategy, trade-offs, rejected alternatives, technical risks, and implementation strategy. The Architect does not build the agent team — that is the Pipeline Designer's job.
+Artefatto di progettazione tecnica prodotto dall'Architect a partire da un Requirements Blueprint. Contiene: architettura proposta, stack tecnologico, componenti, flussi di dati, integrazioni, strategia di sicurezza, trade-off, alternative scartate, rischi tecnici e strategia di implementazione. L'Architect non costruisce il team di agenti — quello è il lavoro del Pipeline Designer.
 
-Format defined in: `standards/solution-blueprint-standard.md`
-
----
-
-## Subagent (Temporary Agent)
-
-An agent created for a specific project or task. Subagents are disposable — they can be archived or destroyed when the project ends. They are composed by the Knowledge Compiler from an archetype or ad-hoc definition plus relevant capabilities and project context.
-
-Subagents are distinct from Permanent Agents: they do project work, not factory governance.
+Formato definito in: `standards/solution-blueprint-standard.md`
 
 ---
 
-## Temporary vs Permanent Knowledge
+## Subagente (Agente Temporaneo)
 
-| | Temporary Knowledge | Permanent Knowledge |
+Agente creato per un progetto o task specifico. I subagenti sono usa e getta — possono essere archiviati o eliminati al termine del progetto. Vengono composti dal Knowledge Compiler a partire da un archetype o una definizione ad hoc, più capability pertinenti e contesto di progetto.
+
+I subagenti si distinguono dagli Agenti Permanenti: svolgono lavoro di progetto, non governance della factory.
+
+---
+
+## Conoscenza Temporanea vs Permanente
+
+| | Conoscenza Temporanea | Conoscenza Permanente |
 |---|---|---|
-| **Lives in** | `projects/<project-id>/` | `agents/`, `archetypes/`, `capabilities/`, `standards/`, `runtime-adapters/` |
-| **Scope** | One project or task | All future projects |
-| **Created by** | Any agent during execution | Knowledge Evolution (after approval) |
-| **Survives project end** | Archived, not promoted | Yes |
-| **Entry gate** | None | Knowledge Candidate → Knowledge Evolution |
+| **Vive in** | `projects/<project-id>/` | `agents/`, `archetypes/`, `capabilities/`, `standards/`, `runtime-adapters/` |
+| **Scope** | Un progetto o task | Tutti i progetti futuri |
+| **Creata da** | Qualsiasi agente durante l'esecuzione | Knowledge Evolution (dopo approvazione) |
+| **Sopravvive al progetto** | Archiviata, non promossa | Sì |
+| **Porta d'ingresso** | Nessuna | Knowledge Candidate → Knowledge Evolution |
+
+---
+
+## Workflow
+
+Sequenza operativa definita nell'Execution Blueprint che specifica l'ordine e il parallelismo degli agenti nel progetto. Esiste in due forme:
+- **Execution Blueprint** (`blueprints/execution-blueprint.md`): documento human-readable che descrive strategia, agenti, input, output e gate.
+- **workflow.yml** (`blueprints/workflow.yml`): versione machine-readable consumata da `tools/orchestrate.py` per l'esecuzione automatica della pipeline.

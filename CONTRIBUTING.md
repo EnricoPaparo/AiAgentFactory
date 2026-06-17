@@ -1,40 +1,40 @@
-# Contributing to AiAgentFactory
+# Contribuire ad AiAgentFactory
 
-This document explains how to extend the factory's permanent knowledge: adding capabilities, archetypes, standards, permanent agents, and runtime adapters.
+Questo documento spiega come estendere la conoscenza permanente della factory: aggiungere capability, archetype, standard, agenti permanenti e runtime adapter.
 
-AiAgentFactory follows a **controlled knowledge evolution process**. No change to permanent knowledge should happen without deliberate review. Spontaneous improvements belong in a project's `knowledge-candidates/` folder first.
-
----
-
-## General Rules
-
-1. **All permanent changes go through review.** Use a Knowledge Candidate during a project run, then promote it via the Knowledge Evolution agent.
-2. **Separation of concerns.** Do not put project-specific knowledge in permanent files. Keep temporary work in `projects/<project-id>/`.
-3. **No automatic integration.** Even if a change looks obviously correct, it must go through the Knowledge Evolution lifecycle before landing in permanent files.
-4. **Minimal but complete.** Every new artifact must satisfy its standard's required fields. Prefer fewer, high-quality files over many shallow ones.
-5. **Language.** All documentation is written in **Italian** (existing convention). New contributions must follow the same language.
+AiAgentFactory segue un **processo controllato di evoluzione della conoscenza**. Nessuna modifica alla conoscenza permanente deve avvenire senza una revisione deliberata. I miglioramenti spontanei appartengono prima alla cartella `knowledge-candidates/` del progetto.
 
 ---
 
-## Naming Conventions
+## Regole Generali
 
-| Type | Convention | Example |
+1. **Tutte le modifiche permanenti passano per la revisione.** Usa una Knowledge Candidate durante l'esecuzione di un progetto, poi promuovila tramite l'agente Knowledge Evolution.
+2. **Separazione delle responsabilità.** Non mettere conoscenza specifica di progetto nei file permanenti. Tieni il lavoro temporaneo in `projects/<project-id>/`.
+3. **Nessuna integrazione automatica.** Anche se una modifica sembra ovviamente corretta, deve passare per il ciclo di vita Knowledge Evolution prima di atterrare nei file permanenti.
+4. **Minimale ma completo.** Ogni nuovo artefatto deve soddisfare i campi obbligatori del suo standard. Preferire pochi file di alta qualità a molti file superficiali.
+5. **Lingua.** Tutta la documentazione è scritta in **italiano**. I nuovi contributi devono seguire la stessa lingua.
+
+---
+
+## Convenzioni di Nomenclatura
+
+| Tipo | Convenzione | Esempio |
 |---|---|---|
-| Files and folders | `kebab-case` | `api-security.md`, `knowledge-compiler/` |
-| Permanent agents | `agents/<agent-name>/` | `agents/requirement-analyst/` |
-| Archetypes | singular noun | `developer.md`, `tester.md` |
-| Capabilities | topic or technology | `postgres.md`, `api-security.md` |
-| Standards | `<artifact>-standard.md` | `handoff-standard.md` |
-| Runtime adapters | runtime name | `claude-code.md`, `langgraph.md` |
-| Agent Packages | descriptive pattern | `developer-node-postgres.md` |
+| File e cartelle | `kebab-case` | `api-security.md`, `knowledge-compiler/` |
+| Agenti permanenti | `agents/<nome-agente>/` | `agents/requirement-analyst/` |
+| Archetype | sostantivo singolare | `developer.md`, `tester.md` |
+| Capability | argomento o tecnologia | `postgres.md`, `api-security.md` |
+| Standard | `<artefatto>-standard.md` | `handoff-standard.md` |
+| Runtime adapter | nome del runtime | `claude-code.md`, `langgraph.md` |
+| Agent Package | pattern descrittivo | `developer-node-postgres.md` |
 
 ---
 
-## How to Add a Capability
+## Come Aggiungere una Capability
 
-A capability is reusable operational knowledge — best practices, checklists, failure modes, risks, and lessons learned for a specific technology, domain, or practice. It is **not** a tutorial.
+Una capability è conoscenza operativa riutilizzabile — best practice, checklist, failure mode, rischi e lezioni apprese per una tecnologia, un dominio o una pratica specifica. **Non è** un tutorial.
 
-**Required fields** (defined in `standards/capability-standard.md`):
+**Campi obbligatori** (definiti in `standards/capability-standard.md`):
 - Scopo
 - Usata da
 - Quando si usa
@@ -42,30 +42,30 @@ A capability is reusable operational knowledge — best practices, checklists, f
 - Criteri di revisione
 - Limiti
 
-**Steps:**
-1. Verify the capability doesn't already exist in `capabilities/`.
-2. Create `capabilities/<topic>.md` following `standards/capability-standard.md`.
-3. Keep the content operational: checklists and criteria, not generic explanations.
-4. If created during a project, save it as a Knowledge Candidate first (`projects/<id>/knowledge-candidates/`), then promote via Knowledge Evolution.
+**Passi:**
+1. Verifica che la capability non esista già in `capabilities/`.
+2. Crea `capabilities/<argomento>.md` seguendo `standards/capability-standard.md`.
+3. Mantieni il contenuto operativo: checklist e criteri, non spiegazioni generiche.
+4. Se creata durante un progetto, salvala prima come Knowledge Candidate (`projects/<id>/knowledge-candidates/`), poi promuovila tramite Knowledge Evolution.
 
-**What belongs in a capability:**
-- Specific practices for a technology or domain
-- Checklist of things to verify or avoid
-- Known failure modes and how to detect them
-- Security or performance criteria relevant to the topic
+**Cosa appartiene a una capability:**
+- Pratiche specifiche per una tecnologia o un dominio
+- Checklist di cose da verificare o evitare
+- Failure mode noti e come rilevarli
+- Criteri di sicurezza o performance rilevanti per l'argomento
 
-**What does NOT belong in a capability:**
-- Generic tutorials or introductions
-- Decisions that belong in a blueprint
-- Project-specific context
+**Cosa NON appartiene a una capability:**
+- Tutorial o introduzioni generiche
+- Decisioni che appartengono a un blueprint
+- Contesto specifico di un progetto
 
 ---
 
-## How to Add an Archetype
+## Come Aggiungere un Archetype
 
-An archetype is a reusable skeleton for generating temporary agents of a recurring type. It defines role, responsibilities, inputs, outputs, boundaries, and Definition of Done. It does **not** contain specific technical knowledge (that belongs in capabilities).
+Un archetype è uno scheletro riutilizzabile per generare agenti temporanei di un tipo ricorrente. Definisce ruolo, responsabilità, input, output, confini e Definition of Done. **Non** contiene conoscenza tecnica specifica (quella appartiene alle capability).
 
-**Required fields** (follow existing archetypes as reference):
+**Campi obbligatori** (segui gli archetype esistenti come riferimento):
 - Scopo
 - Natura dell'archetype
 - Responsabilità
@@ -77,58 +77,58 @@ An archetype is a reusable skeleton for generating temporary agents of a recurri
 - Definition of Done
 - Failure mode da evitare
 
-**Steps:**
-1. Verify the role is genuinely recurring across projects (one-off roles should be ad-hoc agents, not archetypes).
-2. Create `archetypes/<role>.md` using existing archetypes as format reference.
-3. Do not include project-specific context or technical knowledge in the archetype itself.
-4. If created during a project, save it as a Knowledge Candidate first.
+**Passi:**
+1. Verifica che il ruolo sia genuinamente ricorrente tra progetti diversi (i ruoli occasionali devono essere agenti ad hoc, non archetype).
+2. Crea `archetypes/<ruolo>.md` usando gli archetype esistenti come riferimento di formato.
+3. Non includere nell'archetype contesto specifico di progetto o conoscenza tecnica.
+4. Se creato durante un progetto, salvalo prima come Knowledge Candidate.
 
 ---
 
-## How to Add a Runtime Adapter
+## Come Aggiungere un Runtime Adapter
 
-A runtime adapter defines translation rules from a generic Agent Package to a specific runtime's format and execution model.
+Un runtime adapter definisce le regole di traduzione da un Agent Package generico al formato e al modello di esecuzione di un runtime specifico.
 
-**Required sections** (follow `runtime-adapters/manual-execution.md` as reference):
+**Sezioni obbligatorie** (segui `runtime-adapters/manual-execution.md` come riferimento):
 - Scopo
 - Quando si usa
 - Prerequisiti
 - Come tradurre un Agent Package
 - Come gestire gli Handoff
 - Come gestire i Human Gate
-- Anti-pattern da evitare
+- Failure mode da evitare
 
-**Steps:**
-1. Create `runtime-adapters/<runtime-name>.md`.
-2. The adapter must not contain factory decision logic — it translates, it does not decide.
-3. Document all runtime-specific constraints and limitations explicitly.
-4. Add the new adapter to the runtime-adapters table in `implementation-status.md`.
-
----
-
-## How to Update a Standard
-
-Standards are format contracts. Changing them affects all existing and future artifacts that reference them.
-
-**Before changing a standard:**
-1. Identify all existing artifacts that follow the standard (search in `projects/`, `agents/`, `archetypes/`).
-2. Assess the impact — breaking changes require migrating existing artifacts.
-3. Propose the change as a Knowledge Candidate during a project run.
-4. Get explicit approval through the Knowledge Evolution agent.
-
-**When changing a standard:**
-1. Update the required/optional fields table.
-2. Update the format example in the standard.
-3. Update the failure mode list if new anti-patterns are identified.
-4. Update `implementation-status.md`.
+**Passi:**
+1. Crea `runtime-adapters/<nome-runtime>.md`.
+2. L'adapter non deve contenere logica decisionale della factory — traduce, non decide.
+3. Documenta esplicitamente tutti i vincoli e le limitazioni specifici del runtime.
+4. Aggiungi il nuovo adapter alla tabella dei runtime adapter in `implementation-status.md`.
 
 ---
 
-## How to Add a Permanent Agent
+## Come Aggiornare uno Standard
 
-Permanent agents are governance roles in the factory. Adding one means introducing a new stable responsibility in the factory's core process.
+Gli standard sono contratti di formato. Modificarli impatta tutti gli artefatti esistenti e futuri che vi fanno riferimento.
 
-**Required sections** (follow existing agents as reference):
+**Prima di modificare uno standard:**
+1. Identifica tutti gli artefatti esistenti che seguono lo standard (cerca in `projects/`, `agents/`, `archetypes/`).
+2. Valuta l'impatto — le modifiche incompatibili richiedono la migrazione degli artefatti esistenti.
+3. Proponi la modifica come Knowledge Candidate durante un'esecuzione di progetto.
+4. Ottieni l'approvazione esplicita tramite l'agente Knowledge Evolution.
+
+**Quando modifichi uno standard:**
+1. Aggiorna la tabella dei campi obbligatori/opzionali.
+2. Aggiorna l'esempio di formato nello standard.
+3. Aggiorna la lista dei failure mode se emergono nuovi anti-pattern.
+4. Aggiorna `implementation-status.md`.
+
+---
+
+## Come Aggiungere un Agente Permanente
+
+Gli agenti permanenti sono ruoli di governance nella factory. Aggiungerne uno significa introdurre una nuova responsabilità stabile nel processo centrale della factory.
+
+**Sezioni obbligatorie** (segui gli agenti esistenti come riferimento):
 - Identità
 - Responsabilità
 - Input
@@ -138,44 +138,45 @@ Permanent agents are governance roles in the factory. Adding one means introduci
 - Definition of Done
 - Failure mode da evitare
 
-**Steps:**
-1. Verify the role doesn't overlap with an existing permanent agent.
-2. Define the agent's single responsibility clearly.
-3. Create `agents/<agent-name>/<agent-name>.md`.
-4. Update the permanent agents table in `AgentFactory.md` and `implementation-status.md`.
-5. New permanent agents require explicit review — propose as Knowledge Candidate first.
+**Passi:**
+1. Verifica che il ruolo non si sovrapponga a un agente permanente esistente.
+2. Definisci chiaramente la singola responsabilità dell'agente.
+3. Crea `agents/<nome-agente>/<nome-agente>.md`.
+4. Aggiorna la tabella degli agenti permanenti in `AgentFactory.md` e `implementation-status.md`.
+5. I nuovi agenti permanenti richiedono revisione esplicita — proponi prima come Knowledge Candidate.
 
 ---
 
-## Knowledge Candidate Lifecycle
+## Ciclo di Vita della Knowledge Candidate
 
-When you identify an improvement during a project:
+Quando identifichi un miglioramento durante un progetto:
 
 ```text
-1. Create the proposal in projects/<project-id>/knowledge-candidates/
-   following standards/knowledge-candidate-standard.md
+1. Crea la proposta in projects/<project-id>/knowledge-candidates/
+   seguendo standards/knowledge-candidate-standard.md
 
-2. Activate the Knowledge Evolution agent to evaluate it
+2. Attiva l'agente Knowledge Evolution per valutarla
 
-3. If Accepted → Knowledge Evolution integrates it into the correct permanent file(s)
+3. Se Accettata → Knowledge Evolution la integra nei file permanenti corretti
 
-4. If Rejected → reason is recorded in the Knowledge Candidate file; no permanent change
+4. Se Rifiutata → il motivo viene registrato nel file Knowledge Candidate;
+                  nessuna modifica permanente
 
-5. Update the Knowledge Candidate status:
-   Proposed → Reviewed → Accepted → Integrated
-                        → Rejected
+5. Aggiorna lo stato della Knowledge Candidate:
+   Proposta → Revisionata → Accettata → Integrata
+                           → Rifiutata
 ```
 
-Never skip this cycle. Even obvious improvements must be evaluated before entering permanent files.
+Non saltare mai questo ciclo. Anche i miglioramenti ovvi devono essere valutati prima di entrare nei file permanenti.
 
 ---
 
-## Checklist Before Submitting a Change
+## Checklist Prima di Inviare una Modifica
 
-- [ ] The change belongs in permanent knowledge (not project-specific)
-- [ ] The file follows the correct standard or format reference
-- [ ] Naming follows `kebab-case` convention
-- [ ] Language is Italian (consistent with existing docs)
-- [ ] No overlap with existing permanent agents, archetypes, or capabilities
-- [ ] `implementation-status.md` updated if a new artifact was added
-- [ ] Change was proposed as a Knowledge Candidate and approved before integration
+- [ ] La modifica appartiene alla conoscenza permanente (non è specifica di progetto)
+- [ ] Il file segue lo standard o il riferimento di formato corretto
+- [ ] La nomenclatura segue la convenzione `kebab-case`
+- [ ] La lingua è l'italiano (coerente con i documenti esistenti)
+- [ ] Nessuna sovrapposizione con agenti permanenti, archetype o capability esistenti
+- [ ] `implementation-status.md` aggiornato se è stato aggiunto un nuovo artefatto
+- [ ] La modifica è stata proposta come Knowledge Candidate e approvata prima dell'integrazione

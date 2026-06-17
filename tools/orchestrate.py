@@ -178,7 +178,7 @@ class Orchestrator:
         self.client = anthropic.Anthropic()
         self._clarification_lock = threading.Lock()
 
-    # ── State management ──────────────────────────────────────────────────────
+    # ── Stato ─────────────────────────────────────────────────────────────────
 
     def _load_state(self) -> dict:
         if self.state_file.exists():
@@ -194,7 +194,7 @@ class Orchestrator:
         )
 
     def reset_from(self, from_step: str):
-        """Remove from_step and all later steps from completed state."""
+        """Rimuove from_step e tutti gli step successivi dallo stato completato."""
         workflow = self.load_workflow()
         all_ids = self._collect_step_ids(workflow.get("steps", []))
         if from_step not in all_ids:
@@ -220,7 +220,7 @@ class Orchestrator:
                 ids.append(item["id"])
         return ids
 
-    # ── Workflow loading ───────────────────────────────────────────────────────
+    # ── Caricamento workflow ───────────────────────────────────────────────────
 
     def load_workflow(self) -> dict:
         wf_file = self.project_dir / "blueprints" / "workflow.yml"
@@ -231,7 +231,7 @@ class Orchestrator:
             )
         return yaml.safe_load(wf_file.read_text(encoding="utf-8"))
 
-    # ── Tool handlers ──────────────────────────────────────────────────────────
+    # ── Gestori tool ───────────────────────────────────────────────────────────
 
     def _tool_read_file(self, path: str) -> str:
         p = REPO_ROOT / path
@@ -296,7 +296,7 @@ class Orchestrator:
             return json.dumps(tool_input, ensure_ascii=False)
         return f"ERRORE: tool sconosciuto: {tool_name}"
 
-    # ── Agent execution ────────────────────────────────────────────────────────
+    # ── Esecuzione agente ──────────────────────────────────────────────────────
 
     def _load_agent_content(self, step: dict) -> str:
         agent_path = step.get("agent") or step.get("package")
@@ -366,8 +366,8 @@ PERCORSI:
 
     def run_agent(self, step: dict) -> tuple[bool, str, list]:
         """
-        Run one agent step via Anthropic API agentic loop.
-        Returns (success, summary, files_created).
+        Esegue uno step agente tramite API Anthropic con tool use.
+        Restituisce (successo, riepilogo, file_creati).
         """
         step_id = step["id"]
         step_name = step.get("name", step_id)
@@ -416,7 +416,7 @@ PERCORSI:
                 name = block.name
                 inp = block.input
 
-                # Print compact tool call log (skip content for brevity)
+                # Log compatto della tool call (omette il corpo di 'content')
                 log_inp = {k: (repr(v)[:60] if k != "content" else f"<{len(v)} chars>")
                            for k, v in inp.items()}
                 print(f"     🔧 {name}({', '.join(f'{k}={v}' for k, v in log_inp.items())})")
@@ -482,7 +482,7 @@ PERCORSI:
             print(f"     ℹ Human Gate '{gate_id}': cancellato — proseguo")
             return True
 
-        # Pending (or expired) — interactive
+        # Pending o expired — interattivo
         print(f"\n{'━'*60}")
         print(f"  ⚠  HUMAN GATE PENDING: {gate_id}")
         print(f"{'━'*60}")
@@ -530,7 +530,7 @@ PERCORSI:
             else:
                 print("  Scelta non valida. Usa: a, r, v, s")
 
-    # ── Output validation ─────────────────────────────────────────────────────
+    # ── Validazione output ─────────────────────────────────────────────────────
 
     def _validate_outputs(self, step: dict) -> bool:
         outputs = [
@@ -553,14 +553,14 @@ PERCORSI:
         except Exception:
             return True
 
-    # ── Step execution ─────────────────────────────────────────────────────────
+    # ── Esecuzione step ────────────────────────────────────────────────────────
 
     def run_step(self, step: dict) -> bool:
-        """Run a single sequential step: gate check, agent, validate, persist state."""
+        """Esegue uno step sequenziale: verifica gate, agente, validazione, salvataggio stato."""
         step_id = step["id"]
 
         if step_id in self.state["completed"]:
-            print(f"\n  ↷ [{step_id}] già completato — skip")
+            print(f"\n  ↷ [{step_id}] già completato — salto")
             return True
 
         if gate_id := step.get("human-gate"):
@@ -591,7 +591,7 @@ PERCORSI:
         to_run = [s for s in parallel_steps if s["id"] not in self.state["completed"]]
 
         if already_done and not to_run:
-            print(f"\n  ↷ [parallelo] già completati — skip")
+            print(f"\n  ↷ [parallelo] già completati — salto")
             return True
 
         print(f"\n  ⇉ Parallelo: {ids}")
@@ -603,7 +603,7 @@ PERCORSI:
 
         return all(results)
 
-    # ── Main run ───────────────────────────────────────────────────────────────
+    # ── Esecuzione principale ──────────────────────────────────────────────────
 
     async def run(self, from_step: str = None, dry_run: bool = False) -> bool:
         workflow = self.load_workflow()
@@ -672,7 +672,7 @@ PERCORSI:
         print()
 
 
-# ── CLI ────────────────────────────────────────────────────────────────────────
+# ── Interfaccia a riga di comando ─────────────────────────────────────────────
 
 def main():
     parser = argparse.ArgumentParser(
