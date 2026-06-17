@@ -943,8 +943,37 @@ Il workflow si ferma. Rivedere e correggere gli artefatti prima di rilanciare.
         print(f"  ✓ Pipeline completata — {len(self.state['completed'])} step eseguiti")
         print(f"{'━'*60}\n")
         self._print_summary()
+        self._run_knowledge_evolution()
         self._validate_project()
         return True
+
+    def _run_knowledge_evolution(self):
+        """
+        Se esistono Knowledge Candidates nel progetto, lancia automaticamente
+        l'agente knowledge-evolution per valutarle prima della chiusura.
+        """
+        kc_dir = self.project_dir / "knowledge-candidates"
+        candidates = [
+            p for p in sorted(kc_dir.glob("*.md"))
+            if p.name != "README.md"
+        ] if kc_dir.exists() else []
+
+        if not candidates:
+            return
+
+        print(f"\n{'─'*60}")
+        print(f"  Knowledge Candidates trovate ({len(candidates)}) — avvio Knowledge Evolution")
+        print(f"{'─'*60}")
+
+        step = {
+            "id":   "knowledge-evolution",
+            "name": "Knowledge Evolution",
+            "agent": "agents/knowledge-evolution/knowledge-evolution.md",
+            "inputs": [str(p.relative_to(REPO_ROOT)) for p in candidates],
+        }
+        success, summary, _ = self.run_agent(step)
+        if not success:
+            print("     ⚠ Knowledge Evolution non completata — revisionare manualmente.")
 
     def _validate_project(self):
         """Esegue validate.py su tutti gli artefatti del progetto e stampa il report."""
