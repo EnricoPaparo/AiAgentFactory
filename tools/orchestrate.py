@@ -833,7 +833,27 @@ Il workflow si ferma. Rivedere e correggere gli artefatti prima di rilanciare.
         print(f"  ✓ Pipeline completata — {len(self.state['completed'])} step eseguiti")
         print(f"{'━'*60}\n")
         self._print_summary()
+        self._validate_project()
         return True
+
+    def _validate_project(self):
+        """Esegue validate.py su tutti gli artefatti del progetto e stampa il report."""
+        artifacts = sorted(self.project_dir.rglob("*.md"))
+        artifacts = [str(p) for p in artifacts if p.name != "README.md"]
+        if not artifacts:
+            return
+        print(f"{'─'*60}")
+        print(f"  Validazione artefatti progetto\n")
+        try:
+            r = subprocess.run(
+                [sys.executable, "tools/validate.py"] + artifacts,
+                capture_output=True, text=True,
+            )
+            for line in r.stdout.strip().splitlines():
+                print(f"  {line}")
+        except Exception as e:
+            print(f"  ⚠ validate.py non disponibile: {e}")
+        print()
 
     def _print_summary(self):
         if not self.state["completed"]:
