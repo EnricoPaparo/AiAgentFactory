@@ -575,14 +575,18 @@ class Orchestrator:
 
     def _load_inputs(self, step: dict) -> dict:
         result = {}
-        # Auto-includi clarifications se esistono (prodotte da --clarify)
-        clarify_file = self.project_dir / "input" / "clarifications.md"
-        if clarify_file.exists():
-            rel = str(clarify_file.relative_to(REPO_ROOT)).replace("\\", "/")
-            try:
-                result[rel] = clarify_file.read_text(encoding="utf-8")
-            except Exception:
-                pass
+        # Auto-includi file di contesto generati dai tool di preprocessamento
+        for auto_file in ("clarifications.md", "existing-codebase.md", "project-files-context.md"):
+            p = self.project_dir / "input" / auto_file
+            if p.exists():
+                rel = str(p.relative_to(REPO_ROOT)).replace("\\", "/")
+                try:
+                    content = p.read_text(encoding="utf-8")
+                    if len(content) > _INPUT_TRUNCATE_CHARS:
+                        content = content[:_INPUT_TRUNCATE_CHARS] + f"\n\n[... TRONCATO a {_INPUT_TRUNCATE_CHARS:,} chars. Usa read_file per sezioni specifiche.]"
+                    result[rel] = content
+                except Exception:
+                    pass
         for inp in step.get("inputs", []):
             for base in (self.project_dir, REPO_ROOT):
                 p = base / inp
