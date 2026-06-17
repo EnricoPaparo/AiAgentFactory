@@ -530,17 +530,25 @@ class Orchestrator:
         return result
 
     def _build_system_prompt(self, step: dict, agent_content: str) -> str:
-        return f"""Sei un agente temporaneo della AgentFactory. Esegui il seguente Agent Package con precisione.
+        return f"""Sei un agente della AgentFactory. Esegui il seguente task con precisione.
 
 {agent_content}
 
-═══ REGOLE OPERATIVE ORCHESTRATORE ═══
+═══ REGOLE OPERATIVE — LEGGILE TUTTE PRIMA DI AGIRE ═══
 
-- Leggi tutti gli input prima di agire.
+CHIARIMENTI (priorità massima):
+- Prima di scrivere qualsiasi file, valuta se hai informazioni sufficienti.
+- Se mancano dati critici che non puoi risolvere con assunzioni ragionevoli,
+  chiama request_clarification con TUTTE le domande in una sola chiamata.
+- Non fare mai assunzioni silenziose su requisiti ambigui: o li dichiari
+  esplicitamente nell'output, o li chiedi all'utente.
+- Dopo aver ricevuto i chiarimenti, riparte dall'analisi con le nuove informazioni.
+
+ESECUZIONE:
+- Leggi tutti gli input disponibili prima di agire.
 - Produci SOLO gli output dichiarati nel task.
 - Usa read_file per file aggiuntivi di cui hai bisogno.
 - Usa write_file per scrivere gli output (percorso relativo al project workspace).
-- Usa request_clarification SOLO per dubbi critici non risolvibili dagli input disponibili.
 - Chiama complete_task al termine con stato e riepilogo dettagliato.
 
 PERCORSI:
@@ -565,8 +573,12 @@ PERCORSI:
             for path, content in inputs_content.items():
                 parts.append(f"### {path}\n```\n{content}\n```\n")
         parts.append(
-            "Procedi: analizza gli input, esegui il task, scrivi gli output con write_file, "
-            "poi chiama complete_task con il riepilogo finale."
+            "PRIMA DI PROCEDERE: verifica di avere informazioni sufficienti per completare "
+            "il task senza fare assunzioni critiche. Se hai dubbi su requisiti, vincoli tecnici, "
+            "obiettivi o scope, chiama request_clarification con tutte le domande ADESSO, "
+            "prima di scrivere qualsiasi file.\n\n"
+            "Se le informazioni sono sufficienti: analizza gli input, esegui il task, "
+            "scrivi gli output con write_file, poi chiama complete_task con il riepilogo finale."
         )
         return "\n".join(parts)
 
