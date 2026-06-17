@@ -63,6 +63,9 @@ Si usa dopo l'approvazione di un Execution Blueprint, quando serve generare uno 
 
 | Campo | Descrizione |
 |---|---|
+| `chunk-id` | ID del chunk dell'Implementation Plan coperto da questo package (es. `auth-module`). Obbligatorio quando generato da un Implementation Plan. |
+| `chunk-modules` | Lista dei moduli dell'Implementation Plan inclusi in questo package. |
+| `chunk-dependencies` | Lista dei chunk-id che devono essere completati prima di eseguire questo package. |
 | `runtime-hints` | Indicazioni non vincolanti per runtime adapter. |
 | `runtime-packet` | Percorso del runtime packet compatto collegato al package, se generato. |
 | `risk-notes` | Rischi specifici del task. |

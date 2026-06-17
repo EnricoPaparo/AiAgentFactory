@@ -84,17 +84,22 @@ steps:
     agent: agents/knowledge-compiler/knowledge-compiler.md
     inputs:
       - blueprints/execution-blueprint.md
+      - blueprints/implementation-plan.md   # genera un package per chunk
     outputs:
       - generated-agents/developer.md
-      # aggiungere altri package se previsti dall'execution blueprint
+      # Con Implementation Plan: un file per chunk, es.:
+      #   generated-agents/developer-auth-module.md
+      #   generated-agents/developer-data-layer.md
+      #   generated-agents/developer-api-routes.md
 
-  # ── Fase 6: Sviluppo (esempio parallelo) ─────────────────────────────────────
-  # Se il progetto ha moduli indipendenti, eseguirli in parallelo:
+  # ── Fase 6: Sviluppo (chunk paralleli dall'Implementation Plan) ──────────────
+  # Il Pipeline Designer popola questa sezione basandosi sui gruppi paralleli
+  # dell'Implementation Plan. Ogni chunk diventa uno step con il suo package.
   #
   # - parallel:
-  #   - id: developer-module-a
-  #     name: "Sviluppo Modulo A"
-  #     package: generated-agents/developer-module-a.md
+  #   - id: developer-auth-module
+  #     name: "Sviluppo Auth Module"
+  #     package: generated-agents/developer-auth-module.md
   #     inputs:
   #       - blueprints/solution-blueprint.md
   #       - blueprints/execution-blueprint.md
