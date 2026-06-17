@@ -1,0 +1,113 @@
+# workflow.yml — Piano di esecuzione macchina-leggibile per l'Orchestratore AgentFactory
+#
+# Questo file guida python tools/orchestrate.py nell'esecuzione automatica della pipeline.
+# Viene generato dal Pipeline Designer a partire dall'Execution Blueprint.
+#
+# Uso:
+#   python tools/orchestrate.py <project-id>
+#   python tools/orchestrate.py <project-id> --dry-run
+#   python tools/orchestrate.py <project-id> --from <step-id>
+#
+# ────────────────────────────────────────────────────────────────────────────────
+# STRUTTURA DEGLI STEP
+#
+# Step sequenziale:
+#   - id: nome-step                  # identificatore unico (kebab-case)
+#     name: "Nome leggibile"         # opzionale, per log
+#     agent: agents/xxx/xxx.md       # agente permanente (OR)
+#     package: generated-agents/x.md # agente generato (usa uno dei due)
+#     inputs:                        # file letti dall'agente (relativi al workspace)
+#       - input/initial-request.md
+#     outputs:                       # file che l'agente deve produrre
+#       - blueprints/requirements-blueprint.md
+#     human-gate: gate-id            # opzionale — ID del file in human-gates/
+#
+# Step parallelo (più agenti eseguiti in simultanea):
+#   - parallel:
+#     - id: step-a
+#       ...
+#     - id: step-b
+#       ...
+#
+# ────────────────────────────────────────────────────────────────────────────────
+
+project: test-api-health
+version: "1.0"
+
+steps:
+
+  - id: requirement-analyst
+    name: "Analisi Requisiti"
+    agent: agents/requirement-analyst/requirement-analyst.md
+    inputs:
+      - input/initial-request.md
+    outputs:
+      - blueprints/requirements-blueprint.md
+
+  - id: architect
+    name: "Architettura"
+    agent: agents/architect/architect.md
+    inputs:
+      - blueprints/requirements-blueprint.md
+      - input/initial-request.md
+    outputs:
+      - blueprints/solution-blueprint.md
+
+  - id: pipeline-designer
+    name: "Pianificazione Pipeline"
+    agent: agents/pipeline-designer/pipeline-designer.md
+    inputs:
+      - blueprints/requirements-blueprint.md
+      - blueprints/solution-blueprint.md
+    outputs:
+      - blueprints/execution-blueprint.md
+
+  - id: knowledge-compiler
+    name: "Composizione Agent Package"
+    agent: agents/knowledge-compiler/knowledge-compiler.md
+    inputs:
+      - blueprints/execution-blueprint.md
+      - archetypes/developer.md
+      - archetypes/reviewer.md
+      - capabilities/node.md
+      - capabilities/git-workflow.md
+      - capabilities/testing-strategy.md
+    outputs:
+      - generated-agents/developer.md
+      - generated-agents/reviewer.md
+
+  - id: developer
+    name: "Sviluppo API"
+    package: generated-agents/developer.md
+    inputs:
+      - blueprints/solution-blueprint.md
+      - blueprints/execution-blueprint.md
+      - capabilities/node.md
+      - capabilities/testing-strategy.md
+    outputs:
+      - deliverables/implementation.md
+      - handoffs/developer-to-reviewer.md
+
+  - id: reviewer
+    name: "Code Review"
+    package: generated-agents/reviewer.md
+    inputs:
+      - handoffs/developer-to-reviewer.md
+      - deliverables/implementation.md
+      - blueprints/requirements-blueprint.md
+      - capabilities/code-review.md
+    outputs:
+      - reviews/review-report.md
+      - handoffs/reviewer-to-pipeline-supervisor.md
+    human-gate: approve-review
+
+  - id: pipeline-supervisor
+    name: "Supervisione Finale"
+    agent: agents/pipeline-supervisor/pipeline-supervisor.md
+    inputs:
+      - handoffs/reviewer-to-pipeline-supervisor.md
+      - blueprints/execution-blueprint.md
+      - deliverables/implementation.md
+      - reviews/review-report.md
+    outputs:
+      - deliverables/supervisor-report.md
