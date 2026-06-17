@@ -762,7 +762,35 @@ Il workflow si ferma. Rivedere e correggere gli artefatti prima di rilanciare.
                 self.state["failed"].append(step_id)
 
         self._save_state()
+        self._update_project_status()
         return success
+
+    def _update_project_status(self):
+        """Aggiorna project-status.md con lo stato corrente della pipeline."""
+        status_file = self.project_dir / "project-status.md"
+        completed = list(self.state["completed"].keys())
+        failed = self.state["failed"]
+        total = len(completed) + len(failed)
+        now = datetime.now().strftime("%Y-%m-%d %H:%M")
+
+        lines = [
+            f"# Project Status — {self.project_id}",
+            f"",
+            f"Aggiornato: {now}",
+            f"",
+            f"## Step completati ({len(completed)})",
+            "",
+        ]
+        for sid in completed:
+            info = self.state["completed"][sid]
+            lines.append(f"- ✓ {sid}  ({info.get('at', '')[:16]})")
+        if failed:
+            lines += ["", f"## Step falliti ({len(failed)})", ""]
+            for sid in failed:
+                lines.append(f"- ✗ {sid}")
+        lines += [""]
+
+        status_file.write_text("\n".join(lines), encoding="utf-8")
 
     async def run_parallel_group(self, parallel_steps: list) -> bool:
         ids = [s["id"] for s in parallel_steps]
