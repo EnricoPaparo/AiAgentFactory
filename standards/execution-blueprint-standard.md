@@ -1,3 +1,25 @@
+---
+standard: execution-blueprint
+applies-to: "projects/*/blueprints/execution-blueprint.md"
+required-sections:
+  - "## Requirements Source"
+  - "## Solution Source"
+  - "## Execution Goal"
+  - "## Required Agents"
+  - "## Agent Inputs"
+  - "## Agent Outputs"
+  - "## Workflow"
+  - "## Handoffs"
+  - "## Review Gates"
+  - "## Human Gates"
+  - "## Completion Criteria"
+  - "## Escalation Rules"
+optional-sections:
+  - "## Parallelization Notes"
+  - "## Runtime Preferences"
+  - "## Knowledge Candidate Plan"
+---
+
 # Execution Blueprint Standard
 
 ## Scopo

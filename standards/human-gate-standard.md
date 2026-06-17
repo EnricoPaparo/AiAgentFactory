@@ -1,3 +1,20 @@
+---
+standard: human-gate
+applies-to: "projects/[!_]*/human-gates/*.md"
+required-sections:
+  - "## Metadata"
+  - "## Decision Required"
+  - "## Context"
+  - "## Options"
+  - "## Approval Criteria"
+  - "## Impact If Approved"
+  - "## Impact If Rejected"
+  - "## Human Decision"
+optional-sections:
+  - "## Return To Phase"
+  - "## Blocking Scope"
+---
+
 # Human Gate Standard
 
 ## Scopo

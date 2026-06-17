@@ -1,3 +1,23 @@
+---
+standard: capability
+applies-to: "capabilities/*.md"
+required-sections:
+  - "## Scope"
+  - "## Applies When"
+  - "## Does Not Apply When"
+  - "## Operational Practices"
+  - "## Checklist"
+  - "## Failure Modes"
+  - "## Review Criteria"
+  - "## Risk Signals"
+  - "## Not A Tutorial Boundary"
+optional-sections:
+  - "## Related Capabilities"
+  - "## Source Knowledge Candidates"
+  - "## Examples"
+  - "## Deprecated Guidance"
+---
+
 # Capability Standard
 
 ## Scopo
