@@ -6,18 +6,26 @@ Legge workflow.yml dal project workspace ed esegue automaticamente la pipeline
 di agenti AI: step sequenziali, step paralleli, Human Gate interattivi,
 chiarimenti all'utente, validazione output e ripresa da uno step specifico.
 
+Supporta qualsiasi provider AI tramite due backend:
+  - anthropic SDK  : per modelli Claude  (ANTHROPIC_API_KEY)
+  - openai SDK     : per tutto il resto  (endpoint OpenAI-compatibili)
+
+Provider gratuiti supportati:
+  gemini/gemini-2.0-flash         → GEMINI_API_KEY   (aistudio.google.com)
+  groq/llama-3.3-70b-versatile    → GROQ_API_KEY     (console.groq.com)
+  ollama/llama3.1                 → nessuna chiave   (server locale)
+  mistral/mistral-small-latest    → MISTRAL_API_KEY  (console.mistral.ai)
+
 Uso:
   python tools/orchestrate.py <project-id>
+  python tools/orchestrate.py <project-id> --model gemini/gemini-2.0-flash
+  python tools/orchestrate.py <project-id> --model groq/llama-3.3-70b-versatile
+  python tools/orchestrate.py <project-id> --model ollama/llama3.1
   python tools/orchestrate.py <project-id> --from <step-id>
   python tools/orchestrate.py <project-id> --dry-run
-  python tools/orchestrate.py <project-id> --model claude-sonnet-4-6
-
-Esempi:
-  python tools/orchestrate.py my-api-project
-  python tools/orchestrate.py my-api-project --from architect
-  python tools/orchestrate.py my-api-project --dry-run
 """
 
+import os
 import sys
 import re
 import json
@@ -32,13 +40,7 @@ from pathlib import Path
 try:
     import yaml
 except ImportError:
-    print("ERRORE: PyYAML richiesto. Installa con: pip install pyyaml", file=sys.stderr)
-    sys.exit(1)
-
-try:
-    import anthropic
-except ImportError:
-    print("ERRORE: anthropic SDK richiesto. Installa con: pip install anthropic", file=sys.stderr)
+    print("ERRORE: PyYAML richiesto. Installa con: pip install -r requirements.txt", file=sys.stderr)
     sys.exit(1)
 
 PROJECTS_DIR = Path("projects")
@@ -46,137 +48,214 @@ REPO_ROOT = Path(".")
 DEFAULT_MODEL = "claude-opus-4-8"
 MAX_TOOL_CALLS = 40
 
-TOOLS = [
+# Provider OpenAI-compatibili: prefisso → (base_url, variabile_env_api_key)
+_OPENAI_PROVIDERS: dict[str, tuple[str, str | None]] = {
+    "gemini":     ("https://generativelanguage.googleapis.com/v1beta/openai/", "GEMINI_API_KEY"),
+    "groq":       ("https://api.groq.com/openai/v1",                          "GROQ_API_KEY"),
+    "ollama":     ("http://localhost:11434/v1",                                None),
+    "mistral":    ("https://api.mistral.ai/v1",                               "MISTRAL_API_KEY"),
+    "together":   ("https://api.together.xyz/v1",                             "TOGETHER_API_KEY"),
+    "openrouter": ("https://openrouter.ai/api/v1",                            "OPENROUTER_API_KEY"),
+}
+
+# Tool in formato OpenAI function calling (usato dal backend openai).
+# Il backend anthropic li converte automaticamente al formato Anthropic.
+TOOLS_OPENAI = [
     {
-        "name": "read_file",
-        "description": (
-            "Leggi il contenuto di un file. Usa percorsi relativi alla radice del repository. "
-            "Esempi: 'projects/my-project/input/initial-request.md', "
-            "'standards/agent-package-standard.md', 'capabilities/git.md'."
-        ),
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "path": {
-                    "type": "string",
-                    "description": "Percorso del file relativo alla radice del repository.",
-                }
+        "type": "function",
+        "function": {
+            "name": "read_file",
+            "description": (
+                "Leggi il contenuto di un file. Usa percorsi relativi alla radice del repository. "
+                "Esempi: 'projects/mio-progetto/input/initial-request.md', "
+                "'standards/agent-package-standard.md'."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "path": {"type": "string", "description": "Percorso relativo alla radice del repository."}
+                },
+                "required": ["path"],
             },
-            "required": ["path"],
         },
     },
     {
-        "name": "write_file",
-        "description": (
-            "Crea o sovrascrive un file nel project workspace. "
-            "Usa percorsi relativi al project workspace "
-            "(es. 'blueprints/requirements-blueprint.md', 'handoffs/dev-to-reviewer.md'). "
-            "Le directory intermedie vengono create automaticamente."
-        ),
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "path": {
-                    "type": "string",
-                    "description": "Percorso relativo al project workspace.",
+        "type": "function",
+        "function": {
+            "name": "write_file",
+            "description": (
+                "Crea o sovrascrive un file nel project workspace. "
+                "Percorso relativo al project workspace "
+                "(es. 'blueprints/requirements-blueprint.md'). "
+                "Le directory intermedie vengono create automaticamente."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "path":    {"type": "string", "description": "Percorso relativo al project workspace."},
+                    "content": {"type": "string", "description": "Contenuto completo del file."},
                 },
-                "content": {
-                    "type": "string",
-                    "description": "Contenuto completo del file.",
-                },
+                "required": ["path", "content"],
             },
-            "required": ["path", "content"],
         },
     },
     {
-        "name": "list_files",
-        "description": "Elenca file e directory in un percorso del repository.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "path": {
-                    "type": "string",
-                    "description": (
-                        "Percorso relativo alla radice del repository. "
-                        "Se omesso, elenca il project workspace."
-                    ),
-                }
+        "type": "function",
+        "function": {
+            "name": "list_files",
+            "description": "Elenca file e directory in un percorso del repository.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "path": {
+                        "type": "string",
+                        "description": "Percorso relativo alla radice del repo. Se omesso, elenca il project workspace.",
+                    }
+                },
+                "required": [],
             },
-            "required": [],
         },
     },
     {
-        "name": "request_clarification",
-        "description": (
-            "Poni domande all'utente umano quando hai dubbi critici non risolvibili "
-            "con le informazioni disponibili. L'esecuzione si mette in pausa finché "
-            "l'utente non risponde. Usa solo per dubbi bloccanti — non per conferme di routine."
-        ),
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "questions": {
-                    "type": "array",
-                    "items": {"type": "string"},
-                    "description": "Lista di domande da porre all'utente.",
+        "type": "function",
+        "function": {
+            "name": "request_clarification",
+            "description": (
+                "Poni domande all'utente umano per dubbi critici non risolvibili dagli input. "
+                "L'esecuzione si mette in pausa finché l'utente non risponde. "
+                "Usa solo per dubbi bloccanti — non per conferme di routine."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "questions": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Lista di domande da porre all'utente.",
+                    },
+                    "context": {
+                        "type": "string",
+                        "description": "Contesto che spiega perché queste domande sono necessarie.",
+                    },
                 },
-                "context": {
-                    "type": "string",
-                    "description": "Contesto che aiuta l'utente a capire perché queste domande sono necessarie.",
-                },
+                "required": ["questions"],
             },
-            "required": ["questions"],
         },
     },
     {
-        "name": "complete_task",
-        "description": (
-            "Dichiara il completamento del task. Chiama SEMPRE questo tool al termine, "
-            "sia in caso di successo che di blocco o fallimento. "
-            "Non terminare la sessione senza averlo chiamato."
-        ),
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "status": {
-                    "type": "string",
-                    "enum": ["completed", "blocked", "changes-requested", "failed"],
-                    "description": (
-                        "Stato finale: "
-                        "completed=output prodotti e DoD verificata; "
-                        "blocked=input mancante o Human Gate pendente; "
-                        "changes-requested=review ha richiesto modifiche; "
-                        "failed=task non completabile."
-                    ),
+        "type": "function",
+        "function": {
+            "name": "complete_task",
+            "description": (
+                "Dichiara il completamento del task. Chiama SEMPRE questo tool al termine, "
+                "sia in caso di successo che di blocco o fallimento."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "string",
+                        "enum": ["completed", "blocked", "changes-requested", "failed"],
+                        "description": (
+                            "completed=output prodotti; blocked=input mancante o Human Gate; "
+                            "changes-requested=review richiede modifiche; failed=task non completabile."
+                        ),
+                    },
+                    "summary": {
+                        "type": "string",
+                        "description": "Riepilogo: cosa fatto, file prodotti, rischi residui, prossimo agente.",
+                    },
+                    "files_created": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "File creati o modificati (percorsi relativi al project workspace).",
+                    },
                 },
-                "summary": {
-                    "type": "string",
-                    "description": (
-                        "Riepilogo: cosa è stato fatto, file prodotti, "
-                        "verifiche eseguite, rischi residui, prossimo agente suggerito."
-                    ),
-                },
-                "files_created": {
-                    "type": "array",
-                    "items": {"type": "string"},
-                    "description": "Lista dei file creati o modificati (percorsi relativi al project workspace).",
-                },
+                "required": ["status", "summary"],
             },
-            "required": ["status", "summary"],
         },
     },
 ]
+
+# Conversione in formato Anthropic per il backend anthropic SDK
+TOOLS_ANTHROPIC = [
+    {
+        "name":         t["function"]["name"],
+        "description":  t["function"]["description"],
+        "input_schema": t["function"]["parameters"],
+    }
+    for t in TOOLS_OPENAI
+]
+
+
+# ── Risposta normalizzata ──────────────────────────────────────────────────────
+
+class _ToolCall:
+    def __init__(self, name: str, call_id: str, arguments: dict):
+        self.name = name
+        self.call_id = call_id
+        self.arguments = arguments
+
+class _NormalizedResponse:
+    def __init__(self, text: str | None, tool_calls: list[_ToolCall]):
+        self.text = text
+        self.tool_calls = tool_calls
+
+    @property
+    def has_tool_calls(self) -> bool:
+        return bool(self.tool_calls)
+
+
+# ── Creazione client ───────────────────────────────────────────────────────────
+
+def _make_client(model: str):
+    """
+    Restituisce (backend, client, model_name).
+    backend è 'anthropic' o 'openai'.
+    """
+    # Claude → anthropic SDK
+    if model.startswith("claude-") or model.startswith("anthropic/"):
+        try:
+            import anthropic
+        except ImportError:
+            print("ERRORE: pip install anthropic", file=sys.stderr)
+            sys.exit(1)
+        return "anthropic", anthropic.Anthropic(), model.replace("anthropic/", "")
+
+    # Provider OpenAI-compatibile
+    try:
+        from openai import OpenAI
+    except ImportError:
+        print("ERRORE: pip install openai", file=sys.stderr)
+        sys.exit(1)
+
+    if "/" in model:
+        provider, model_name = model.split("/", 1)
+    else:
+        provider, model_name = "openai", model
+
+    if provider in _OPENAI_PROVIDERS:
+        base_url, key_env = _OPENAI_PROVIDERS[provider]
+        api_key = os.environ.get(key_env, "dummy") if key_env else "ollama"
+        if key_env and not os.environ.get(key_env):
+            print(f"ATTENZIONE: variabile {key_env} non impostata.", file=sys.stderr)
+        client = OpenAI(api_key=api_key, base_url=base_url)
+    else:
+        client = OpenAI()  # OpenAI standard con OPENAI_API_KEY
+        model_name = model
+
+    return "openai", client, model_name
 
 
 class Orchestrator:
     def __init__(self, project_id: str, model: str = DEFAULT_MODEL):
         self.project_id = project_id
         self.project_dir = PROJECTS_DIR / project_id
-        self.model = model
+        self.model_str = model
         self.state_file = self.project_dir / ".orchestrator-state.json"
         self.state = self._load_state()
-        self.client = anthropic.Anthropic()
         self._clarification_lock = threading.Lock()
+        self._backend, self._client, self._model_name = _make_client(model)
 
     # ── Stato ─────────────────────────────────────────────────────────────────
 
@@ -195,8 +274,7 @@ class Orchestrator:
 
     def reset_from(self, from_step: str):
         """Rimuove from_step e tutti gli step successivi dallo stato completato."""
-        workflow = self.load_workflow()
-        all_ids = self._collect_step_ids(workflow.get("steps", []))
+        all_ids = self._collect_step_ids(self.load_workflow().get("steps", []))
         if from_step not in all_ids:
             print(f"ERRORE: step '{from_step}' non trovato nel workflow.", file=sys.stderr)
             sys.exit(1)
@@ -223,13 +301,85 @@ class Orchestrator:
     # ── Caricamento workflow ───────────────────────────────────────────────────
 
     def load_workflow(self) -> dict:
-        wf_file = self.project_dir / "blueprints" / "workflow.yml"
-        if not wf_file.exists():
+        wf = self.project_dir / "blueprints" / "workflow.yml"
+        if not wf.exists():
             raise FileNotFoundError(
-                f"workflow.yml non trovato: {wf_file}\n"
+                f"workflow.yml non trovato: {wf}\n"
                 "Crea il file seguendo il template in projects/_template/blueprints/workflow.yml"
             )
-        return yaml.safe_load(wf_file.read_text(encoding="utf-8"))
+        return yaml.safe_load(wf.read_text(encoding="utf-8"))
+
+    # ── Chiamata API con normalizzazione ───────────────────────────────────────
+
+    def _call_api(self, system: str, messages: list) -> _NormalizedResponse:
+        if self._backend == "anthropic":
+            response = self._client.messages.create(
+                model=self._model_name,
+                max_tokens=8192,
+                system=system,
+                tools=TOOLS_ANTHROPIC,
+                messages=messages,
+            )
+            text = None
+            tool_calls = []
+            for block in response.content:
+                if block.type == "text":
+                    text = block.text
+                elif block.type == "tool_use":
+                    tool_calls.append(_ToolCall(block.name, block.id, block.input))
+            return _NormalizedResponse(text, tool_calls)
+        else:
+            msgs = [{"role": "system", "content": system}] + messages
+            response = self._client.chat.completions.create(
+                model=self._model_name,
+                max_tokens=8192,
+                tools=TOOLS_OPENAI,
+                messages=msgs,
+            )
+            msg = response.choices[0].message
+            tool_calls = []
+            if msg.tool_calls:
+                for tc in msg.tool_calls:
+                    try:
+                        inp = json.loads(tc.function.arguments)
+                    except Exception:
+                        inp = {}
+                    tool_calls.append(_ToolCall(tc.function.name, tc.id, inp))
+            return _NormalizedResponse(msg.content, tool_calls)
+
+    def _append_assistant(self, messages: list, norm: _NormalizedResponse):
+        """Aggiunge la risposta dell'assistente alla storia messaggi nel formato corretto."""
+        if self._backend == "anthropic":
+            content = []
+            if norm.text:
+                content.append({"type": "text", "text": norm.text})
+            for tc in norm.tool_calls:
+                content.append({"type": "tool_use", "id": tc.call_id, "name": tc.name, "input": tc.arguments})
+            messages.append({"role": "assistant", "content": content})
+        else:
+            entry: dict = {"role": "assistant", "content": norm.text or ""}
+            if norm.tool_calls:
+                entry["tool_calls"] = [
+                    {"id": tc.call_id, "type": "function",
+                     "function": {"name": tc.name, "arguments": json.dumps(tc.arguments)}}
+                    for tc in norm.tool_calls
+                ]
+            messages.append(entry)
+
+    def _append_tool_result(self, messages: list, tc: _ToolCall, result: str):
+        """Aggiunge il risultato di un tool alla storia messaggi nel formato corretto."""
+        if self._backend == "anthropic":
+            # Raggruppa i tool_result in un unico messaggio user
+            if messages and messages[-1]["role"] == "user" and isinstance(messages[-1]["content"], list):
+                messages[-1]["content"].append(
+                    {"type": "tool_result", "tool_use_id": tc.call_id, "content": result}
+                )
+            else:
+                messages.append({"role": "user", "content": [
+                    {"type": "tool_result", "tool_use_id": tc.call_id, "content": result}
+                ]})
+        else:
+            messages.append({"role": "tool", "tool_call_id": tc.call_id, "content": result})
 
     # ── Gestori tool ───────────────────────────────────────────────────────────
 
@@ -256,9 +406,10 @@ class Orchestrator:
         if not target.exists():
             return f"ERRORE: directory non trovata: {path}"
         try:
-            lines = []
-            for item in sorted(target.iterdir()):
-                lines.append(f"{'  ' if item.is_dir() else '  '}{item.name}{'/' if item.is_dir() else ''}")
+            lines = [
+                f"  {item.name}{'/' if item.is_dir() else ''}"
+                for item in sorted(target.iterdir())
+            ]
             return "\n".join(lines) if lines else "(directory vuota)"
         except Exception as e:
             return f"ERRORE: {e}"
@@ -281,20 +432,20 @@ class Orchestrator:
             print(f"{'─'*60}\n")
             return json.dumps(answers, ensure_ascii=False, indent=2)
 
-    def _execute_tool(self, tool_name: str, tool_input: dict) -> str:
-        if tool_name == "read_file":
-            return self._tool_read_file(tool_input["path"])
-        if tool_name == "write_file":
-            return self._tool_write_file(tool_input["path"], tool_input["content"])
-        if tool_name == "list_files":
-            return self._tool_list_files(tool_input.get("path"))
-        if tool_name == "request_clarification":
+    def _execute_tool(self, tc: _ToolCall) -> str:
+        if tc.name == "read_file":
+            return self._tool_read_file(tc.arguments["path"])
+        if tc.name == "write_file":
+            return self._tool_write_file(tc.arguments["path"], tc.arguments["content"])
+        if tc.name == "list_files":
+            return self._tool_list_files(tc.arguments.get("path"))
+        if tc.name == "request_clarification":
             return self._tool_request_clarification(
-                tool_input["questions"], tool_input.get("context")
+                tc.arguments["questions"], tc.arguments.get("context")
             )
-        if tool_name == "complete_task":
-            return json.dumps(tool_input, ensure_ascii=False)
-        return f"ERRORE: tool sconosciuto: {tool_name}"
+        if tc.name == "complete_task":
+            return "Task registrato."
+        return f"ERRORE: tool sconosciuto: {tc.name}"
 
     # ── Esecuzione agente ──────────────────────────────────────────────────────
 
@@ -366,12 +517,11 @@ PERCORSI:
 
     def run_agent(self, step: dict) -> tuple[bool, str, list]:
         """
-        Esegue uno step agente tramite API Anthropic con tool use.
+        Esegue uno step agente tramite API con tool use.
         Restituisce (successo, riepilogo, file_creati).
         """
         step_id = step["id"]
         step_name = step.get("name", step_id)
-
         print(f"\n  → [{step_id}] {step_name}")
 
         agent_content = self._load_agent_content(step)
@@ -379,69 +529,45 @@ PERCORSI:
         system = self._build_system_prompt(step, agent_content)
         user_msg = self._build_user_message(step, inputs_content)
 
-        messages = [{"role": "user", "content": user_msg}]
+        messages: list = [{"role": "user", "content": user_msg}]
         completion_result = None
-        tool_calls = 0
+        tool_calls_count = 0
 
-        while tool_calls < MAX_TOOL_CALLS:
+        while tool_calls_count < MAX_TOOL_CALLS:
             try:
-                response = self.client.messages.create(
-                    model=self.model,
-                    max_tokens=8192,
-                    system=system,
-                    tools=TOOLS,
-                    messages=messages,
-                )
-            except anthropic.APIError as e:
-                print(f"     ✗ API error: {e}")
+                norm = self._call_api(system, messages)
+            except Exception as e:
+                print(f"     ✗ Errore API ({type(e).__name__}): {e}")
                 return False, str(e), []
 
-            messages.append({"role": "assistant", "content": response.content})
+            self._append_assistant(messages, norm)
 
-            if response.stop_reason == "end_turn":
+            if not norm.has_tool_calls:
                 print("     ⚠ Agente terminato senza complete_task")
-                return True, "Terminato senza riepilogo formale.", []
+                return True, norm.text or "Terminato senza riepilogo formale.", []
 
-            if response.stop_reason != "tool_use":
-                break
-
-            tool_results = []
             done = False
+            for tc in norm.tool_calls:
+                tool_calls_count += 1
 
-            for block in response.content:
-                if block.type != "tool_use":
-                    continue
+                # Log compatto (omette il corpo di 'content')
+                log_args = {
+                    k: (repr(v)[:60] if k != "content" else f"<{len(str(v))} chars>")
+                    for k, v in tc.arguments.items()
+                }
+                print(f"     🔧 {tc.name}({', '.join(f'{k}={v}' for k, v in log_args.items())})")
 
-                tool_calls += 1
-                name = block.name
-                inp = block.input
-
-                # Log compatto della tool call (omette il corpo di 'content')
-                log_inp = {k: (repr(v)[:60] if k != "content" else f"<{len(v)} chars>")
-                           for k, v in inp.items()}
-                print(f"     🔧 {name}({', '.join(f'{k}={v}' for k, v in log_inp.items())})")
-
-                result_str = self._execute_tool(name, inp)
-
-                if name == "complete_task":
-                    try:
-                        completion_result = json.loads(result_str)
-                    except Exception:
-                        completion_result = inp
+                if tc.name == "complete_task":
+                    completion_result = tc.arguments
                     done = True
 
-                tool_results.append({
-                    "type": "tool_result",
-                    "tool_use_id": block.id,
-                    "content": result_str,
-                })
-
-            messages.append({"role": "user", "content": tool_results})
+                result_str = self._execute_tool(tc)
+                self._append_tool_result(messages, tc, result_str)
 
             if done:
                 break
 
-        if tool_calls >= MAX_TOOL_CALLS:
+        if tool_calls_count >= MAX_TOOL_CALLS:
             print(f"     ⚠ Limite tool call raggiunto ({MAX_TOOL_CALLS})")
 
         if completion_result:
@@ -465,7 +591,7 @@ PERCORSI:
         gate_file = self.project_dir / "human-gates" / f"{gate_id}.md"
 
         if not gate_file.exists():
-            print(f"     ℹ Human Gate '{gate_id}' non trovato — skip")
+            print(f"     ℹ Human Gate '{gate_id}' non trovato — salto")
             return True
 
         content = gate_file.read_text(encoding="utf-8")
@@ -500,32 +626,22 @@ PERCORSI:
                 if len(content) > 3000:
                     print(f"  ... (troncato — vedi {gate_file})")
                 print(f"{'─'*60}")
-            elif choice in ("a", "approva", "approve"):
-                updated = re.sub(
-                    r"([-*]\s+status:\s*)\S+",
-                    r"\1Approved",
-                    content,
-                    flags=re.IGNORECASE,
-                )
+            elif choice in ("a", "approva"):
+                updated = re.sub(r"([-*]\s+status:\s*)\S+", r"\1Approved", content, flags=re.IGNORECASE)
                 if updated == content:
-                    updated += f"\n- status: Approved\n- approved-at: {datetime.now().isoformat()}\n"
+                    updated += f"\n- status: Approved\n- approvato-il: {datetime.now().isoformat()}\n"
                 gate_file.write_text(updated, encoding="utf-8")
-                print(f"  ✓ Approvato — proseguo")
+                print("  ✓ Approvato — proseguo")
                 return True
-            elif choice in ("r", "rifiuta", "reject"):
-                updated = re.sub(
-                    r"([-*]\s+status:\s*)\S+",
-                    r"\1Rejected",
-                    content,
-                    flags=re.IGNORECASE,
-                )
+            elif choice in ("r", "rifiuta"):
+                updated = re.sub(r"([-*]\s+status:\s*)\S+", r"\1Rejected", content, flags=re.IGNORECASE)
                 if updated == content:
-                    updated += f"\n- status: Rejected\n- rejected-at: {datetime.now().isoformat()}\n"
+                    updated += f"\n- status: Rejected\n- rifiutato-il: {datetime.now().isoformat()}\n"
                 gate_file.write_text(updated, encoding="utf-8")
-                print(f"  ✗ Rifiutato — stop")
+                print("  ✗ Rifiutato — stop")
                 return False
             elif choice == "s":
-                print("  ⚠ Skippato")
+                print("  ⚠ Saltato")
                 return True
             else:
                 print("  Scelta non valida. Usa: a, r, v, s")
@@ -543,8 +659,7 @@ PERCORSI:
         try:
             r = subprocess.run(
                 [sys.executable, "tools/validate.py"] + outputs,
-                capture_output=True,
-                text=True,
+                capture_output=True, text=True,
             )
             if r.returncode != 0:
                 for line in r.stdout.strip().splitlines()[-8:]:
@@ -587,10 +702,9 @@ PERCORSI:
 
     async def run_parallel_group(self, parallel_steps: list) -> bool:
         ids = [s["id"] for s in parallel_steps]
-        already_done = [s for s in parallel_steps if s["id"] in self.state["completed"]]
         to_run = [s for s in parallel_steps if s["id"] not in self.state["completed"]]
 
-        if already_done and not to_run:
+        if not to_run:
             print(f"\n  ↷ [parallelo] già completati — salto")
             return True
 
@@ -617,9 +731,9 @@ PERCORSI:
             self.reset_from(from_step)
 
         print(f"\n{'━'*60}")
-        print(f"  AgentFactory Orchestrator")
+        print(f"  AgentFactory Orchestratore")
         print(f"  Progetto : {self.project_id}")
-        print(f"  Modello  : {self.model}")
+        print(f"  Modello  : {self.model_str}")
         if from_step:
             print(f"  Da step  : {from_step}")
         print(f"{'━'*60}")
@@ -639,11 +753,11 @@ PERCORSI:
             return True
 
         for item in steps:
-            if "parallel" in item:
-                ok = await self.run_parallel_group(item["parallel"])
-            else:
-                ok = self.run_step(item)
-
+            ok = (
+                await self.run_parallel_group(item["parallel"])
+                if "parallel" in item
+                else self.run_step(item)
+            )
             if not ok:
                 step_id = item.get("id") or "[parallelo]"
                 print(f"\n  ✗ Pipeline interrotta a '{step_id}'")
@@ -690,12 +804,14 @@ def main():
     )
     parser.add_argument(
         "--model", default=DEFAULT_MODEL,
-        help=f"Modello Anthropic da usare (default: {DEFAULT_MODEL})",
+        help=(
+            f"Modello da usare (default: {DEFAULT_MODEL}). "
+            "Esempi: gemini/gemini-2.0-flash  groq/llama-3.3-70b-versatile  ollama/llama3.1"
+        ),
     )
     args = parser.parse_args()
 
-    project_dir = PROJECTS_DIR / args.project_id
-    if not project_dir.exists():
+    if not (PROJECTS_DIR / args.project_id).exists():
         print(f"ERRORE: progetto '{args.project_id}' non trovato in {PROJECTS_DIR}/", file=sys.stderr)
         sys.exit(1)
 
