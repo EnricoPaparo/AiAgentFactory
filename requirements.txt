@@ -5,4 +5,5 @@
 anthropic>=0.40.0    # client Claude
 pypdf>=4.0.0         # lettura PDF
 python-docx>=1.0.0   # lettura Word
+markdown>=3.6        # conversione Markdown → HTML
 weasyprint>=60.0     # generazione PDF
