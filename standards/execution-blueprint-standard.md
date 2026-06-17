@@ -18,6 +18,7 @@ optional-sections:
   - "## Parallelization Notes"
   - "## Runtime Preferences"
   - "## Knowledge Candidate Plan"
+  - "## Workflow Yml"
 ---
 
 # Execution Blueprint Standard
@@ -63,6 +64,7 @@ Si usa dopo Requirements Blueprint e Solution Blueprint validi, prima della gene
 | `parallelization-notes` | Task eseguibili in parallelo. |
 | `runtime-preferences` | Preferenze non vincolanti per runtime adapter. |
 | `knowledge-candidate-plan` | Dove raccogliere lezioni e proposte. |
+| `workflow-yml` | Riferimento al file `blueprints/workflow.yml` generato contestualmente, consumato da `tools/orchestrate.py`. |
 
 ## Formato consigliato
 
@@ -98,6 +100,8 @@ Si usa dopo Requirements Blueprint e Solution Blueprint validi, prima della gene
 ## Runtime Preferences
 
 ## Knowledge Candidate Plan
+
+## Workflow Yml
 ```
 
 ## Criteri di validita

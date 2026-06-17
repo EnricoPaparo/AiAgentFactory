@@ -1,0 +1,12 @@
+# Dipendenze Python per gli strumenti AiAgentFactory
+#
+# Installazione:
+#   pip install -r requirements.txt
+#
+# Python 3.11+ richiesto.
+
+# Parsing YAML (usato da tools/validate.py, tools/orchestrate.py e tools/status.py)
+pyyaml>=6.0
+
+# Anthropic Python SDK (usato da tools/orchestrate.py)
+anthropic>=0.40.0
