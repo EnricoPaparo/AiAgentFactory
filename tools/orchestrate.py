@@ -821,7 +821,16 @@ Il workflow si ferma. Rivedere e correggere gli artefatti prima di rilanciare.
                 self._save_state()
                 return False
 
-        success, summary, files = self.run_agent(step)
+        max_retries = 2
+        success, summary, files = False, "", []
+        for attempt in range(max_retries + 1):
+            success, summary, files = self.run_agent(step)
+            if success:
+                break
+            if attempt < max_retries:
+                wait = 2 ** attempt
+                print(f"     ↺ Tentativo {attempt + 2}/{max_retries + 1} tra {wait}s…")
+                time.sleep(wait)
         self._validate_outputs(step)
 
         if success:
