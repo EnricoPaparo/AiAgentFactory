@@ -104,18 +104,36 @@ steps:
   #       - blueprints/solution-blueprint.md
   #       - blueprints/execution-blueprint.md
   #     outputs:
-  #       - deliverables/module-a.md
-  #       - handoffs/developer-a-to-reviewer.md
+  #       - deliverables/developer-auth-module.md
+  #       - handoffs/developer-auth-module-to-integration.md
   #
-  #   - id: developer-module-b
-  #     name: "Sviluppo Modulo B"
-  #     package: generated-agents/developer-module-b.md
+  #   - id: developer-api-routes
+  #     name: "Sviluppo API Routes"
+  #     package: generated-agents/developer-api-routes.md
   #     inputs:
   #       - blueprints/solution-blueprint.md
   #       - blueprints/execution-blueprint.md
   #     outputs:
-  #       - deliverables/module-b.md
-  #       - handoffs/developer-b-to-reviewer.md
+  #       - deliverables/developer-api-routes.md
+  #       - handoffs/developer-api-routes-to-integration.md
+
+  # ── Fase 6b: Integrazione chunk paralleli ────────────────────────────────────
+  # Presente solo quando Fase 6 usa step paralleli. Unisce i deliverable dei
+  # chunk in un'unica base di codice coerente prima della review.
+  #
+  # - id: integration
+  #   name: "Integrazione Chunk"
+  #   agent: agents/integration-agent/integration-agent.md
+  #   inputs:
+  #     - deliverables/developer-auth-module.md
+  #     - deliverables/developer-api-routes.md
+  #     - handoffs/developer-auth-module-to-integration.md
+  #     - handoffs/developer-api-routes-to-integration.md
+  #     - blueprints/solution-blueprint.md
+  #     - blueprints/execution-blueprint.md
+  #   outputs:
+  #     - deliverables/integrated-implementation.md
+  #     - handoffs/integration-to-reviewer.md
 
   # ── Fase 7: Sviluppo singolo agente ─────────────────────────────────────────
   - id: developer

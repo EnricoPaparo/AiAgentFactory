@@ -28,6 +28,19 @@ Il Pipeline Designer e l'agente permanente che trasforma requisiti e soluzione i
 - Un file `human-gates/<gate-id>.md` per ogni Human Gate dichiarato nel workflow, conforme a `standards/human-gate-standard.md`, con `status: Pending`. L'orchestratore non crea questi file automaticamente: se mancano, il gate viene creato vuoto e il contesto è perso.
 - Handoff verso Knowledge Compiler e Pipeline Supervisor conforme a `standards/handoff-standard.md`, quando richiesto dal workflow.
 
+## Regola: Integration Agent dopo blocchi paralleli
+
+Ogni volta che il workflow contiene un blocco `parallel:` con più step developer,
+**deve seguire immediatamente uno step `integration`** che usa
+`agents/integration-agent/integration-agent.md`.
+
+Questo step riceve in input tutti i deliverable e gli handoff dei chunk paralleli
+e produce un'unica `deliverables/integrated-implementation.md` prima di passare
+al Reviewer.
+
+Senza questo step, il Reviewer riceve output scollegati e non può fare una review
+coerente dell'intera base di codice.
+
 ## Limiti
 
 - Non esegue direttamente il progetto.
@@ -47,6 +60,8 @@ Il Pipeline Designer e l'agente permanente che trasforma requisiti e soluzione i
 5. Per ogni agente, scegliere archetype esistente oppure definizione ad hoc motivata.
 6. Assegnare input e output a ogni agente, rispettando le dipendenze del grafo.
 7. Tradurre i gruppi paralleli dell'Implementation Plan in blocchi `parallel:` nel workflow.
+7b. Se presenti blocchi paralleli, aggiungere uno step `integration` immediatamente dopo,
+    usando `agents/integration-agent/integration-agent.md`.
 8. Stabilire handoff tra step.
 9. Definire review gate, human gate e completion criteria.
 10. Per ogni Human Gate, dichiarare decisione richiesta, decision owner e blocking scope.

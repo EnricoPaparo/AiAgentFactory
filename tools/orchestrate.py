@@ -23,6 +23,8 @@ Uso:
   python tools/orchestrate.py <project-id> --model ollama/llama3.1
   python tools/orchestrate.py <project-id> --from <step-id>
   python tools/orchestrate.py <project-id> --dry-run
+  python tools/orchestrate.py <project-id> --budget 1.00
+  python tools/orchestrate.py <project-id> --clarify
 """
 
 import os
@@ -48,6 +50,11 @@ PROJECTS_DIR = Path("projects")
 REPO_ROOT = Path(".")
 DEFAULT_MODEL = "claude-opus-4-8"
 MAX_TOOL_CALLS = 40
+
+# Soglie contesto (token stimati = caratteri / 4)
+_CONTEXT_WARN_TOKENS  = 150_000   # avviso giallo
+_CONTEXT_TRIM_TOKENS  = 180_000   # trim automatico storia messaggi
+_INPUT_TRUNCATE_CHARS = 80_000    # tronca singolo input se > N chars
 
 # Pricing: input $/MTok, output $/MTok
 _MODEL_PRICING: dict[str, tuple[float, float]] = {
@@ -259,10 +266,11 @@ def _make_client(model: str):
 
 
 class Orchestrator:
-    def __init__(self, project_id: str, model: str = DEFAULT_MODEL):
+    def __init__(self, project_id: str, model: str = DEFAULT_MODEL, budget: float = 0.0):
         self.project_id = project_id
         self.project_dir = PROJECTS_DIR / project_id
         self.model_str = model
+        self.budget = budget  # 0 = illimitato
         self.state_file = self.project_dir / ".orchestrator-state.json"
         self.state = self._load_state()
         self._clarification_lock = threading.Lock()
@@ -280,6 +288,58 @@ class Orchestrator:
         pi, po = self._model_price()
         cost = (input_tok * pi + output_tok * po) / 1_000_000
         return f"${cost:.4f}  ({input_tok:,}↑ {output_tok:,}↓ tok)"
+
+    def _total_cost(self) -> float:
+        pi, po = self._model_price()
+        return (self._total_tokens["input"] * pi + self._total_tokens["output"] * po) / 1_000_000
+
+    def _check_budget(self) -> bool:
+        """Ritorna False se il budget è esaurito. Stampa avviso e interrompe."""
+        if not self.budget:
+            return True
+        spent = self._total_cost()
+        if spent >= self.budget:
+            print(f"\n  ✗ Budget esaurito: ${spent:.4f} / ${self.budget:.2f} — pipeline interrotta.")
+            return False
+        remaining = self.budget - spent
+        if remaining < self.budget * 0.1:
+            print(f"     ⚠ Budget quasi esaurito: rimane ${remaining:.4f}")
+        return True
+
+    @staticmethod
+    def _estimate_tokens(text: str) -> int:
+        return max(1, len(text) // 4)
+
+    def _trim_messages_if_needed(self, system: str, messages: list) -> list:
+        """
+        Se la storia messaggi supera _CONTEXT_TRIM_TOKENS, rimuove i messaggi
+        centrali più vecchi mantenendo sempre il primo (utente iniziale) e
+        gli ultimi 6 messaggi (contesto recente).
+        """
+        total_chars = len(system) + sum(
+            len(str(m.get("content", ""))) for m in messages
+        )
+        estimated = self._estimate_tokens(total_chars * 4)  # chars → stima tokens
+
+        if estimated < _CONTEXT_WARN_TOKENS:
+            return messages
+
+        if estimated >= _CONTEXT_TRIM_TOKENS and len(messages) > 8:
+            keep_head = 1   # primo messaggio utente
+            keep_tail = 6   # ultimi N messaggi
+            middle = messages[keep_head:-keep_tail]
+            trimmed_count = len(middle)
+            trimmed_chars = sum(len(str(m.get("content", ""))) for m in middle)
+            messages = (
+                messages[:keep_head]
+                + [{"role": "user", "content": f"[{trimmed_count} messaggi intermedi rimossi per rispettare i limiti di contesto — ~{trimmed_chars:,} caratteri]"}]
+                + messages[-keep_tail:]
+            )
+            print(f"     ⚠ Contesto grande: rimossi {trimmed_count} messaggi intermedi (~{trimmed_chars:,} chars)")
+        else:
+            print(f"     ⚠ Contesto grande: ~{estimated:,} token stimati")
+
+        return messages
 
     # ── Stato ─────────────────────────────────────────────────────────────────
 
@@ -336,6 +396,7 @@ class Orchestrator:
     # ── Chiamata API con normalizzazione ───────────────────────────────────────
 
     def _call_api(self, system: str, messages: list) -> _NormalizedResponse:
+        messages = self._trim_messages_if_needed(system, messages)
         if self._backend == "anthropic":
             text_printed = False
             with self._client.messages.stream(
@@ -521,7 +582,12 @@ class Orchestrator:
                 p = base / inp
                 if p.exists():
                     try:
-                        result[inp] = p.read_text(encoding="utf-8")
+                        content = p.read_text(encoding="utf-8")
+                        if len(content) > _INPUT_TRUNCATE_CHARS:
+                            trunc = _INPUT_TRUNCATE_CHARS
+                            print(f"     ⚠ Input grande '{inp}': troncato a {trunc:,} chars (originale: {len(content):,})")
+                            content = content[:trunc] + f"\n\n[... TRONCATO: il file originale ha {len(content):,} caratteri. Usa read_file per leggere sezioni specifiche.]"
+                        result[inp] = content
                     except Exception as e:
                         result[inp] = f"[ERRORE lettura: {e}]"
                     break
@@ -603,6 +669,8 @@ PERCORSI:
         tool_calls_count = 0
 
         while tool_calls_count < MAX_TOOL_CALLS:
+            if not self._check_budget():
+                return False, "Budget esaurito.", []
             try:
                 norm = self._call_api(system, messages)
             except Exception as e:
@@ -1027,6 +1095,8 @@ Il workflow si ferma. Rivedere e correggere gli artefatti prima di rilanciare.
         print(f"  AgentFactory Orchestratore")
         print(f"  Progetto : {self.project_id}")
         print(f"  Modello  : {self.model_str}")
+        if self.budget:
+            print(f"  Budget   : ${self.budget:.2f}")
         if from_step:
             print(f"  Da step  : {from_step}")
         print(f"{'━'*60}")
@@ -1163,13 +1233,22 @@ def main():
             "Esempi: gemini/gemini-2.0-flash  groq/llama-3.3-70b-versatile  ollama/llama3.1"
         ),
     )
+    parser.add_argument(
+        "--budget", type=float, default=0.0, metavar="USD",
+        help=(
+            "Limite di spesa in dollari per l'intera pipeline. "
+            "La pipeline si interrompe se il costo stimato supera questo valore. "
+            "Esempio: --budget 0.50 (interrompe dopo 50 centesimi). "
+            "Default: 0 (nessun limite)."
+        ),
+    )
     args = parser.parse_args()
 
     if not (PROJECTS_DIR / args.project_id).exists():
         print(f"ERRORE: progetto '{args.project_id}' non trovato in {PROJECTS_DIR}/", file=sys.stderr)
         sys.exit(1)
 
-    orchestrator = Orchestrator(args.project_id, model=args.model)
+    orchestrator = Orchestrator(args.project_id, model=args.model, budget=args.budget)
 
     try:
         success = asyncio.run(
