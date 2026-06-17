@@ -734,6 +734,33 @@ Il workflow si ferma. Rivedere e correggere gli artefatti prima di rilanciare.
 
     # ── Esecuzione step ────────────────────────────────────────────────────────
 
+    def _block_downstream(self, gate_id: str):
+        """
+        Legge il blocking-scope dal file di gate e marca i relativi step come bloccati
+        nello stato, in modo che --from non li esegua accidentalmente.
+        """
+        gate_file = self.project_dir / "human-gates" / f"{gate_id}.md"
+        if not gate_file.exists():
+            return
+        content = gate_file.read_text(encoding="utf-8")
+        # Cerca la sezione ## Blocking Scope e raccoglie i bullet - item
+        in_scope = False
+        blocked = []
+        for line in content.splitlines():
+            if re.match(r"^##\s+Blocking Scope", line, re.IGNORECASE):
+                in_scope = True
+                continue
+            if in_scope:
+                if line.startswith("##"):
+                    break
+                m = re.match(r"^\s*[-*]\s+(.+)", line)
+                if m:
+                    blocked.append(m.group(1).strip())
+        for sid in blocked:
+            if sid not in self.state["failed"] and sid not in self.state["completed"]:
+                self.state["failed"].append(sid)
+                print(f"     ✗ Bloccato da gate '{gate_id}': {sid}")
+
     def run_step(self, step: dict) -> bool:
         """Esegue uno step sequenziale: verifica gate, agente, validazione, salvataggio stato."""
         step_id = step["id"]
@@ -745,6 +772,7 @@ Il workflow si ferma. Rivedere e correggere gli artefatti prima di rilanciare.
         if gate_id := step.get("human-gate"):
             if not self.check_human_gate(gate_id):
                 self.state["failed"].append(step_id)
+                self._block_downstream(gate_id)
                 self._save_state()
                 return False
 
