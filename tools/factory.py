@@ -809,6 +809,14 @@ def cmd_run(args: argparse.Namespace) -> None:
     start_args = argparse.Namespace(idea=idea, project_id=args.project_id, force=args.force)
     cmd_start(start_args)
 
+    # Copia workflow.yml dal template e aggiorna il project id
+    template_workflow = repo / "projects" / "_template" / "blueprints" / "workflow.yml"
+    dest_workflow = project / "blueprints" / "workflow.yml"
+    if template_workflow.exists() and not dest_workflow.exists():
+        text = template_workflow.read_text(encoding="utf-8")
+        text = text.replace("project: _template", f"project: {project_id}")
+        dest_workflow.write_text(text, encoding="utf-8")
+
     # Step 2: copia file e preprocessa
     if args.files:
         src = Path(args.files)
