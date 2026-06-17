@@ -116,15 +116,16 @@ def load_image(path: Path, model: str) -> tuple[str, str]:
         return "", "anthropic non installato — esegui: pip install anthropic"
 
     media_type = _MEDIA_TYPES.get(path.suffix.lower(), "image/png")
+
+    # Controlla dimensione PRIMA di leggere il file
+    size_mb = path.stat().st_size / (1024 * 1024)
+    if size_mb > 5:
+        return "", f"Immagine troppo grande ({size_mb:.1f} MB) — ridimensiona sotto i 5 MB"
+
     try:
         data = base64.standard_b64encode(path.read_bytes()).decode("utf-8")
     except Exception as e:
         return "", f"Errore lettura immagine: {e}"
-
-    # Stima dimensione: immagini > 5MB potrebbero essere troppo grandi
-    size_mb = path.stat().st_size / (1024 * 1024)
-    if size_mb > 5:
-        return "", f"Immagine troppo grande ({size_mb:.1f} MB) — ridimensiona sotto i 5 MB"
 
     client = anthropic.Anthropic(api_key=api_key)
     try:

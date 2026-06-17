@@ -274,6 +274,7 @@ class Orchestrator:
         self.state_file = self.project_dir / ".orchestrator-state.json"
         self.state = self._load_state()
         self._clarification_lock = threading.Lock()
+        self._tokens_lock = threading.Lock()
         self._backend, self._client, self._model_name = _make_client(model)
         self._total_tokens = {"input": 0, "output": 0}
 
@@ -306,36 +307,39 @@ class Orchestrator:
             print(f"     ⚠ Budget quasi esaurito: rimane ${remaining:.4f}")
         return True
 
-    @staticmethod
-    def _estimate_tokens(text: str) -> int:
-        return max(1, len(text) // 4)
-
     def _trim_messages_if_needed(self, system: str, messages: list) -> list:
         """
         Se la storia messaggi supera _CONTEXT_TRIM_TOKENS, rimuove i messaggi
-        centrali più vecchi mantenendo sempre il primo (utente iniziale) e
-        gli ultimi 6 messaggi (contesto recente).
+        centrali mantenendo il primo (utente iniziale) e gli ultimi N messaggi.
+
+        Garantisce l'alternanza user/assistant richiesta dall'API Anthropic:
+        la coda inizia sempre da un messaggio assistant (che segue il primo
+        messaggio utente preservato in testa).
         """
-        total_chars = len(system) + sum(
-            len(str(m.get("content", ""))) for m in messages
-        )
-        estimated = self._estimate_tokens(total_chars * 4)  # chars → stima tokens
+        total_chars = len(system) + sum(len(str(m.get("content", ""))) for m in messages)
+        estimated = total_chars // 4  # stima token: 1 token ≈ 4 chars
 
         if estimated < _CONTEXT_WARN_TOKENS:
             return messages
 
         if estimated >= _CONTEXT_TRIM_TOKENS and len(messages) > 8:
             keep_head = 1   # primo messaggio utente
-            keep_tail = 6   # ultimi N messaggi
-            middle = messages[keep_head:-keep_tail]
-            trimmed_count = len(middle)
+            keep_tail = 6   # ultimi N messaggi da preservare
+
+            # La coda deve iniziare con un messaggio "assistant" per mantenere
+            # l'alternanza dopo il messaggio utente di testa (messages[0]).
+            tail_start = max(keep_head + 1, len(messages) - keep_tail)
+            while tail_start < len(messages) and messages[tail_start].get("role") != "assistant":
+                tail_start += 1
+
+            if tail_start >= len(messages):
+                print(f"     ⚠ Contesto grande: ~{estimated:,} token stimati (trim saltato)")
+                return messages
+
+            middle = messages[keep_head:tail_start]
             trimmed_chars = sum(len(str(m.get("content", ""))) for m in middle)
-            messages = (
-                messages[:keep_head]
-                + [{"role": "user", "content": f"[{trimmed_count} messaggi intermedi rimossi per rispettare i limiti di contesto — ~{trimmed_chars:,} caratteri]"}]
-                + messages[-keep_tail:]
-            )
-            print(f"     ⚠ Contesto grande: rimossi {trimmed_count} messaggi intermedi (~{trimmed_chars:,} chars)")
+            messages = messages[:keep_head] + messages[tail_start:]
+            print(f"     ⚠ Contesto grande: rimossi {len(middle)} messaggi intermedi (~{trimmed_chars:,} chars)")
         else:
             print(f"     ⚠ Contesto grande: ~{estimated:,} token stimati")
 
@@ -416,8 +420,9 @@ class Orchestrator:
             if text_printed:
                 print()
 
-            self._total_tokens["input"]  += response.usage.input_tokens
-            self._total_tokens["output"] += response.usage.output_tokens
+            with self._tokens_lock:
+                self._total_tokens["input"]  += response.usage.input_tokens
+                self._total_tokens["output"] += response.usage.output_tokens
 
             text = None
             tool_calls = []
@@ -441,8 +446,9 @@ class Orchestrator:
             )
             msg = response.choices[0].message
             if hasattr(response, "usage") and response.usage:
-                self._total_tokens["input"]  += response.usage.prompt_tokens
-                self._total_tokens["output"] += response.usage.completion_tokens
+                with self._tokens_lock:
+                    self._total_tokens["input"]  += response.usage.prompt_tokens
+                    self._total_tokens["output"] += response.usage.completion_tokens
             tool_calls = []
             if msg.tool_calls:
                 for tc in msg.tool_calls:
