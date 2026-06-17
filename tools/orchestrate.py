@@ -593,12 +593,67 @@ PERCORSI:
 
     # ── Human Gate ────────────────────────────────────────────────────────────
 
+    def _create_gate_file(self, gate_id: str, gate_file) -> str:
+        """Crea un file di gate minimale conforme allo standard se non esiste."""
+        content = f"""# Human Gate: {gate_id}
+
+## Metadata
+
+- gate-id: {gate_id}
+- project-id: {self.project_id}
+- status: Pending
+- requested-by: orchestratore (gate dichiarato nel workflow ma file non trovato)
+- decision-owner: maintainer umano
+
+## Decision Required
+
+Approvare il proseguimento del progetto oltre il gate `{gate_id}`.
+
+## Context
+
+Il workflow dichiara un Human Gate `{gate_id}` ma il file corrispondente non era presente.
+Questo gate è stato creato automaticamente dall'orchestratore in stato Pending.
+Rivedere gli artefatti prodotti fino a questo punto prima di approvare.
+
+## Options
+
+- Approva: il workflow prosegue allo step successivo.
+- Rifiuta: il workflow si ferma qui.
+
+## Approval Criteria
+
+- Gli artefatti prodotti fino a questo punto sono corretti e completi.
+- Non ci sono rischi bloccanti da risolvere prima di continuare.
+
+## Impact If Approved
+
+Il workflow prosegue allo step successivo.
+
+## Impact If Rejected
+
+Il workflow si ferma. Rivedere e correggere gli artefatti prima di rilanciare.
+
+## Human Decision
+
+- decision: (da compilare)
+- note: (da compilare)
+- decided-at: (da compilare)
+"""
+        gate_file.parent.mkdir(parents=True, exist_ok=True)
+        gate_file.write_text(content, encoding="utf-8")
+        return content
+
     def check_human_gate(self, gate_id: str) -> bool:
         gate_file = self.project_dir / "human-gates" / f"{gate_id}.md"
 
         if not gate_file.exists():
-            print(f"     ℹ Human Gate '{gate_id}' non trovato — salto")
-            return True
+            print(f"     ⚠ Human Gate '{gate_id}' non trovato — creo file Pending e blocco")
+            content = self._create_gate_file(gate_id, gate_file)
+            self._run_interactive_gate(gate_id, gate_file, content)
+            content = gate_file.read_text(encoding="utf-8")
+            m = re.search(r"[-*]\s+status:\s*(.+)", content, re.IGNORECASE)
+            status = m.group(1).strip().strip("`").lower() if m else "pending"
+            return status in ("approved", "cancelled")
 
         content = gate_file.read_text(encoding="utf-8")
         m = re.search(r"[-*]\s+status:\s*(.+)", content, re.IGNORECASE)
@@ -615,6 +670,9 @@ PERCORSI:
             return True
 
         # Pending o expired — interattivo
+        return self._run_interactive_gate(gate_id, gate_file, content)
+
+    def _run_interactive_gate(self, gate_id: str, gate_file, content: str) -> bool:
         print(f"\n{'━'*60}")
         print(f"  ⚠  HUMAN GATE PENDING: {gate_id}")
         print(f"{'━'*60}")
@@ -647,7 +705,7 @@ PERCORSI:
                 print("  ✗ Rifiutato — stop")
                 return False
             elif choice == "s":
-                print("  ⚠ Saltato")
+                print("  ⚠ Saltato (skip esplicito)")
                 return True
             else:
                 print("  Scelta non valida. Usa: a, r, v, s")
