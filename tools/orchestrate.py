@@ -315,7 +315,7 @@ class Orchestrator:
         if self._backend == "anthropic":
             response = self._client.messages.create(
                 model=self._model_name,
-                max_tokens=8192,
+                max_tokens=16000,
                 system=system,
                 tools=TOOLS_ANTHROPIC,
                 messages=messages,
@@ -327,6 +327,10 @@ class Orchestrator:
                     text = block.text
                 elif block.type == "tool_use":
                     tool_calls.append(_ToolCall(block.name, block.id, block.input))
+            if response.stop_reason == "max_tokens" and not text and not tool_calls:
+                return _NormalizedResponse(
+                    "RISPOSTA TRONCATA: max_tokens raggiunto. Riscrivi il file con contenuto più conciso.", []
+                )
             return _NormalizedResponse(text, tool_calls)
         else:
             msgs = [{"role": "system", "content": system}] + messages
