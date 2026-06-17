@@ -1,113 +1,342 @@
 # workflow.yml — Piano di esecuzione macchina-leggibile per l'Orchestratore AgentFactory
 #
-# Questo file guida python tools/orchestrate.py nell'esecuzione automatica della pipeline.
-# Viene generato dal Pipeline Designer a partire dall'Execution Blueprint.
+# Progetto: test-api-health
+# Generato da: Pipeline Designer
+# Data: 2026-06-17
+#
+# Questo file guida `tools/orchestrate.py` nell'esecuzione della pipeline.
 #
 # Uso:
-#   python tools/orchestrate.py <project-id>
-#   python tools/orchestrate.py <project-id> --dry-run
-#   python tools/orchestrate.py <project-id> --from <step-id>
-#
-# ────────────────────────────────────────────────────────────────────────────────
-# STRUTTURA DEGLI STEP
-#
-# Step sequenziale:
-#   - id: nome-step                  # identificatore unico (kebab-case)
-#     name: "Nome leggibile"         # opzionale, per log
-#     agent: agents/xxx/xxx.md       # agente permanente (OR)
-#     package: generated-agents/x.md # agente generato (usa uno dei due)
-#     inputs:                        # file letti dall'agente (relativi al workspace)
-#       - input/initial-request.md
-#     outputs:                       # file che l'agente deve produrre
-#       - blueprints/requirements-blueprint.md
-#     human-gate: gate-id            # opzionale — ID del file in human-gates/
-#
-# Step parallelo (più agenti eseguiti in simultanea):
-#   - parallel:
-#     - id: step-a
-#       ...
-#     - id: step-b
-#       ...
-#
-# ────────────────────────────────────────────────────────────────────────────────
+#   python tools/orchestrate.py test-api-health
+#   python tools/orchestrate.py test-api-health --dry-run
+#   python tools/orchestrate.py test-api-health --from <step-id>
 
 project: test-api-health
 version: "1.0"
 
 steps:
 
-  - id: requirement-analyst
-    name: "Analisi Requisiti"
-    agent: agents/requirement-analyst/requirement-analyst.md
-    inputs:
-      - input/initial-request.md
-    outputs:
-      - blueprints/requirements-blueprint.md
+  # ── Fase 0: Human Gate — Approvazione Piano di Esecuzione ────────────────────
+  - id: human-gate-approve-execution-plan
+    name: "Approvazione Piano di Esecuzione"
+    human-gate: approve-execution-plan
+    description: |
+      Stakeholder valida e approva il piano di esecuzione:
+      - Agenti con responsabilità distinte
+      - Workflow sequenziale senza loop irrisolubili
+      - Handoff verificabili
+      - Human gate appropriati (pre-execution e final-delivery)
+    blocking-scope: "entire-workflow"
+    decision-owner: "Project Stakeholder / Requester"
+    decision-required: |
+      Confermare che la pipeline sia appropriata per implementare test-api-health
+      secondo Requirements e Solution Blueprint. Procedere?
 
-  - id: architect
-    name: "Architettura"
-    agent: agents/architect/architect.md
-    inputs:
-      - blueprints/requirements-blueprint.md
-      - input/initial-request.md
-    outputs:
-      - blueprints/solution-blueprint.md
-
-  - id: pipeline-designer
-    name: "Pianificazione Pipeline"
-    agent: agents/pipeline-designer/pipeline-designer.md
-    inputs:
-      - blueprints/requirements-blueprint.md
-      - blueprints/solution-blueprint.md
-    outputs:
-      - blueprints/execution-blueprint.md
-
-  - id: knowledge-compiler
-    name: "Composizione Agent Package"
-    agent: agents/knowledge-compiler/knowledge-compiler.md
-    inputs:
-      - blueprints/execution-blueprint.md
-      - archetypes/developer.md
-      - archetypes/reviewer.md
-      - capabilities/node.md
-      - capabilities/git-workflow.md
-      - capabilities/testing-strategy.md
-    outputs:
-      - generated-agents/developer.md
-      - generated-agents/reviewer.md
-
-  - id: developer
-    name: "Sviluppo API"
+  # ── Fase 1: Implementazione (Developer) ─────────────────────────────────────
+  - id: developer-implementation
+    name: "Implementazione (Developer)"
     package: generated-agents/developer.md
     inputs:
+      - blueprints/requirements-blueprint.md
       - blueprints/solution-blueprint.md
-      - blueprints/execution-blueprint.md
-      - capabilities/node.md
-      - capabilities/testing-strategy.md
     outputs:
+      - src/index.js
+      - __tests__/health.test.js
+      - package.json
+      - package-lock.json
+      - Dockerfile
+      - .dockerignore
+      - .gitignore
+      - README.md
       - deliverables/implementation.md
-      - handoffs/developer-to-reviewer.md
+      - handoffs/developer-to-qa.md
+    description: |
+      Developer implementa la REST API Node.js minimalista con:
+      - Server Express su porta configurable
+      - Endpoint GET /health con JSON response (status, timestamp)
+      - Test suite Jest
+      - Dockerfile per containerizzazione
+      - package.json con dipendenze minime
+      - README con istruzioni di installazione e uso
+    completion-criteria:
+      - Tutti i file di output presenti nel workspace
+      - npm install completa senza errori
+      - npm test passa localmente
+      - node src/index.js avvia il server senza errori
+      - docker build -t test-api-health . completa senza errori (evidenza in handoff)
 
-  - id: reviewer
-    name: "Code Review"
+  # ── Fase 2: Validazione Funzionale (QA Tester) ────────────────────────────
+  - id: qa-tester-validation
+    name: "Validazione Funzionale (QA Tester)"
+    package: generated-agents/qa-tester.md
+    inputs:
+      - handoffs/developer-to-qa.md
+      - blueprints/requirements-blueprint.md
+      - src/index.js
+      - __tests__/health.test.js
+      - Dockerfile
+    outputs:
+      - test-evidence/ac1-endpoint-200.md
+      - test-evidence/ac2-json-structure.md
+      - test-evidence/ac3-npm-test.md
+      - test-evidence/ac4-docker-build.md
+      - test-evidence/ac5-docker-run.md
+      - test-evidence/port-env-var.md
+      - reviews/qa-test-report.md
+      - handoffs/qa-to-reviewer.md
+    description: |
+      QA Tester valida il comportamento dell'API secondo Acceptance Criteria:
+      - AC-1: GET /health ritorna HTTP 200
+      - AC-2: Body JSON valido con status e timestamp ISO8601
+      - AC-3: npm test esecuzione exit code 0
+      - AC-4: docker build funziona
+      - AC-5: docker run con port mapping funziona
+      - Bonus: PORT env var configurabile
+    completion-criteria:
+      - Tutti gli AC testati e documentati
+      - Almeno 6 test evidence file creati
+      - Se qualsiasi AC fallisce: handoff declara BLOCKING STATUS
+      - Se tutti AC passano: handoff declara PROCEED TO REVIEW
+    blocking-criteria:
+      - If ANY Acceptance Criteria FAILED: escalate to Developer for fix
+      - BLOCK Reviewer phase until ALL AC PASSED
+
+  # ── Fase 3: Code Review (Reviewer) ──────────────────────────────────────────
+  - id: reviewer-code-review
+    name: "Code Review (Reviewer)"
     package: generated-agents/reviewer.md
     inputs:
-      - handoffs/developer-to-reviewer.md
-      - deliverables/implementation.md
-      - blueprints/requirements-blueprint.md
-      - capabilities/code-review.md
+      - handoffs/qa-to-reviewer.md
+      - blueprints/solution-blueprint.md
+      - src/index.js
+      - __tests__/health.test.js
+      - package.json
+      - Dockerfile
+      - README.md
     outputs:
-      - reviews/review-report.md
-      - handoffs/reviewer-to-pipeline-supervisor.md
-    human-gate: approve-review
+      - reviews/code-review-report.md
+      - handoffs/reviewer-to-supervisor.md
+    description: |
+      Reviewer valida:
+      - Leggibilità del codice (nomi, logica lineare)
+      - Assenza di over-engineering
+      - Completezza della documentazione
+      - Correttezza del Dockerfile
+      - Compliance con design principles della soluzione
+      - Security spot-check (no hardcoded secrets)
+    completion-criteria:
+      - Code Review Report presente
+      - Decisione di approvazione dichiarata
+      - Se feedback critical: blocchi specificati
+      - Se approvato: ready per Pipeline Supervisor
+    blocking-criteria:
+      - If critical issues found: request changes to Developer
+      - BLOCK Supervisor phase until approved
 
-  - id: pipeline-supervisor
-    name: "Supervisione Finale"
+  # ── Fase 4: Supervisione Finale (Pipeline Supervisor) ───────────────────────
+  - id: pipeline-supervisor-final
+    name: "Supervisione Finale (Pipeline Supervisor)"
     agent: agents/pipeline-supervisor/pipeline-supervisor.md
     inputs:
-      - handoffs/reviewer-to-pipeline-supervisor.md
+      - handoffs/reviewer-to-supervisor.md
       - blueprints/execution-blueprint.md
       - deliverables/implementation.md
-      - reviews/review-report.md
+      - reviews/code-review-report.md
+      - reviews/qa-test-report.md
     outputs:
       - deliverables/supervisor-report.md
+    description: |
+      Pipeline Supervisor valida end-to-end:
+      - Tutti gli artefatti sono presenti e coerenti
+      - Handoff chain è completa
+      - Acceptance Criteria sono soddisfatti
+      - Documentazione è adequata
+      - Progetto è ready per uso/deploy
+    completion-criteria:
+      - Supervisor Report presente
+      - Status VALIDATED
+      - Repository è funcional e documentato
+
+  # ── Fase 5: Human Gate — Approvazione Rilascio Finale ────────────────────────
+  - id: human-gate-approve-final-delivery
+    name: "Approvazione Rilascio Finale"
+    human-gate: approve-final-delivery
+    description: |
+      Project Owner approva il rilascio finale:
+      - Tutti gli output presenti e validati
+      - Test evidence completa
+      - Code review approvato
+      - Supervisione completata
+      - Repository è pronto per uso
+    blocking-scope: "project-closure"
+    decision-owner: "Project Owner / Release Manager"
+    decision-required: |
+      Approvare il rilascio e chiusura del progetto test-api-health?
+
+# ────────────────────────────────────────────────────────────────────────────────
+# SCHEDULING & PARALLELIZATION
+# ────────────────────────────────────────────────────────────────────────────────
+
+parallelization: none
+  # Questo progetto non ha task parallelizzabili (singolo endpoint)
+  # Se esteso con più endpoint indipendenti, potremmo parallelizzare Developer-A, B, C
+
+# ────────────────────────────────────────────────────────────────────────────────
+# HANDOFF SPECIFICATIONS
+# ────────────────────────────────────────────────────────────────────────────────
+
+handoffs:
+  - id: developer-to-qa
+    from: developer-implementation
+    to: qa-tester-validation
+    file: handoffs/developer-to-qa.md
+    required-content:
+      - list of files created
+      - npm test output (local)
+      - manual curl test output (http://localhost:3000/health)
+      - docker build output
+      - execution instructions
+      - status: "Implementation Complete, Ready for Functional Testing"
+    verification: "File exists, contains logs and instructions"
+
+  - id: qa-to-reviewer
+    from: qa-tester-validation
+    to: reviewer-code-review
+    file: handoffs/qa-to-reviewer.md
+    required-content:
+      - summary of all AC tested
+      - status per AC (pass/fail)
+      - links to test evidence files
+      - status: "ALL AC PASSED" or "BLOCKING: AC X FAILED"
+    verification: "If any AC failed: BLOCKING_STATUS declared; if all passed: PROCEED"
+
+  - id: reviewer-to-supervisor
+    from: reviewer-code-review
+    to: pipeline-supervisor-final
+    file: handoffs/reviewer-to-supervisor.md
+    required-content:
+      - summary of code quality review
+      - link to code review report
+      - feedback on code, docs, security, structure
+      - recommendation: APPROVED, APPROVED-WITH-NOTES, BLOCKED
+      - status: "Code Quality Validated" or "BLOCKING: [issue]"
+    verification: "Handoff declares approval or blocking status explicitly"
+
+# ────────────────────────────────────────────────────────────────────────────────
+# REVIEW GATES
+# ────────────────────────────────────────────────────────────────────────────────
+
+review-gates:
+  - id: code-quality-gate
+    agent: reviewer-code-review
+    criteria:
+      - Code is readable (clear variable names, linear logic)
+      - No unnecessary complexity (no advanced patterns)
+      - Tests cover AC minimum (status code, JSON structure, timestamp)
+      - package.json has ONLY express and jest
+      - Dockerfile is minimal (no unnecessary layers)
+      - README is complete (install, run, test, docker)
+    pass-action: "Proceed to Supervisor"
+    fail-action: "Request feedback to Developer"
+
+  - id: security-spot-check-gate
+    agent: reviewer-code-review
+    criteria:
+      - No hardcoded credentials, API keys, passwords
+      - .env not committed (verified in .gitignore)
+      - No secrets in Dockerfile
+      - No logging of sensitive data
+      - No unnecessary middleware (CORS, auth)
+    pass-action: "Proceed to Supervisor"
+    fail-action: "Request fix to Developer"
+
+  - id: completeness-structure-gate
+    agent: reviewer-code-review
+    criteria:
+      - Files present: src/index.js, __tests__/health.test.js, Dockerfile, package.json, README.md, .gitignore, .dockerignore
+      - Directory structure is logical
+      - package-lock.json present
+      - README has clear sections
+    pass-action: "Proceed to Supervisor"
+    fail-action: "Request fix to Developer"
+
+# ────────────────────────────────────────────────────────────────────────────────
+# ESCALATION RULES
+# ────────────────────────────────────────────────────────────────────────────────
+
+escalation-rules:
+  - trigger: "developer-fails"
+    description: "Developer Agent cannot generate working code"
+    action: "Document error in handoff, escalate to Pipeline Supervisor, contact Developer for debug"
+    blocking-scope: "qa-tester-validation, reviewer-code-review, pipeline-supervisor-final"
+
+  - trigger: "qa-test-fails"
+    description: "One or more AC fails in QA testing"
+    action: "QA Tester documents specific AC failure, declares BLOCKING_STATUS, Developer requested for fix"
+    blocking-scope: "reviewer-code-review, pipeline-supervisor-final"
+    loop: "Developer → QA (iterative)"
+
+  - trigger: "code-review-fails"
+    description: "Reviewer identifies critical issues in code"
+    action: "Reviewer documents issue in report, declares BLOCKED_STATUS, Developer requested for fix"
+    blocking-scope: "pipeline-supervisor-final"
+    loop: "Developer → Reviewer (iterative)"
+
+  - trigger: "human-gate-rejected"
+    description: "Human Gate (approve-execution-plan or approve-final-delivery) rejected"
+    action: "Decision Owner provides feedback, relevant agents implement changes, Human Gate re-proposed"
+    blocking-scope: "Entire workflow or project closure"
+
+  - trigger: "nodejs-not-available"
+    description: "Node.js 20 LTS not found in environment"
+    action: "Escalate to Pipeline Supervisor, Decision Owner decides: install Node.js or use Docker or accept alternative LTS"
+    blocking-scope: "developer-implementation"
+
+  - trigger: "docker-not-available"
+    description: "Docker not available for build/run"
+    action: "Escalate to Pipeline Supervisor, Decision Owner decides: install Docker or skip Docker validation (risk disclosure)"
+    blocking-scope: "qa-tester-validation (Docker AC only)"
+
+  - trigger: "dependency-conflict"
+    description: "npm install fails due to dependency conflict"
+    action: "Developer documents npm error, escalate to Pipeline Supervisor, Decision Owner approves version update or alternative"
+    blocking-scope: "developer-implementation"
+
+# ────────────────────────────────────────────────────────────────────────────────
+# RUNTIME PREFERENCES (non-binding)
+# ────────────────────────────────────────────────────────────────────────────────
+
+runtime-preferences:
+  node-version: "20 LTS"
+  npm-version: "standard with Node.js 20"
+  docker-required: true
+  docker-version: "20.10+"
+  test-environment: "Jest in-process (no external server)"
+  http-client: "curl, wget, or native HTTP client"
+  ci-cd-agnostic: true
+    # Pipeline is agnostic to GitHub Actions, GitLab CI, Jenkins, etc.
+
+# ────────────────────────────────────────────────────────────────────────────────
+# KNOWLEDGE CANDIDATE PLAN
+# ────────────────────────────────────────────────────────────────────────────────
+
+knowledge-candidates:
+  - id: k1-developer-nodejs-archetype
+    title: "Developer Archetype for Node.js Implementation"
+    target: "agents/developer/developer.md"
+    content: "How to structure Developer agent for JavaScript/Node.js, validation patterns, handoff expectations"
+
+  - id: k2-qa-tester-ad-hoc
+    title: "QA Tester Temporary Agent Definition"
+    target: "agents/qa-tester/qa-tester.md (new)"
+    content: "When to use QA Tester (vs Developer integration), test evidence plan, AC validation pattern"
+
+  - id: k3-docker-validation
+    title: "Docker Validation Pattern in QA"
+    target: "standards/qa-testing-standard.md"
+    content: "Docker build/run validation, port mapping testing, environment variable testing"
+
+  - id: k4-minimal-api-nodejs
+    title: "Minimal Architecture for MVP APIs"
+    target: "knowledge-base/patterns/minimal-api-nodejs.md (new)"
+    content: "Express minimalista, Jest lightweight config, multi-stage pipeline (Dev→QA→Review→Supervisor)"
