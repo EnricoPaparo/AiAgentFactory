@@ -57,17 +57,28 @@ steps:
       - blueprints/solution-blueprint.md
     human-gate: approve-architecture
 
-  # ── Fase 3: Pianificazione pipeline ─────────────────────────────────────────
+  # ── Fase 3: Piano di implementazione ────────────────────────────────────────
+  - id: implementation-planner
+    name: "Piano di Implementazione"
+    agent: agents/implementation-planner/implementation-planner.md
+    inputs:
+      - blueprints/requirements-blueprint.md
+      - blueprints/solution-blueprint.md
+    outputs:
+      - blueprints/implementation-plan.md
+
+  # ── Fase 4: Pianificazione pipeline ─────────────────────────────────────────
   - id: pipeline-designer
     name: "Pianificazione Pipeline"
     agent: agents/pipeline-designer/pipeline-designer.md
     inputs:
       - blueprints/requirements-blueprint.md
       - blueprints/solution-blueprint.md
+      - blueprints/implementation-plan.md
     outputs:
       - blueprints/execution-blueprint.md
 
-  # ── Fase 4: Composizione Agent Package ───────────────────────────────────────
+  # ── Fase 5: Composizione Agent Package ───────────────────────────────────────
   - id: knowledge-compiler
     name: "Composizione Agent Package"
     agent: agents/knowledge-compiler/knowledge-compiler.md
@@ -77,7 +88,7 @@ steps:
       - generated-agents/developer.md
       # aggiungere altri package se previsti dall'execution blueprint
 
-  # ── Fase 5: Sviluppo (esempio parallelo) ─────────────────────────────────────
+  # ── Fase 6: Sviluppo (esempio parallelo) ─────────────────────────────────────
   # Se il progetto ha moduli indipendenti, eseguirli in parallelo:
   #
   # - parallel:
@@ -101,7 +112,7 @@ steps:
   #       - deliverables/module-b.md
   #       - handoffs/developer-b-to-reviewer.md
 
-  # ── Fase 6: Sviluppo singolo agente ─────────────────────────────────────────
+  # ── Fase 7: Sviluppo singolo agente ─────────────────────────────────────────
   - id: developer
     name: "Sviluppo"
     package: generated-agents/developer.md
@@ -112,7 +123,7 @@ steps:
       - deliverables/implementation.md
       - handoffs/developer-to-reviewer.md
 
-  # ── Fase 7: Review ───────────────────────────────────────────────────────────
+  # ── Fase 8: Review ───────────────────────────────────────────────────────────
   - id: reviewer
     name: "Code Review"
     package: generated-agents/reviewer.md
@@ -125,7 +136,7 @@ steps:
       - handoffs/reviewer-to-pipeline-supervisor.md
     human-gate: approve-review
 
-  # ── Fase 8: Supervisione finale ───────────────────────────────────────────────
+  # ── Fase 9: Supervisione finale ───────────────────────────────────────────────
   - id: pipeline-supervisor
     name: "Supervisione Finale"
     agent: agents/pipeline-supervisor/pipeline-supervisor.md

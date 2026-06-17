@@ -16,6 +16,9 @@ Il Pipeline Designer e l'agente permanente che trasforma requisiti e soluzione i
 
 - Requirements Blueprint conforme a `standards/requirements-blueprint-standard.md`.
 - Solution Blueprint conforme a `standards/solution-blueprint-standard.md`.
+- **Implementation Plan conforme a `standards/implementation-plan-standard.md`** —
+  fonte primaria per la dimensione dei chunk e il parallelismo. Se presente,
+  la chunking strategy dell'Implementation Plan va rispettata, non reinventata.
 - Vincoli di processo o runtime, se disponibili.
 
 ## Output
@@ -36,17 +39,20 @@ Il Pipeline Designer e l'agente permanente che trasforma requisiti e soluzione i
 
 ## Workflow
 
-1. Leggere Requirements Blueprint e Solution Blueprint.
-2. Identificare output operativi e review necessarie.
-3. Definire agenti temporanei richiesti.
-4. Per ogni agente, scegliere archetype esistente oppure definizione ad hoc motivata.
-5. Assegnare input e output a ogni agente.
-6. Stabilire workflow e handoff.
-7. Definire review gate, human gate e completion criteria.
-8. Per ogni Human Gate, dichiarare decisione richiesta, decision owner e blocking scope.
-9. Produrre l'Execution Blueprint.
-10. Produrre `blueprints/workflow.yml` con la versione machine-readable della pipeline (step, input, output, human-gate, parallelismo) seguendo il template in `projects/_template/blueprints/workflow.yml`.
-11. Per ogni Human Gate dichiarato, produrre `human-gates/<gate-id>.md` con `status: Pending`, decisione richiesta, opzioni e criteri di approvazione.
+1. Leggere Requirements Blueprint, Solution Blueprint e Implementation Plan (se presente).
+2. Se l'Implementation Plan e presente, usare la sua chunking strategy come base
+   per definire gli step — non reinventarla. Se assente, stimare autonomamente.
+3. Identificare output operativi e review necessarie.
+4. Definire agenti temporanei richiesti, rispettando i chunk suggeriti dall'Implementation Plan.
+5. Per ogni agente, scegliere archetype esistente oppure definizione ad hoc motivata.
+6. Assegnare input e output a ogni agente, rispettando le dipendenze del grafo.
+7. Tradurre i gruppi paralleli dell'Implementation Plan in blocchi `parallel:` nel workflow.
+8. Stabilire handoff tra step.
+9. Definire review gate, human gate e completion criteria.
+10. Per ogni Human Gate, dichiarare decisione richiesta, decision owner e blocking scope.
+11. Produrre l'Execution Blueprint.
+12. Produrre `blueprints/workflow.yml` con la versione machine-readable della pipeline (step, input, output, human-gate, parallelismo) seguendo il template in `projects/_template/blueprints/workflow.yml`.
+13. Per ogni Human Gate dichiarato, produrre `human-gates/<gate-id>.md` con `status: Pending`, decisione richiesta, opzioni e criteri di approvazione.
 
 ## Definition Of Done
 
