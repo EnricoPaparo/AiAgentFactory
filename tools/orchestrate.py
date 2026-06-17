@@ -508,6 +508,14 @@ class Orchestrator:
 
     def _load_inputs(self, step: dict) -> dict:
         result = {}
+        # Auto-includi clarifications se esistono (prodotte da --clarify)
+        clarify_file = self.project_dir / "input" / "clarifications.md"
+        if clarify_file.exists():
+            rel = str(clarify_file.relative_to(REPO_ROOT)).replace("\\", "/")
+            try:
+                result[rel] = clarify_file.read_text(encoding="utf-8")
+            except Exception:
+                pass
         for inp in step.get("inputs", []):
             for base in (self.project_dir, REPO_ROOT):
                 p = base / inp
@@ -891,9 +899,105 @@ Il workflow si ferma. Rivedere e correggere gli artefatti prima di rilanciare.
 
         return all(results)
 
+    # ── Pre-flight clarification ───────────────────────────────────────────────
+
+    def _run_clarification_pass(self):
+        """
+        Raccoglie chiarimenti dall'utente PRIMA di avviare la pipeline.
+        Il modello legge la initial-request e fa tutte le domande in una sola
+        chiamata; le risposte vengono salvate in input/clarifications.md e
+        incluse automaticamente come input in ogni step successivo.
+        """
+        clarify_file = self.project_dir / "input" / "clarifications.md"
+        if clarify_file.exists():
+            print(f"  ℹ Chiarimenti già presenti ({clarify_file}) — salto")
+            return
+
+        request_file = self.project_dir / "input" / "initial-request.md"
+        if not request_file.exists():
+            print("  ⚠ initial-request.md non trovato — salto chiarimenti")
+            return
+
+        initial_request = request_file.read_text(encoding="utf-8")
+
+        # Leggi anche file di contesto esistenti dichiarati in workflow.yml
+        workflow = self.load_workflow()
+        extra_context = ""
+        for inp in workflow.get("context-files", []):
+            p = REPO_ROOT / inp
+            if p.exists():
+                try:
+                    extra_context += f"\n\n### {inp}\n```\n{p.read_text(encoding='utf-8')}\n```"
+                except Exception:
+                    pass
+
+        system = (
+            "Sei un assistente pre-pipeline. Il tuo unico compito è leggere la richiesta "
+            "iniziale e raccogliere TUTTI i chiarimenti necessari in UNA SOLA chiamata "
+            "a request_clarification prima che la pipeline AI inizi.\n\n"
+            "Identifica ambiguità, decisioni tecniche mancanti (linguaggio, framework, "
+            "deploy target, autenticazione, testing…), vincoli non specificati "
+            "(performance, budget, deadline, team), dipendenze esterne non dichiarate.\n\n"
+            "Se la richiesta è già completa e non hai dubbi, chiama direttamente "
+            "complete_task con status: completed e summary: 'Nessun chiarimento necessario'.\n\n"
+            "Non produrre analisi, non scrivere file. Solo request_clarification (se serve) "
+            "e complete_task."
+        )
+        user_msg = f"Richiesta iniziale:\n\n{initial_request}"
+        if extra_context:
+            user_msg += f"\n\nFile di contesto esistenti:{extra_context}"
+
+        messages: list = [{"role": "user", "content": user_msg}]
+        answers: dict = {}
+
+        print(f"\n{'─'*60}")
+        print("  Pre-flight: raccolta chiarimenti")
+        print(f"{'─'*60}")
+
+        for _ in range(10):
+            try:
+                norm = self._call_api(system, messages)
+            except Exception as e:
+                print(f"     ✗ Errore API: {e}")
+                return
+            self._append_assistant(messages, norm)
+
+            if not norm.has_tool_calls:
+                break
+            done = False
+            for tc in norm.tool_calls:
+                if tc.name == "request_clarification":
+                    result = self._tool_request_clarification(
+                        tc.arguments["questions"], tc.arguments.get("context")
+                    )
+                    answers.update(json.loads(result))
+                    self._append_tool_result(messages, tc, result)
+                elif tc.name == "complete_task":
+                    done = True
+                    self._append_tool_result(messages, tc, "Chiarimenti registrati.")
+                else:
+                    self._append_tool_result(messages, tc, "Tool non disponibile in questa fase.")
+            if done:
+                break
+
+        if answers:
+            lines = [
+                "# Chiarimenti Pre-Pipeline",
+                "",
+                f"Data: {datetime.now().strftime('%Y-%m-%d %H:%M')}",
+                "",
+            ]
+            for entry in answers.values():
+                lines += [f"## {entry['domanda']}", "", f"**Risposta**: {entry['risposta']}", ""]
+            clarify_file.parent.mkdir(parents=True, exist_ok=True)
+            clarify_file.write_text("\n".join(lines), encoding="utf-8")
+            print(f"     ✓ Chiarimenti salvati: {clarify_file}")
+        else:
+            print("     ✓ Nessun chiarimento necessario — pipeline pronta")
+
     # ── Esecuzione principale ──────────────────────────────────────────────────
 
-    async def run(self, from_step: str = None, dry_run: bool = False) -> bool:
+    async def run(self, from_step: str = None, dry_run: bool = False, clarify: bool = False) -> bool:
         workflow = self.load_workflow()
         steps = workflow.get("steps", [])
 
@@ -903,6 +1007,9 @@ Il workflow si ferma. Rivedere e correggere gli artefatti prima di rilanciare.
 
         if from_step:
             self.reset_from(from_step)
+
+        if clarify:
+            self._run_clarification_pass()
 
         print(f"\n{'━'*60}")
         print(f"  AgentFactory Orchestratore")
@@ -1030,6 +1137,14 @@ def main():
         help="Mostra il piano di esecuzione senza eseguire agenti",
     )
     parser.add_argument(
+        "--clarify", action="store_true",
+        help=(
+            "Pre-flight: chiede chiarimenti all'utente prima di avviare la pipeline. "
+            "Le risposte vengono salvate in input/clarifications.md e incluse "
+            "automaticamente come contesto in ogni step."
+        ),
+    )
+    parser.add_argument(
         "--model", default=DEFAULT_MODEL,
         help=(
             f"Modello da usare (default: {DEFAULT_MODEL}). "
@@ -1046,7 +1161,7 @@ def main():
 
     try:
         success = asyncio.run(
-            orchestrator.run(from_step=args.from_step, dry_run=args.dry_run)
+            orchestrator.run(from_step=args.from_step, dry_run=args.dry_run, clarify=args.clarify)
         )
     except FileNotFoundError as e:
         print(f"ERRORE: {e}", file=sys.stderr)
