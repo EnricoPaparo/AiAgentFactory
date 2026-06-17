@@ -81,6 +81,9 @@ def validate_file(artifact_path, registry):
       (standard_name: str, errors: list[str])
       Se nessuno standard e applicabile, restituisce (None, []).
     """
+    if Path(artifact_path).name == "README.md":
+        return None, []
+
     std = find_standard(artifact_path, registry)
     if std is None:
         return None, []
@@ -108,7 +111,7 @@ def find_all_artifacts(registry, repo_root=REPO_ROOT):
     for std in registry:
         pattern = std["applies-to"]
         for path in repo_root.glob(pattern):
-            if path.is_file():
+            if path.is_file() and path.name != "README.md":
                 artifacts.add(path)
     return sorted(artifacts)
 
