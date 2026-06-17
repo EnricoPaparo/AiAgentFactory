@@ -33,6 +33,7 @@ import asyncio
 import threading
 import argparse
 import subprocess
+import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from pathlib import Path
@@ -47,6 +48,16 @@ PROJECTS_DIR = Path("projects")
 REPO_ROOT = Path(".")
 DEFAULT_MODEL = "claude-opus-4-8"
 MAX_TOOL_CALLS = 40
+
+# Pricing: input $/MTok, output $/MTok
+_MODEL_PRICING: dict[str, tuple[float, float]] = {
+    "claude-fable-5":    (10.00, 50.00),
+    "claude-opus-4-8":   ( 5.00, 25.00),
+    "claude-opus-4-7":   ( 5.00, 25.00),
+    "claude-opus-4-6":   ( 5.00, 25.00),
+    "claude-sonnet-4-6": ( 3.00, 15.00),
+    "claude-haiku-4-5":  ( 1.00,  5.00),
+}
 
 # Provider OpenAI-compatibili: prefisso → (base_url, variabile_env_api_key)
 _OPENAI_PROVIDERS: dict[str, tuple[str, str | None]] = {
@@ -256,6 +267,19 @@ class Orchestrator:
         self.state = self._load_state()
         self._clarification_lock = threading.Lock()
         self._backend, self._client, self._model_name = _make_client(model)
+        self._total_tokens = {"input": 0, "output": 0}
+
+    def _model_price(self) -> tuple[float, float]:
+        name = self._model_name.lower()
+        for prefix, price in _MODEL_PRICING.items():
+            if name.startswith(prefix):
+                return price
+        return (0.0, 0.0)
+
+    def _cost_str(self, input_tok: int, output_tok: int) -> str:
+        pi, po = self._model_price()
+        cost = (input_tok * pi + output_tok * po) / 1_000_000
+        return f"${cost:.4f}  ({input_tok:,}↑ {output_tok:,}↓ tok)"
 
     # ── Stato ─────────────────────────────────────────────────────────────────
 
@@ -313,13 +337,27 @@ class Orchestrator:
 
     def _call_api(self, system: str, messages: list) -> _NormalizedResponse:
         if self._backend == "anthropic":
-            response = self._client.messages.create(
+            text_printed = False
+            with self._client.messages.stream(
                 model=self._model_name,
                 max_tokens=16000,
                 system=system,
                 tools=TOOLS_ANTHROPIC,
                 messages=messages,
-            )
+            ) as stream:
+                for chunk in stream.text_stream:
+                    if not text_printed:
+                        print("     ", end="", flush=True)
+                        text_printed = True
+                    print(chunk, end="", flush=True)
+                response = stream.get_final_message()
+
+            if text_printed:
+                print()
+
+            self._total_tokens["input"]  += response.usage.input_tokens
+            self._total_tokens["output"] += response.usage.output_tokens
+
             text = None
             tool_calls = []
             for block in response.content:
@@ -341,6 +379,9 @@ class Orchestrator:
                 messages=msgs,
             )
             msg = response.choices[0].message
+            if hasattr(response, "usage") and response.usage:
+                self._total_tokens["input"]  += response.usage.prompt_tokens
+                self._total_tokens["output"] += response.usage.completion_tokens
             tool_calls = []
             if msg.tool_calls:
                 for tc in msg.tool_calls:
@@ -530,6 +571,8 @@ PERCORSI:
         step_name = step.get("name", step_id)
         print(f"\n  → [{step_id}] {step_name}")
 
+        tok_before = dict(self._total_tokens)
+
         agent_content = self._load_agent_content(step)
         inputs_content = self._load_inputs(step)
         system = self._build_system_prompt(step, agent_content)
@@ -582,7 +625,9 @@ PERCORSI:
             files = completion_result.get("files_created", [])
             success = status in ("completed", "changes-requested")
             icon = "✓" if success else "✗"
-            print(f"     {icon} {status}")
+            step_in  = self._total_tokens["input"]  - tok_before["input"]
+            step_out = self._total_tokens["output"] - tok_before["output"]
+            print(f"     {icon} {status}  [{self._cost_str(step_in, step_out)}]")
             for line in summary.splitlines()[:4]:
                 print(f"       {line}")
             if len(summary.splitlines()) > 4:
@@ -923,6 +968,10 @@ Il workflow si ferma. Rivedere e correggere gli artefatti prima di rilanciare.
             print("\n  Step falliti:")
             for sid in self.state["failed"]:
                 print(f"    ✗ {sid}")
+        total_in  = self._total_tokens["input"]
+        total_out = self._total_tokens["output"]
+        if total_in or total_out:
+            print(f"\n  Costo totale sessione: {self._cost_str(total_in, total_out)}")
         print()
 
 
