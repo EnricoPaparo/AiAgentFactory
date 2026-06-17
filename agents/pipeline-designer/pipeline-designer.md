@@ -22,6 +22,7 @@ Il Pipeline Designer e l'agente permanente che trasforma requisiti e soluzione i
 
 - Execution Blueprint conforme a `standards/execution-blueprint-standard.md`.
 - `workflow.yml` nel project workspace (`blueprints/workflow.yml`): versione machine-readable dell'Execution Blueprint consumata da `tools/orchestrate.py` per l'esecuzione automatica della pipeline.
+- Un file `human-gates/<gate-id>.md` per ogni Human Gate dichiarato nel workflow, conforme a `standards/human-gate-standard.md`, con `status: Pending`. L'orchestratore non crea questi file automaticamente: se mancano, il gate viene creato vuoto e il contesto è perso.
 - Handoff verso Knowledge Compiler e Pipeline Supervisor conforme a `standards/handoff-standard.md`, quando richiesto dal workflow.
 
 ## Limiti
@@ -45,6 +46,7 @@ Il Pipeline Designer e l'agente permanente che trasforma requisiti e soluzione i
 8. Per ogni Human Gate, dichiarare decisione richiesta, decision owner e blocking scope.
 9. Produrre l'Execution Blueprint.
 10. Produrre `blueprints/workflow.yml` con la versione machine-readable della pipeline (step, input, output, human-gate, parallelismo) seguendo il template in `projects/_template/blueprints/workflow.yml`.
+11. Per ogni Human Gate dichiarato, produrre `human-gates/<gate-id>.md` con `status: Pending`, decisione richiesta, opzioni e criteri di approvazione.
 
 ## Definition Of Done
 
@@ -57,6 +59,7 @@ Il Pipeline Designer e l'agente permanente che trasforma requisiti e soluzione i
 - Per un progetto software end-to-end, l'Execution Blueprint include almeno `approve-execution-plan` prima della generazione degli Agent Package e `approve-final-delivery` prima della chiusura.
 - Ogni handoff e verificabile.
 - `blueprints/workflow.yml` e presente e coerente con l'Execution Blueprint.
+- Per ogni Human Gate dichiarato nel workflow esiste il corrispondente file `human-gates/<gate-id>.md` con `status: Pending`.
 
 ## Failure Mode Da Evitare
 
