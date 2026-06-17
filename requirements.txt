@@ -13,3 +13,10 @@ pyyaml>=6.0
 
 anthropic>=0.40.0   # modelli Claude  (richiede ANTHROPIC_API_KEY)
 openai>=1.0.0       # Gemini, Groq, Ollama, Mistral e altri provider OpenAI-compatibili
+
+# Dipendenze opzionali per tools/load-project.py (preprocessore file di progetto)
+# Installa solo quelle che ti servono:
+
+pypdf>=4.0.0        # estrazione testo da PDF           (pip install pypdf)
+python-docx>=1.0.0  # estrazione testo da file Word     (pip install python-docx)
+# Whisper (audio) non incluso — richiede torch, installazione separata
