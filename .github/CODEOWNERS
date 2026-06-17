@@ -1,0 +1,25 @@
+# AgentFactory CODEOWNERS
+#
+# Qualsiasi modifica alla conoscenza permanente della factory richiede
+# review esplicita del maintainer prima del merge.
+#
+# Questo file mappa tecnicamente il ruolo di Knowledge Evolution:
+# le proposte (Knowledge Candidate) vengono valutate e approvate,
+# poi integrate dal maintainer — GitHub lo fa rispettare automaticamente.
+#
+# Documentazione: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Conoscenza permanente — ogni modifica richiede review del maintainer
+/standards/          @EnricoPaparo
+/agents/             @EnricoPaparo
+/archetypes/         @EnricoPaparo
+/capabilities/       @EnricoPaparo
+/runtime-adapters/   @EnricoPaparo
+
+# Documenti architetturali radice
+/AgentFactory.md     @EnricoPaparo
+/GLOSSARY.md         @EnricoPaparo
+
+# Infrastruttura factory — richiede review del maintainer
+/tools/              @EnricoPaparo
+/.github/            @EnricoPaparo
