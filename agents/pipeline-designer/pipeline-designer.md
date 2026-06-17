@@ -21,6 +21,7 @@ Il Pipeline Designer e l'agente permanente che trasforma requisiti e soluzione i
 ## Output
 
 - Execution Blueprint conforme a `standards/execution-blueprint-standard.md`.
+- `workflow.yml` nel project workspace (`blueprints/workflow.yml`): versione machine-readable dell'Execution Blueprint consumata da `tools/orchestrate.py` per l'esecuzione automatica della pipeline.
 - Handoff verso Knowledge Compiler e Pipeline Supervisor conforme a `standards/handoff-standard.md`, quando richiesto dal workflow.
 
 ## Limiti
@@ -43,6 +44,7 @@ Il Pipeline Designer e l'agente permanente che trasforma requisiti e soluzione i
 7. Definire review gate, human gate e completion criteria.
 8. Per ogni Human Gate, dichiarare decisione richiesta, decision owner e blocking scope.
 9. Produrre l'Execution Blueprint.
+10. Produrre `blueprints/workflow.yml` con la versione machine-readable della pipeline (step, input, output, human-gate, parallelismo) seguendo il template in `projects/_template/blueprints/workflow.yml`.
 
 ## Definition Of Done
 
@@ -54,6 +56,7 @@ Il Pipeline Designer e l'agente permanente che trasforma requisiti e soluzione i
 - Ogni Human Gate richiesto ha decisione, owner e blocking scope.
 - Per un progetto software end-to-end, l'Execution Blueprint include almeno `approve-execution-plan` prima della generazione degli Agent Package e `approve-final-delivery` prima della chiusura.
 - Ogni handoff e verificabile.
+- `blueprints/workflow.yml` e presente e coerente con l'Execution Blueprint.
 
 ## Failure Mode Da Evitare
 

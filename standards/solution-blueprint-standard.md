@@ -1,3 +1,24 @@
+---
+standard: solution-blueprint
+applies-to: "projects/*/blueprints/solution-blueprint.md"
+required-sections:
+  - "## Requirements Source"
+  - "## Solution Summary"
+  - "## Architecture"
+  - "## Stack"
+  - "## Components"
+  - "## Data Flow"
+  - "## Integrations"
+  - "## Security Considerations"
+  - "## Implementation Strategy"
+  - "## Trade-Offs"
+  - "## Technical Risks"
+optional-sections:
+  - "## Migration Notes"
+  - "## Performance Notes"
+  - "## Operational Notes"
+---
+
 # Solution Blueprint Standard
 
 ## Scopo

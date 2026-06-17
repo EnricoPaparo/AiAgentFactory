@@ -1,0 +1,15 @@
+# Dipendenze Python per gli strumenti AiAgentFactory
+#
+# Installazione:
+#   pip install -r requirements.txt
+#
+# Python 3.11+ richiesto.
+
+# Parsing YAML (usato da tools/validate.py, tools/orchestrate.py, tools/status.py)
+pyyaml>=6.0
+
+# Client AI — backend per tools/orchestrate.py
+# Installa quello/i che ti servono in base ai provider che vuoi usare:
+
+anthropic>=0.40.0   # modelli Claude  (richiede ANTHROPIC_API_KEY)
+openai>=1.0.0       # Gemini, Groq, Ollama, Mistral e altri provider OpenAI-compatibili

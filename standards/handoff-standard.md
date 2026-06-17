@@ -1,3 +1,23 @@
+---
+standard: handoff
+applies-to: "projects/[!_]*/handoffs/*.md"
+required-sections:
+  - "## Metadata"
+  - "## Completed Task Or Phase"
+  - "## Produced Output"
+  - "## Involved Files"
+  - "## Decisions Made"
+  - "## Open Issues"
+  - "## Residual Risks"
+  - "## Requested Next Action"
+  - "## Verification Criteria"
+optional-sections:
+  - "## Blocked Items"
+  - "## Knowledge Candidates"
+  - "## Test Evidence"
+  - "## Review Notes"
+---
+
 # Handoff Standard
 
 ## Scopo

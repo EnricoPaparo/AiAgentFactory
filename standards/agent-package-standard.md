@@ -1,3 +1,26 @@
+---
+standard: agent-package
+applies-to: "projects/[!_]*/generated-agents/*.md"
+required-sections:
+  - "## Metadata"
+  - "## Mission"
+  - "## Task"
+  - "## Inputs"
+  - "## Expected Outputs"
+  - "## Responsibilities"
+  - "## Boundaries"
+  - "## Tools"
+  - "## Workflow"
+  - "## Handoff Requirements"
+  - "## Definition of Done"
+optional-sections:
+  - "## Runtime Hints"
+  - "## Risk Notes"
+  - "## Review Gates"
+  - "## Escalation Rules"
+  - "## Knowledge Candidate Triggers"
+---
+
 # Agent Package Standard
 
 ## Scopo

@@ -1,3 +1,21 @@
+---
+standard: knowledge-candidate
+applies-to: "projects/[!_]*/knowledge-candidates/*.md"
+required-sections:
+  - "## Metadata"
+  - "## Proposal"
+  - "## Context"
+  - "## Motivation"
+  - "## Generalizability"
+  - "## Risk"
+  - "## Recommended Action"
+optional-sections:
+  - "## Evidence"
+  - "## Review Notes"
+  - "## Decision"
+  - "## Integration Target"
+---
+
 # Knowledge Candidate Standard
 
 ## Scopo
