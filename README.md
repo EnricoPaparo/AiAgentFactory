@@ -106,26 +106,29 @@ AiAgentFactory/
 
 ## Avvio Rapido: Nuovo Progetto
 
-**Prerequisiti:** Python 3.11+, `pip install pyyaml anthropic` (per l'orchestratore).
+**Prerequisiti:** Python 3.11+, `pip install -r requirements.txt`
 
-### Opzione A — con orchestratore automatico (consigliato)
+### Comando unico (consigliato)
 
 ```bash
-# 1. Crea il workspace
-python tools/new-project.py mio-progetto --request "API REST per gestione utenti"
-
-# 2. Scrivi i dettagli in projects/mio-progetto/input/initial-request.md
-
-# 3. Crea blueprints/workflow.yml nel workspace
-#    (copia da projects/_template/blueprints/workflow.yml e adattalo)
-
-# 4. Avvia la pipeline
 export ANTHROPIC_API_KEY=sk-ant-...
-python tools/orchestrate.py mio-progetto --dry-run   # anteprima
-python tools/orchestrate.py mio-progetto             # esecuzione
+
+# Con file di input (testo, PDF, DOCX, immagini)
+python tools/factory.py run "descrizione del progetto" --files ./miei-documenti/
+
+# Solo da descrizione testuale
+python tools/factory.py run "API REST per gestione utenti"
+
+# Con budget massimo e modello specifico
+python tools/factory.py run "descrizione" --files ./docs/ --budget 2.00 --model claude-sonnet-4-6
+
+# Anteprima senza eseguire
+python tools/factory.py run "descrizione" --dry-run
 ```
 
-### Opzione B — manuale (OpenCode, Claude Code, ecc.)
+Il comando crea automaticamente il workspace, carica i file, li preprocessa e avvia la pipeline.
+
+### Opzione manuale (OpenCode, Claude Code, ecc.)
 
 ```bash
 # 1. Crea il workspace

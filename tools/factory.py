@@ -789,9 +789,100 @@ def cmd_approve(args: argparse.Namespace) -> None:
     print(f"run_record: {record}")
 
 
+def cmd_run(args: argparse.Namespace) -> None:
+    """Bootstrap + carica file + avvia pipeline in un unico comando."""
+    idea = args.idea.strip()
+    if not idea:
+        die("idea non può essere vuota")
+
+    repo = Path.cwd()
+    projects_dir = repo / "projects"
+    projects_dir.mkdir(exist_ok=True)
+    project_id = kebab_case(args.project_id) if args.project_id else infer_project_id(idea)
+    project = projects_dir / project_id
+
+    if project.exists() and not args.force:
+        die(f"il progetto '{project_id}' esiste già. Usa --force per sovrascrivere.")
+
+    # Step 1: crea workspace
+    print(f"[1/3] Creazione workspace: {project_id}")
+    start_args = argparse.Namespace(idea=idea, project_id=args.project_id, force=args.force)
+    cmd_start(start_args)
+
+    # Step 2: copia file e preprocessa
+    if args.files:
+        src = Path(args.files)
+        if not src.exists():
+            die(f"percorso file non trovato: {src}")
+        input_dir = project / "input"
+        copied = 0
+        if src.is_dir():
+            for f in sorted(src.iterdir()):
+                if f.is_file():
+                    import shutil as _shutil
+                    _shutil.copy2(f, input_dir / f.name)
+                    copied += 1
+                    print(f"   copiato: {f.name}")
+        else:
+            import shutil as _shutil
+            _shutil.copy2(src, input_dir / src.name)
+            copied = 1
+            print(f"   copiato: {src.name}")
+        print(f"[2/3] {copied} file copiati → {input_dir}/")
+
+        load_script = repo / "tools" / "load-project.py"
+        if load_script.exists():
+            print(f"   preprocesso file con load-project.py...")
+            result = subprocess.run(
+                [sys.executable, str(load_script), project_id],
+                cwd=repo,
+            )
+            if result.returncode != 0:
+                die("load-project.py ha restituito un errore")
+    else:
+        print("[2/3] Nessun file da caricare (--files non specificato)")
+
+    # Step 3: avvia pipeline
+    orchestrate_script = repo / "tools" / "orchestrate.py"
+    if not orchestrate_script.exists():
+        die(f"orchestrate.py non trovato in {orchestrate_script}")
+
+    cmd = [sys.executable, str(orchestrate_script), project_id]
+    if args.model:
+        cmd += ["--model", args.model]
+    if args.budget:
+        cmd += ["--budget", str(args.budget)]
+    if args.dry_run:
+        cmd += ["--dry-run"]
+    if args.clarify:
+        cmd += ["--clarify"]
+
+    print(f"[3/3] Avvio pipeline → {' '.join(cmd[2:])}\n")
+    result = subprocess.run(cmd, cwd=repo)
+    raise SystemExit(result.returncode)
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="factory", description="Minimal AgentFactory operational runner")
     sub = parser.add_subparsers(dest="command", required=True)
+
+    p_run = sub.add_parser("run", help="crea progetto, carica file e avvia pipeline in un comando solo")
+    p_run.add_argument("idea", help="descrizione del progetto (in virgolette)")
+    p_run.add_argument("--files", "-f", metavar="PERCORSO",
+                       help="file o cartella da caricare come input del progetto")
+    p_run.add_argument("--project-id", metavar="ID",
+                       help="ID progetto kebab-case (default: auto-generato dall'idea)")
+    p_run.add_argument("--model", "-m", metavar="MODELLO",
+                       help="modello AI da usare (default: claude-opus-4-8)")
+    p_run.add_argument("--budget", "-b", type=float, metavar="USD",
+                       help="budget massimo in USD (es. 2.00)")
+    p_run.add_argument("--dry-run", action="store_true",
+                       help="mostra i passi senza eseguire la pipeline")
+    p_run.add_argument("--clarify", action="store_true",
+                       help="attiva fase di chiarimento interattivo prima della pipeline")
+    p_run.add_argument("--force", action="store_true",
+                       help="sovrascrive un workspace esistente con lo stesso ID")
+    p_run.set_defaults(func=cmd_run)
 
     p_start = sub.add_parser("start", help="bootstrap a new project workspace from an idea")
     p_start.add_argument("idea")
