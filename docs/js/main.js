@@ -193,16 +193,6 @@ async function navigateTo(idx) {
 }
 
 function renderLesson(md, lesson) {
-  marked.setOptions({
-    highlight: (code, lang) => {
-      if (lang && hljs.getLanguage(lang)) {
-        return hljs.highlight(code, { language: lang }).value;
-      }
-      return hljs.highlightAuto(code).value;
-    },
-    breaks: true
-  });
-
   const html = marked.parse(md);
   lessonContent.innerHTML = html;
 
@@ -215,8 +205,8 @@ function renderLesson(md, lesson) {
     h1.after(meta);
   }
 
-  // Syntax highlight su blocchi senza classe
-  lessonContent.querySelectorAll('pre code:not([class])').forEach(el => {
+  // Fallback highlight su blocchi non già evidenziati
+  lessonContent.querySelectorAll('pre code:not(.hljs)').forEach(el => {
     hljs.highlightElement(el);
   });
 }
@@ -238,5 +228,20 @@ function updateProgressBar() {
   progressBar.style.width = pct + '%';
 }
 
+/* ── marked.js setup (v5+ compatible) ── */
+function initMarked() {
+  const renderer = {
+    code(token) {
+      const text = typeof token === 'object' ? token.text : token;
+      const lang = (typeof token === 'object' ? token.lang : arguments[1]) || '';
+      if (lang && hljs.getLanguage(lang)) {
+        return `<pre><code class="hljs language-${lang}">${hljs.highlight(text, { language: lang }).value}</code></pre>`;
+      }
+      return `<pre><code class="hljs">${hljs.highlightAuto(text).value}</code></pre>`;
+    }
+  };
+  marked.use({ renderer, breaks: true });
+}
+
 /* ── Avvio ── */
-document.addEventListener('DOMContentLoaded', init);
+document.addEventListener('DOMContentLoaded', () => { initMarked(); init(); });
