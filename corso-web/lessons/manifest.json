@@ -1,0 +1,56 @@
+{
+  "corso": "AI Agent Factory — Corso Completo",
+  "sottotitolo": "Dal prompt all'agente autonomo",
+  "versione": "1.0",
+  "anno": "2026",
+  "roadmap": [
+    {
+      "id": "cap01",
+      "titolo": "Fondamenti dell'IA",
+      "icona": "⬡",
+      "colore": "#00ff41",
+      "lezioni": [
+        { "id": "01-intro",        "titolo": "Cos'è l'Intelligenza Artificiale" },
+        { "id": "02-storia",       "titolo": "Storia e Timeline dell'IA" },
+        { "id": "03-ml-vs-ai",    "titolo": "ML, Deep Learning e IA Generativa" },
+        { "id": "04-llm",          "titolo": "Come funzionano i Large Language Model" }
+      ]
+    },
+    {
+      "id": "cap02",
+      "titolo": "Prompt Engineering",
+      "icona": "◈",
+      "colore": "#00d4ff",
+      "lezioni": [
+        { "id": "01-prompt-base",  "titolo": "Anatomia di un Prompt" },
+        { "id": "02-chain-of-thought", "titolo": "Chain-of-Thought e Ragionamento" },
+        { "id": "03-few-shot",     "titolo": "Few-Shot e Zero-Shot Learning" },
+        { "id": "04-avanzato",     "titolo": "Tecniche Avanzate di Prompting" }
+      ]
+    },
+    {
+      "id": "cap03",
+      "titolo": "AI Agents",
+      "icona": "◉",
+      "colore": "#ff0080",
+      "lezioni": [
+        { "id": "01-agents-intro", "titolo": "Cosa sono gli AI Agents" },
+        { "id": "02-tools",        "titolo": "Tools e Function Calling" },
+        { "id": "03-memory",       "titolo": "Memoria e Contesto" },
+        { "id": "04-multi-agent",  "titolo": "Sistemi Multi-Agente" }
+      ]
+    },
+    {
+      "id": "cap04",
+      "titolo": "Progetto Finale",
+      "icona": "★",
+      "colore": "#7700ff",
+      "lezioni": [
+        { "id": "01-design",       "titolo": "Design di un Pipeline Agentivo" },
+        { "id": "02-build",        "titolo": "Costruire il tuo primo Agent" },
+        { "id": "03-deploy",       "titolo": "Deploy e Monitoraggio" },
+        { "id": "04-futuro",       "titolo": "Il Futuro degli AI Agents" }
+      ]
+    }
+  ]
+}
