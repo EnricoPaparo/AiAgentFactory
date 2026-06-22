@@ -1,22 +1,9 @@
-# Dipendenze Python per gli strumenti AiAgentFactory
-#
-# Installazione:
-#   pip install -r requirements.txt
-#
-# Python 3.11+ richiesto.
+# AISA — AISolutionArchitect
+# Installazione: pip install -r requirements.txt
+# Python 3.11+ richiesto
 
-# Parsing YAML (usato da tools/validate.py, tools/orchestrate.py, tools/status.py)
-pyyaml>=6.0
-
-# Client AI — backend per tools/orchestrate.py
-# Installa quello/i che ti servono in base ai provider che vuoi usare:
-
-anthropic>=0.40.0   # modelli Claude  (richiede ANTHROPIC_API_KEY)
-openai>=1.0.0       # Gemini, Groq, Ollama, Mistral e altri provider OpenAI-compatibili
-
-# Dipendenze opzionali per tools/load-project.py (preprocessore file di progetto)
-# Installa solo quelle che ti servono:
-
-pypdf>=4.0.0        # estrazione testo da PDF           (pip install pypdf)
-python-docx>=1.0.0  # estrazione testo da file Word     (pip install python-docx)
-# Whisper (audio) non incluso — richiede torch, installazione separata
+anthropic>=0.40.0    # client Claude
+pypdf>=4.0.0         # lettura PDF
+python-docx>=1.0.0   # lettura Word
+markdown>=3.6        # conversione Markdown → HTML
+weasyprint>=60.0     # generazione PDF
